@@ -1,45 +1,25 @@
 
 /* ========================================
-   Tasfina ログイン画面専用JavaScript
+   Tasfina ログイン専用JavaScript
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const loginForm = document.getElementById("loginForm");
-
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
     const togglePassword = document.getElementById("togglePassword");
-
     const loginError = document.getElementById("loginError");
-    const loginButton = document.getElementById("loginButton");
 
-
-    // =====================================
-    // エラーメッセージ表示
-    // =====================================
-
-    function showError(message) {
-        loginError.textContent = message;
-        loginError.hidden = false;
-    }
-
-    function clearError() {
-        loginError.textContent = "";
-        loginError.hidden = true;
-    }
-
-
-    // =====================================
-    // パスワード表示・非表示切替
-    // =====================================
+    /* =====================================
+       パスワード表示切り替え
+    ===================================== */
 
     togglePassword.addEventListener("click", () => {
 
-        const isHidden = passwordInput.type === "password";
+        const isHidden = password.type === "password";
 
-        passwordInput.type = isHidden ? "text" : "password";
+        password.type = isHidden ? "text" : "password";
 
         togglePassword.setAttribute(
             "aria-pressed",
@@ -48,52 +28,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
         togglePassword.setAttribute(
             "aria-label",
-            isHidden
-                ? "パスワードを隠す"
-                : "パスワードを表示"
+            isHidden ? "パスワードを隠す" : "パスワードを表示"
         );
+
+        togglePassword.querySelector("i").className =
+            isHidden ? "bi bi-eye-slash" : "bi bi-eye";
 
     });
 
+    /* =====================================
+       ログインフォーム
+    ===================================== */
 
-    // =====================================
-    // ログイン処理
-    // =====================================
-
-    loginForm.addEventListener("submit", async (event) => {
+    loginForm.addEventListener("submit", (event) => {
 
         event.preventDefault();
 
-        clearError();
+        // 前回のエラーを初期化
+        loginError.hidden = true;
+        loginError.textContent = "";
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        email.classList.remove("is-invalid");
+        password.classList.remove("is-invalid");
 
-        // メールアドレス未入力
-        if (email === "") {
-            showError("メールアドレスを入力してください。");
-            emailInput.focus();
+        let isValid = true;
+
+        // メールアドレス
+        if (!email.validity.valid) {
+
+            email.classList.add("is-invalid");
+            isValid = false;
+
+        }
+
+        // パスワード
+        if (!password.value.trim()) {
+
+            password.classList.add("is-invalid");
+            isValid = false;
+
+        }
+
+        if (!isValid) {
             return;
         }
 
-        // メールアドレス形式チェック
-        if (!emailInput.validity.valid) {
-            showError("正しいメールアドレスを入力してください。");
-            emailInput.focus();
-            return;
-        }
+        // バックエンド接続前の仮処理
+        loginError.textContent =
+            "入力内容を確認しました。ログイン認証機能は現在開発中です。";
 
-        // パスワード未入力
-        if (password === "") {
-            showError("パスワードを入力してください。");
-            passwordInput.focus();
-            return;
-        }
+        loginError.hidden = false;
 
-        // バックエンド未接続のため、認証は行わない
-        showError(
-            "現在ログイン機能を準備中です。画面の表示と入力チェックのみ確認できます。"
-        );
+        // TODO:
+        // バックエンドAPIにメールアドレスと
+        // パスワードを送信して認証する
+
+    });
+
+    /* =====================================
+       入力時にエラー表示を解除
+    ===================================== */
+
+    [email, password].forEach(input => {
+
+        input.addEventListener("input", () => {
+            input.classList.remove("is-invalid");
+        });
 
     });
 
