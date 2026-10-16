@@ -1,0 +1,456 @@
+
+/* ========================================
+   Tasfina ガントチャート専用CSS
+======================================== */
+
+.gantt-page {
+    background: #ffffff;
+    color: #17213a;
+}
+
+.gantt-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 20px;
+}
+
+/* 操作エリア */
+.gantt-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.gantt-toolbar-left,
+.gantt-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gantt-view-switch,
+.gantt-month-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d8e0eb;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.gantt-view-switch button,
+.gantt-month-control button {
+    border: none;
+    background: white;
+    color: #17213a;
+    height: 46px;
+    padding: 0 17px;
+    font-weight: 600;
+}
+
+.gantt-view-switch button.active {
+    background: #0066cc;
+    color: white;
+}
+
+.gantt-month-control span {
+    min-width: 130px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.gantt-icon-button {
+    height: 46px;
+    width: 48px;
+    background: white;
+    border: 1px solid #d8e0eb;
+    border-radius: 7px;
+    color: #17213a;
+}
+
+.gantt-toolbar-right .form-select {
+    width: auto;
+    min-width: 155px;
+    height: 46px;
+    font-size: 14px;
+}
+
+/* ガントチャート全体 */
+.gantt-chart-section {
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.gantt-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.gantt-chart {
+    min-width: 100%;
+    width: max-content;
+}
+
+/* 行 */
+.gantt-row {
+    display: grid;
+    grid-template-columns: 230px 75px var(--timeline-width);
+    min-height: 44px;
+    border-bottom: 1px solid #e3e8ef;
+}
+
+.gantt-row:last-child {
+    border-bottom: none;
+}
+
+.gantt-cell {
+    padding: 10px 12px;
+    border-right: 1px solid #e3e8ef;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    font-size: 14px;
+}
+
+.gantt-name {
+    padding-left: 36px;
+}
+
+.gantt-assignee {
+    color: #53617a;
+}
+
+.gantt-header {
+    min-height: 58px;
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.gantt-header .gantt-cell {
+    justify-content: center;
+}
+
+.gantt-header .gantt-cell:first-child {
+    justify-content: flex-start;
+}
+
+/* 部門 */
+.gantt-department {
+    background: #f8fafc;
+    font-weight: bold;
+    min-height: 42px;
+}
+
+.department-toggle {
+    border: none;
+    background: transparent;
+    color: #17213a;
+    font-weight: 700;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0;
+}
+
+.department-toggle i {
+    transition: transform 0.2s;
+}
+
+.department-toggle.collapsed i {
+    transform: rotate(-90deg);
+}
+
+/* 日付・時間軸 */
+.gantt-timeline {
+    position: relative;
+    min-height: 44px;
+    background-image: linear-gradient(
+        to right,
+        #e8edf4 1px,
+        transparent 1px
+    );
+    background-size: var(--column-width) 100%;
+}
+
+.gantt-dates {
+    display: flex;
+    padding: 0;
+    border-right: none;
+}
+
+.gantt-date {
+    width: var(--column-width);
+    flex-shrink: 0;
+    text-align: center;
+    padding: 9px 0;
+    border-right: 1px solid #e3e8ef;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.gantt-date.saturday {
+    color: #0066cc;
+    background: #eaf4ff;
+}
+
+.gantt-date.sunday {
+    color: #e33445;
+    background: #fff0f1;
+}
+
+.gantt-date.today {
+    box-shadow: inset 0 -3px #0066cc;
+}
+
+/* タスクバー */
+.gantt-task-row {
+    cursor: pointer;
+}
+
+.gantt-task-row:hover {
+    background: #f6faff;
+}
+
+.gantt-task-row.selected {
+    background: #eef6ff;
+}
+
+.gantt-task-row:focus-visible {
+    outline: 2px solid #0066cc;
+    outline-offset: -2px;
+}
+
+.gantt-task-bar {
+    position: absolute;
+    height: 26px;
+    top: 9px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.gantt-task-bar.progress,
+.legend-color.progress {
+    background: #63b1fa;
+}
+
+.gantt-task-bar.pending,
+.legend-color.pending {
+    background: #ffb74e;
+}
+
+.gantt-task-bar.completed,
+.legend-color.completed {
+    background: #55ca96;
+}
+
+.gantt-task-bar.notstarted,
+.legend-color.notstarted {
+    background: #a38af0;
+}
+
+.gantt-task-bar.overdue,
+.legend-color.overdue {
+    background: #f17b87;
+}
+
+.gantt-task-hours {
+    position: absolute;
+    top: 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    color: #24324b;
+}
+
+.gantt-milestone {
+    position: absolute;
+    top: 12px;
+    width: 16px;
+    height: 16px;
+    background: #4a9dea;
+    border: 2px solid #2879cc;
+    transform: rotate(45deg);
+}
+
+/* 凡例 */
+.gantt-legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 17px 5px;
+    font-size: 13px;
+    color: #66738b;
+}
+
+.gantt-legend span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 25px;
+    height: 15px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.legend-diamond {
+    width: 13px;
+    height: 13px;
+    border: 2px solid #53617a;
+    background: #e2e8f0;
+    transform: rotate(45deg);
+    display: inline-block;
+    margin: 0 6px;
+}
+
+/* タスク詳細 */
+.gantt-detail {
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+    padding: 20px 22px;
+    background: #ffffff;
+}
+
+.gantt-detail h2 {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.gantt-detail h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.gantt-detail-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 24px;
+}
+
+.gantt-detail dl {
+    display: grid;
+    grid-template-columns: 105px 1fr;
+    gap: 9px 10px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.gantt-detail dt {
+    color: #66738b;
+    font-weight: 500;
+}
+
+.gantt-detail dd {
+    margin: 0;
+}
+
+.gantt-detail-note {
+    border-left: 1px solid #e1e6ee;
+    padding-left: 20px;
+}
+
+.gantt-detail-note textarea {
+    width: 100%;
+    min-height: 85px;
+    resize: vertical;
+    border: 1px solid #d6deea;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.gantt-detail-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.gantt-detail-actions .btn {
+    font-weight: 600;
+}
+
+.gantt-status {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.gantt-status.progress {
+    background: #dceeff;
+    color: #0066cc;
+}
+
+.gantt-status.pending {
+    background: #fff0d2;
+    color: #a76a00;
+}
+
+.gantt-status.completed {
+    background: #d8f6e7;
+    color: #008b50;
+}
+
+.gantt-status.notstarted {
+    background: #ede6ff;
+    color: #7654c7;
+}
+
+.gantt-status.overdue {
+    background: #ffe4e7;
+    color: #ce3044;
+}
+
+.gantt-empty {
+    color: #66738b;
+}
+
+/* レスポンシブ */
+@media screen and (max-width: 1100px) {
+    .gantt-detail-content {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .gantt-detail-note {
+        grid-column: 1 / -1;
+        border-left: none;
+        border-top: 1px solid #e1e6ee;
+        padding: 15px 0 0;
+    }
+}
+
+@media screen and (max-width: 650px) {
+    .gantt-title {
+        font-size: 25px;
+    }
+
+    .gantt-toolbar-right,
+    .gantt-toolbar-right .form-select {
+        width: 100%;
+    }
+
+    .gantt-detail-content {
+        grid-template-columns: 1fr;
+    }
+
+    .gantt-detail-note {
+        grid-column: auto;
+    }
+
+    .gantt-legend {
+        justify-content: flex-start;
+        gap: 12px;
+    }
+}

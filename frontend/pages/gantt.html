@@ -1,1 +1,126 @@
-ガントチャート
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ガントチャート | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- ガントチャート専用CSS -->
+    <link rel="stylesheet" href="../css/gantt.css">
+
+    <!-- JavaScript -->
+    <script src="../js/common.js" defer></script>
+    <script src="../js/gantt.js" defer></script>
+</head>
+
+<body>
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドメニュー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content gantt-page">
+
+            <h1 class="gantt-title">ガントチャート</h1>
+
+            <!-- 操作エリア -->
+            <section class="gantt-toolbar">
+
+                <div class="gantt-toolbar-left">
+
+                    <div class="gantt-view-switch" role="group" aria-label="表示単位">
+                        <button type="button" data-view="day">日</button>
+                        <button type="button" data-view="week" class="active">週</button>
+                        <button type="button" data-view="month">月</button>
+                    </div>
+
+                    <div class="gantt-month-control">
+                        <button type="button" id="prevPeriod" aria-label="前の期間">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <span id="currentPeriod">2024年10月</span>
+                        <button type="button" id="nextPeriod" aria-label="次の期間">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <button type="button" id="todayButton" class="gantt-icon-button" aria-label="今日へ移動">
+                        <i class="bi bi-calendar3"></i>
+                    </button>
+
+                </div>
+
+                <div class="gantt-toolbar-right">
+
+                    <select id="assigneeFilter" class="form-select" aria-label="担当者">
+                        <option value="all">担当者：全員</option>
+                    </select>
+
+                    <select id="departmentFilter" class="form-select" aria-label="部門">
+                        <option value="all">部門：全て</option>
+                    </select>
+
+                    <select id="statusFilter" class="form-select" aria-label="ステータス">
+                        <option value="all">ステータス：全て</option>
+                        <option value="progress">進行中</option>
+                        <option value="pending">承認待ち</option>
+                        <option value="completed">完了</option>
+                        <option value="notstarted">未着手</option>
+                        <option value="overdue">期限超過</option>
+                    </select>
+
+                </div>
+            </section>
+
+            <!-- ガントチャート -->
+            <section class="gantt-chart-section" aria-label="タスクのスケジュール">
+
+                <div class="gantt-scroll">
+                    <div id="ganttChart" class="gantt-chart"></div>
+                </div>
+
+            </section>
+
+            <!-- 凡例 -->
+            <div class="gantt-legend">
+                <span><i class="legend-color progress"></i>進行中</span>
+                <span><i class="legend-color pending"></i>承認待ち</span>
+                <span><i class="legend-color completed"></i>完了</span>
+                <span><i class="legend-color notstarted"></i>未着手</span>
+                <span><i class="legend-color overdue"></i>期限超過</span>
+                <span><i class="legend-diamond"></i>マイルストーン</span>
+            </div>
+
+            <!-- 選択タスク詳細 -->
+            <section class="gantt-detail">
+
+                <h2>選択中のタスク詳細</h2>
+
+                <div id="taskDetail">
+                    <p class="gantt-empty">タスクを選択してください。</p>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+</body>
+</html>
