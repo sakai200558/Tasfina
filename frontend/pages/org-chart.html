@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>組織図 | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- 組織図専用CSS -->
+    <link rel="stylesheet" href="../css/org-chart.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- 組織図専用JavaScript -->
+    <script src="../js/org-chart.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドメニュー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content org-main">
+
+            <!-- ページ上部 -->
+            <div class="org-page-header">
+
+                <h1>組織図</h1>
+
+                <div class="org-toolbar">
+
+                    <!-- 検索 -->
+                    <div class="org-search">
+                        <i class="bi bi-search"></i>
+                        <input
+                            type="search"
+                            id="orgSearch"
+                            class="form-control"
+                            placeholder="メンバー名・部門名で検索"
+                            aria-label="組織図を検索"
+                        >
+                    </div>
+
+                    <!-- 表示階層 -->
+                    <div class="org-filter">
+
+                        <label for="orgLevel">
+                            表示階層
+                        </label>
+
+                        <select
+                            id="orgLevel"
+                            class="form-select"
+                        >
+                            <option value="all">
+                                すべて表示
+                            </option>
+
+                            <option value="department">
+                                部門まで表示
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <!-- 部門追加 -->
+                    <a
+                        href="groups-new.html"
+                        class="btn btn-primary org-add-button"
+                    >
+                        <i class="bi bi-plus-lg"></i>
+                        部門を追加
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- 組織図と詳細情報 -->
+            <div class="org-content-layout">
+
+                <!-- 左側：組織図 -->
+                <section class="org-chart-area">
+
+                    <div
+                        id="organizationTree"
+                        class="organization-tree"
+                        aria-label="組織図"
+                    ></div>
+
+                    <p
+                        id="orgNoResults"
+                        class="org-no-results"
+                        hidden
+                    >
+                        該当するメンバー・部門がありません。
+                    </p>
+
+                </section>
+
+                <!-- 右側：メンバー詳細 -->
+                <aside class="org-detail-panel">
+
+                    <div class="org-detail-header">
+
+                        <h2>メンバー詳細</h2>
+
+                        <button
+                            type="button"
+                            id="editMemberButton"
+                            class="btn btn-outline-primary"
+                        >
+                            <i class="bi bi-pencil-fill"></i>
+                            編集
+                        </button>
+
+                    </div>
+
+                    <!-- プロフィール -->
+                    <div class="org-profile">
+
+                        <div class="org-profile-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+
+                        <div>
+                            <h3 id="detailName">
+                                田中 美咲
+                            </h3>
+
+                            <p id="detailReading">
+                                たなか みさき
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- 基本情報 -->
+                    <dl class="org-member-info">
+
+                        <div>
+                            <dt>所属</dt>
+                            <dd id="detailDepartment">営業部</dd>
+                        </div>
+
+                        <div>
+                            <dt>役職</dt>
+                            <dd id="detailRole">部門管理者</dd>
+                        </div>
+
+                        <div>
+                            <dt>社員番号</dt>
+                            <dd id="detailEmployeeId">S001</dd>
+                        </div>
+
+                        <div>
+                            <dt>メールアドレス</dt>
+                            <dd id="detailEmail">
+                                misaki.tanaka@tasfina.jp
+                            </dd>
+                        </div>
+
+                    </dl>
+
+                    <!-- シフト状況 -->
+                    <section class="org-shift-section">
+
+                        <h3>シフト状況（今月）</h3>
+
+                        <div
+                            id="detailShiftList"
+                            class="org-shift-list"
+                        ></div>
+
+                    </section>
+
+                    <!-- 負担スコア -->
+                    <section class="org-score-section">
+
+                        <h3>負担スコア</h3>
+
+                        <div class="org-score-content">
+
+                            <div class="org-score-value">
+                                <strong id="detailScore">
+                                    2.1
+                                </strong>
+                                <span>pt</span>
+                            </div>
+
+                            <div
+                                id="detailScoreChange"
+                                class="org-score-change"
+                            >
+                                <i class="bi bi-arrow-down"></i>
+                                <span>-0.3</span>
+                                <small>（前月比）</small>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- シフト詳細 -->
+                    <a
+                        href="shifts.html"
+                        id="memberShiftLink"
+                        class="btn btn-outline-primary org-shift-button"
+                    >
+                        <i class="bi bi-calendar-week"></i>
+                        メンバーのシフト詳細を見る
+                    </a>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
