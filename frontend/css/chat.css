@@ -1,0 +1,587 @@
+
+/* ========================================
+   Tasfina チャット専用CSS
+======================================== */
+
+/* チャット画面全体 */
+.chat-page .chat-main {
+    padding: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chat-layout {
+    display: grid;
+    grid-template-columns: 325px minmax(0, 1fr) 310px;
+    height: calc(100vh - 80px);
+    min-height: 550px;
+    background: #ffffff;
+}
+
+/* ========================================
+   チャット一覧
+======================================== */
+
+.chat-list-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.chat-list-header {
+    padding: 18px 16px 12px;
+}
+
+.chat-list-header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0 0 18px;
+    color: #101a33;
+}
+
+.new-chat-button {
+    width: 100%;
+    height: 44px;
+    background: #0064d8;
+    border: none;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.new-chat-button:hover {
+    background: #0054b5;
+}
+
+.chat-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 43px;
+    padding: 0 12px;
+    border: 1px solid #d5deea;
+    border-radius: 7px;
+}
+
+.chat-search i {
+    font-size: 18px;
+    color: #485b7a;
+}
+
+.chat-search input {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* チャット一覧の各項目 */
+.chat-list-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: none;
+    border-bottom: 1px solid #f0f2f6;
+    background: #ffffff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.chat-list-item:hover {
+    background: #f2f7fd;
+}
+
+.chat-list-item.active {
+    background: #e8f3ff;
+    border-left: 5px solid #65adff;
+    padding-left: 11px;
+}
+
+.chat-avatar {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e8edf4;
+    color: #657a9a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.chat-avatar.large {
+    width: 58px;
+    height: 58px;
+    font-size: 30px;
+}
+
+.chat-list-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-list-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.chat-list-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #17213a;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.chat-list-time {
+    font-size: 12px;
+    color: #7b8ba5;
+    white-space: nowrap;
+}
+
+.chat-list-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 5px;
+}
+
+.chat-list-preview {
+    font-size: 12px;
+    color: #7585a0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.unread-count {
+    background: #0065d8;
+    color: white;
+    border-radius: 50%;
+    min-width: 23px;
+    height: 23px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* ========================================
+   メッセージ画面
+======================================== */
+
+.chat-conversation-panel {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.conversation-header {
+    min-height: 82px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.conversation-title-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.conversation-title-area h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 4px;
+}
+
+.conversation-title-area p {
+    font-size: 13px;
+    color: #7585a0;
+    margin: 0;
+}
+
+.conversation-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-button {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #dbe3ee;
+    border-radius: 7px;
+    background: white;
+    color: #425575;
+    font-size: 20px;
+}
+
+.icon-button:hover {
+    background: #edf5ff;
+}
+
+/* メッセージ表示領域 */
+.message-list {
+    flex: 1;
+    min-height: 0;
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.message-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    max-width: 100%;
+}
+
+.message-row.mine {
+    justify-content: flex-end;
+}
+
+.message-avatar {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e6ecf5;
+    color: #687e9e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.message-content {
+    max-width: 78%;
+    min-width: 0;
+}
+
+.message-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 13px;
+}
+
+.message-row.mine .message-meta {
+    justify-content: flex-end;
+}
+
+.message-sender {
+    font-weight: bold;
+}
+
+.message-time {
+    color: #8b99ae;
+    font-size: 12px;
+}
+
+.message-bubble {
+    display: inline-block;
+    max-width: 100%;
+    background: #f0f3f8;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.message-row.mine .message-bubble {
+    background: #e0f0ff;
+}
+
+/* ========================================
+   メッセージ入力
+======================================== */
+
+.message-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #ffffff;
+}
+
+.message-tools {
+    display: flex;
+    gap: 2px;
+    border: 1px solid #dbe3ee;
+    border-radius: 7px;
+    padding: 4px;
+}
+
+.message-tools button {
+    width: 34px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #415575;
+    font-size: 20px;
+}
+
+.message-tools button:hover {
+    background: #edf5ff;
+    border-radius: 5px;
+}
+
+#messageInput {
+    flex: 1;
+    min-width: 0;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid #dbe3ee;
+    border-radius: 7px;
+    font-size: 14px;
+    outline: none;
+}
+
+#messageInput:focus {
+    border-color: #0065d8;
+}
+
+.send-button {
+    width: 52px;
+    height: 46px;
+    border: none;
+    border-radius: 7px;
+    background: #0065d8;
+    color: white;
+    font-size: 22px;
+}
+
+.send-button:hover {
+    background: #0053b3;
+}
+
+/* ========================================
+   チャット情報
+======================================== */
+
+.chat-info-panel {
+    min-width: 0;
+    overflow-y: auto;
+    border-left: 1px solid #e2e8f0;
+    padding: 18px 16px;
+}
+
+.chat-info-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.chat-info-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.chat-group-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.chat-group-info h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.chat-group-info p {
+    color: #7585a0;
+    font-size: 13px;
+    margin: 0;
+}
+
+.chat-info-section {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.chat-info-section h3 {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.chat-info-section p {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #52627e;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.section-heading h3 {
+    margin: 0;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+}
+
+.member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e8edf4;
+    color: #7084a2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.member-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.member-role {
+    font-size: 11px;
+    color: #8794a9;
+}
+
+.text-action {
+    border: none;
+    background: transparent;
+    color: #0065d8;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 8px 0;
+}
+
+.shared-file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.file-icon {
+    font-size: 26px;
+}
+
+.file-icon.pdf {
+    color: #e44444;
+}
+
+.file-icon.excel {
+    color: #13946b;
+}
+
+.file-icon.word {
+    color: #246ed0;
+}
+
+.file-name {
+    font-size: 12px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.file-meta {
+    font-size: 11px;
+    color: #8b99ae;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+@media screen and (max-width: 1400px) {
+    .chat-layout {
+        grid-template-columns: 270px minmax(0, 1fr) 260px;
+    }
+}
+
+@media screen and (max-width: 1100px) {
+    .chat-layout {
+        grid-template-columns: 250px minmax(0, 1fr);
+    }
+
+    .chat-info-panel {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .chat-layout {
+        height: calc(100vh - 64px);
+        grid-template-columns: 210px minmax(0, 1fr);
+    }
+
+    .message-list {
+        padding: 14px;
+    }
+
+    .message-tools button {
+        width: 28px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .chat-layout {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: 700px;
+    }
+
+    .chat-list-panel {
+        height: 270px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .chat-conversation-panel {
+        height: 560px;
+    }
+
+    .chat-info-panel {
+        display: none;
+    }
+}

@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>チャット | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- チャット専用CSS -->
+    <link rel="stylesheet" href="../css/chat.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- チャット専用JavaScript -->
+    <script src="../js/chat.js" defer></script>
+
+</head>
+
+<body class="chat-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドメニュー -->
+        <div id="sidebar"></div>
+
+        <!-- チャット画面 -->
+        <main class="main-content chat-main">
+
+            <div class="chat-layout">
+
+                <!-- =========================
+                     チャット一覧
+                ========================= -->
+                <section class="chat-list-panel">
+
+                    <div class="chat-list-header">
+
+                        <h1>チャット</h1>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary new-chat-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#newChatModal"
+                        >
+                            <i class="bi bi-plus-lg"></i>
+                            新しいチャット
+                        </button>
+
+                        <div class="chat-search">
+                            <i class="bi bi-search"></i>
+                            <input
+                                type="search"
+                                id="chatSearch"
+                                placeholder="チャットを検索"
+                                aria-label="チャットを検索"
+                            >
+                        </div>
+
+                    </div>
+
+                    <!-- JSでチャット一覧を表示 -->
+                    <div
+                        id="chatList"
+                        class="chat-list"
+                    ></div>
+
+                </section>
+
+                <!-- =========================
+                     メッセージ画面
+                ========================= -->
+                <section class="chat-conversation-panel">
+
+                    <!-- チャット上部 -->
+                    <div class="conversation-header">
+
+                        <div class="conversation-title-area">
+
+                            <div class="chat-avatar">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+
+                            <div>
+                                <h2 id="conversationName">
+                                    営業部
+                                </h2>
+
+                                <p id="conversationMembers">
+                                    メンバー 12名
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="conversation-actions">
+
+                            <button
+                                type="button"
+                                id="messageSearchButton"
+                                class="icon-button"
+                                aria-label="メッセージ検索"
+                            >
+                                <i class="bi bi-search"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="callButton"
+                                class="icon-button"
+                                aria-label="通話"
+                            >
+                                <i class="bi bi-telephone-fill"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="chatMenuButton"
+                                class="icon-button"
+                                aria-label="その他"
+                            >
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- メッセージ一覧 -->
+                    <div
+                        id="messageList"
+                        class="message-list"
+                        aria-live="polite"
+                    ></div>
+
+                    <!-- メッセージ入力 -->
+                    <form
+                        id="messageForm"
+                        class="message-form"
+                    >
+
+                        <div class="message-tools">
+
+                            <button
+                                type="button"
+                                id="attachButton"
+                                aria-label="ファイル添付"
+                            >
+                                <i class="bi bi-paperclip"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="imageButton"
+                                aria-label="画像添付"
+                            >
+                                <i class="bi bi-image"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="emojiButton"
+                                aria-label="絵文字"
+                            >
+                                <i class="bi bi-emoji-smile"></i>
+                            </button>
+
+                        </div>
+
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="メッセージを入力してください..."
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                            class="send-button"
+                            aria-label="送信"
+                        >
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+
+                    </form>
+
+                    <input
+                        type="file"
+                        id="chatFileInput"
+                        class="visually-hidden"
+                    >
+
+                </section>
+
+                <!-- =========================
+                     チャット情報
+                ========================= -->
+                <aside class="chat-info-panel">
+
+                    <div class="chat-info-heading">
+
+                        <h2>チャット情報</h2>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            id="editChatButton"
+                        >
+                            <i class="bi bi-pencil"></i>
+                            編集
+                        </button>
+
+                    </div>
+
+                    <!-- グループ情報 -->
+                    <div class="chat-group-info">
+
+                        <div class="chat-avatar large">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+
+                        <h3 id="infoChatName">営業部</h3>
+
+                        <p id="infoMemberCount">
+                            メンバー 12名
+                        </p>
+
+                    </div>
+
+                    <div class="chat-info-section">
+
+                        <h3>説明</h3>
+
+                        <p id="chatDescription">
+                            営業部の業務連絡・シフト調整用の
+                            チャットです。
+                        </p>
+
+                    </div>
+
+                    <!-- メンバー -->
+                    <div class="chat-info-section">
+
+                        <div class="section-heading">
+
+                            <h3 id="memberSectionTitle">
+                                メンバー（12名）
+                            </h3>
+
+                            <button
+                                type="button"
+                                id="addMemberButton"
+                                class="btn btn-outline-primary btn-sm"
+                            >
+                                <i class="bi bi-plus-lg"></i>
+                                追加
+                            </button>
+
+                        </div>
+
+                        <div id="chatMembers"></div>
+
+                        <button
+                            type="button"
+                            id="showAllMembers"
+                            class="text-action"
+                        >
+                            全メンバーを表示
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- 共有ファイル -->
+                    <div class="chat-info-section">
+
+                        <div class="section-heading">
+
+                            <h3>共有ファイル</h3>
+
+                            <button
+                                type="button"
+                                id="showAllFiles"
+                                class="text-action"
+                            >
+                                すべて見る
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+
+                        </div>
+
+                        <div id="sharedFiles"></div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- =========================
+         新しいチャット作成モーダル
+    ========================= -->
+    <div
+        class="modal fade"
+        id="newChatModal"
+        tabindex="-1"
+        aria-labelledby="newChatModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <form id="newChatForm">
+
+                    <div class="modal-header">
+
+                        <h2
+                            class="modal-title fs-5"
+                            id="newChatModalLabel"
+                        >
+                            新しいチャット
+                        </h2>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="閉じる"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+
+                            <label
+                                for="newChatName"
+                                class="form-label"
+                            >
+                                チャット名
+                            </label>
+
+                            <input
+                                type="text"
+                                id="newChatName"
+                                class="form-control"
+                                maxlength="50"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="newChatDescription"
+                                class="form-label"
+                            >
+                                説明
+                            </label>
+
+                            <textarea
+                                id="newChatDescription"
+                                class="form-control"
+                                rows="3"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            キャンセル
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            作成
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+</body>
+</html>
