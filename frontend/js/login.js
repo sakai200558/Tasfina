@@ -1,4 +1,3 @@
-
 /* ========================================
    Tasfina ログイン専用JavaScript
 ======================================== */
@@ -10,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password");
     const togglePassword = document.getElementById("togglePassword");
     const loginError = document.getElementById("loginError");
+    const loginButton = document.getElementById("loginButton");
 
     /* =====================================
        パスワード表示切り替え
@@ -40,11 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
        ログインフォーム
     ===================================== */
 
-    loginForm.addEventListener("submit", (event) => {
+    loginForm.addEventListener("submit", async (event) => {
 
         event.preventDefault();
 
-        // 前回のエラーを初期化
+        // エラー表示を初期化
         loginError.hidden = true;
         loginError.textContent = "";
 
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let isValid = true;
 
-        // メールアドレス
+        // メールアドレスの入力チェック
         if (!email.validity.valid) {
 
             email.classList.add("is-invalid");
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        // パスワード
+        // パスワードの入力チェック
         if (!password.value.trim()) {
 
             password.classList.add("is-invalid");
@@ -73,15 +73,69 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // バックエンド接続前の仮処理
-        loginError.textContent =
-            "入力内容を確認しました。ログイン認証機能は現在開発中です。";
+        /* =====================================
+           PHPへログインリクエスト送信
+        ===================================== */
 
-        loginError.hidden = false;
+        loginButton.disabled = true;
+        loginButton.textContent = "ログイン中...";
 
-        // TODO:
-        // バックエンドAPIにメールアドレスと
-        // パスワードを送信して認証する
+        try {
+
+            const response = await fetch(
+                "../../backend/login.php",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email: email.value.trim(),
+                        password: password.value
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("サーバーエラーが発生しました。");
+            }
+
+            const result = await response.json();
+
+            /* =====================================
+               ログイン成功
+            ===================================== */
+
+            if (result.success === true) {
+
+                window.location.href = "mypage.html";
+
+            } else {
+
+                loginError.textContent =
+                    result.message || "ログインに失敗しました。";
+
+                loginError.hidden = false;
+
+            }
+
+        } catch (error) {
+
+            console.error("ログインエラー:", error);
+
+            loginError.textContent =
+                "サーバーとの通信に失敗しました。";
+
+            loginError.hidden = false;
+
+        } finally {
+
+            loginButton.disabled = false;
+            loginButton.textContent = "ログイン";
+
+        }
 
     });
 
@@ -92,7 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
     [email, password].forEach(input => {
 
         input.addEventListener("input", () => {
+
             input.classList.remove("is-invalid");
+
+            loginError.hidden = true;
+
         });
 
     });

@@ -1,82 +1,317 @@
 
 /* ========================================
-   Bootstrapフォーム調整
+   Tasfina ログイン専用CSS
 ======================================== */
 
+/* ========================================
+   ログイン画面全体
+======================================== */
+
+.login-page {
+    background-color: #ffffff;
+}
+
+/* ログインフォームの中央配置 */
+.login-main {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    min-height: calc(100vh - 80px);
+
+    padding: 32px 20px;
+}
+
+/* ========================================
+   ログインフォームの外枠
+======================================== */
+
+.login-container {
+    width: 420px;
+    max-width: 100%;
+
+    background-color: #ffffff;
+
+    border: 1px solid #333333;
+
+    padding: 36px 54px 30px;
+
+    margin: 0 auto;
+}
+
+/* ログイン見出し */
+.login-title {
+    margin: 0 0 28px;
+
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+
+    color: #000000;
+}
+
+/* ========================================
+   フォーム全体
+======================================== */
+
+#loginForm {
+    width: 100%;
+}
+
+/* 各入力項目 */
+.login-form-group {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+/* ラベル */
 .login-form-group .form-label {
     display: block;
+
     margin-bottom: 6px;
+
+    font-size: 14px;
+    font-weight: normal;
+
+    color: #000000;
+}
+
+/* ========================================
+   入力欄
+======================================== */
+
+.login-form-group .form-control {
+    display: block;
+
+    width: 100%;
+    height: 36px;
+
+    padding: 6px 12px;
+
+    border: 1px solid #333333;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
     font-size: 14px;
     color: #17213a;
 }
 
-.login-form-group .form-control {
-    width: 100%;
-    height: 38px;
-    border: 1px solid #333333;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 14px;
-}
-
+/* 入力欄を選択したとき */
 .login-form-group .form-control:focus {
     border-color: #5085c5;
+
+    outline: none;
+
     box-shadow: 0 0 0 3px rgba(80, 133, 197, 0.15);
 }
 
-.login-form-group .form-control.is-invalid {
-    border-color: #dc3545;
+/* プレースホルダー */
+.login-form-group .form-control::placeholder {
+    color: #999999;
+    font-size: 13px;
 }
 
-/* パスワード */
+/* ========================================
+   パスワード入力欄
+======================================== */
+
 .password-wrapper {
     position: relative;
+    width: 100%;
 }
 
 .password-wrapper .form-control {
     padding-right: 45px;
 }
 
+/* パスワード表示切り替えボタン */
 .password-toggle {
     position: absolute;
+
     top: 50%;
-    right: 12px;
+    right: 10px;
+
     transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    padding: 0;
+
     border: none;
-    background: transparent;
+    background-color: transparent;
+
     color: #333333;
+
     cursor: pointer;
 }
 
-/* 入力エラー */
-.login-form-group .invalid-feedback {
-    font-size: 12px;
-    margin-top: 5px;
+.password-toggle i {
+    font-size: 16px;
 }
 
-/* ログインボタン */
+/* ========================================
+   ログインボタン
+======================================== */
+
 .login-button {
     display: block;
+
     width: 220px;
     max-width: 100%;
-    margin: 0 auto;
-    padding: 8px 16px;
-    border-radius: 6px;
+
+    height: 44px;
+
+    margin: 28px auto 0;
+
+    padding: 6px 16px;
+
     background-color: #5085c5;
-    border-color: #5085c5;
-    font-size: 20px;
+    border: 1px solid #5085c5;
+    border-radius: 6px;
+
+    color: #ffffff;
+
+    font-size: 22px;
     font-weight: bold;
+
+    text-align: center;
+
+    cursor: pointer;
 }
 
 .login-button:hover {
     background-color: #376fae;
     border-color: #376fae;
+    color: #ffffff;
 }
 
-/* エラーメッセージ */
+/* ========================================
+   パスワードを忘れた場合
+======================================== */
+
+.forgot-password {
+    display: block;
+
+    margin-top: 20px;
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: #276bb7;
+
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   新規登録エリア
+======================================== */
+
+.register-area {
+    margin-top: 16px;
+
+    text-align: center;
+}
+
+.register-area p {
+    margin-bottom: 14px;
+
+    font-size: 13px;
+
+    color: #000000;
+}
+
+/* 新規登録ボタン */
+.register-button {
+    display: inline-block;
+
+    padding: 8px 22px;
+
+    border: 1px solid #5085c5;
+    border-radius: 6px;
+
+    background-color: #ffffff;
+
+    color: #5085c5;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    text-decoration: none;
+}
+
+.register-button:hover {
+    background-color: #e5f0fc;
+    color: #376fae;
+}
+
+/* ========================================
+   入力エラー
+======================================== */
+
+.login-form-group .form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.login-form-group .invalid-feedback {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #dc3545;
+}
+
 .login-error:not([hidden]) {
     margin-bottom: 15px;
+
     font-size: 13px;
+
     color: #dc3545;
+
     text-align: center;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+@media screen and (max-width: 768px) {
+
+    .login-main {
+        min-height: calc(100vh - 64px);
+        padding: 24px 16px;
+    }
+
+    .login-container {
+        width: 420px;
+        padding: 30px 24px;
+    }
+
+    .login-title {
+        font-size: 26px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+
+    .login-container {
+        width: 100%;
+        padding: 28px 20px;
+    }
+
+    .login-button {
+        width: 100%;
+    }
+
+    .register-button {
+        font-size: 16px;
+    }
 }
