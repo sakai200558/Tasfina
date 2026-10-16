@@ -1,1 +1,41 @@
-タスク
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タスク管理 | Tasfina</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../css/common.css"><link rel="stylesheet" href="../css/tasks.css">
+<script src="../js/common.js" defer></script><script src="../js/tasks.js" defer></script>
+</head>
+<body class="app-page">
+<div id="header"></div>
+<div class="app-layout"><div id="sidebar"></div>
+<main class="page-main">
+<div class="page-heading"><div><p class="eyebrow">TASK MANAGEMENT</p><h1>タスク管理</h1><p class="page-description">タスクの進捗を確認・管理できます。</p></div><a class="btn btn-primary" href="task-create.html"><i class="bi bi-plus-lg"></i> 新規タスク作成</a></div>
+<section class="summary-grid" aria-label="タスク概要">
+<article class="summary-card"><span class="summary-icon blue"><i class="bi bi-list-task"></i></span><div><p>全タスク</p><strong id="totalCount">12</strong><small>件</small></div></article>
+<article class="summary-card"><span class="summary-icon orange"><i class="bi bi-hourglass-split"></i></span><div><p>進行中</p><strong id="progressCount">5</strong><small>件</small></div></article>
+<article class="summary-card"><span class="summary-icon green"><i class="bi bi-check2-circle"></i></span><div><p>完了</p><strong id="doneCount">4</strong><small>件</small></div></article>
+<article class="summary-card"><span class="summary-icon red"><i class="bi bi-exclamation-circle"></i></span><div><p>期限超過</p><strong id="overdueCount">2</strong><small>件</small></div></article>
+</section>
+<section class="content-panel">
+<div class="panel-heading"><div><h2>タスク一覧</h2><p>担当タスクを検索・絞り込みできます。</p></div><a class="text-link" href="gantt.html">ガントチャートを見る <i class="bi bi-arrow-right"></i></a></div>
+<div class="filter-bar">
+<div class="search-field"><i class="bi bi-search"></i><input id="taskSearch" type="search" placeholder="タスク名・担当者で検索" aria-label="タスク検索"></div>
+<select id="statusFilter" class="form-select" aria-label="ステータスで絞り込み"><option value="">すべてのステータス</option><option>未着手</option><option>進行中</option><option>完了</option><option>承認待ち</option></select>
+<select id="priorityFilter" class="form-select" aria-label="優先度で絞り込み"><option value="">すべての優先度</option><option>高</option><option>中</option><option>低</option></select>
+</div>
+<div class="table-responsive"><table class="table task-table"><thead><tr><th>タスク名</th><th>担当者</th><th>期限</th><th>優先度</th><th>進捗</th><th>ステータス</th><th>操作</th></tr></thead>
+<tbody id="taskTableBody">
+<tr data-status="進行中" data-priority="高"><td><a href="#" class="task-name">顧客管理画面の実装</a><small>開発プロジェクト</small></td><td><span class="avatar">田</span> 田中 龍之介</td><td>2026/10/18</td><td><span class="priority high">高</span></td><td><div class="progress-label">70%</div><div class="progress"><div class="progress-bar" style="width:70%"></div></div></td><td><span class="status status-progress">進行中</span></td><td><button class="icon-button edit-task" aria-label="顧客管理画面の実装を編集"><i class="bi bi-three-dots"></i></button></td></tr>
+<tr data-status="承認待ち" data-priority="中"><td><a href="#" class="task-name">データベース設計書の確認</a><small>設計フェーズ</small></td><td><span class="avatar purple">佐</span> 佐藤 花子</td><td>2026/10/17</td><td><span class="priority medium">中</span></td><td><div class="progress-label">100%</div><div class="progress"><div class="progress-bar complete" style="width:100%"></div></div></td><td><span class="status status-pending">承認待ち</span></td><td><button class="icon-button edit-task" aria-label="データベース設計書の確認を編集"><i class="bi bi-three-dots"></i></button></td></tr>
+<tr data-status="未着手" data-priority="低"><td><a href="#" class="task-name">テスト項目の作成</a><small>テストフェーズ</small></td><td><span class="avatar yellow">鈴</span> 鈴木 一郎</td><td>2026/10/22</td><td><span class="priority low">低</span></td><td><div class="progress-label">0%</div><div class="progress"><div class="progress-bar" style="width:0%"></div></div></td><td><span class="status status-todo">未着手</span></td><td><button class="icon-button edit-task" aria-label="テスト項目の作成を編集"><i class="bi bi-three-dots"></i></button></td></tr>
+<tr data-status="完了" data-priority="中"><td><a href="#" class="task-name">画面レイアウトの作成</a><small>設計フェーズ</small></td><td><span class="avatar">田</span> 田中 龍之介</td><td>2026/10/14</td><td><span class="priority medium">中</span></td><td><div class="progress-label">100%</div><div class="progress"><div class="progress-bar complete" style="width:100%"></div></div></td><td><span class="status status-done">完了</span></td><td><button class="icon-button edit-task" aria-label="画面レイアウトの作成を編集"><i class="bi bi-three-dots"></i></button></td></tr>
+<tr data-status="進行中" data-priority="高"><td><a href="#" class="task-name">ログイン機能の開発</a><small>開発プロジェクト</small></td><td><span class="avatar purple">佐</span> 佐藤 花子</td><td>2026/10/12</td><td><span class="priority high">高</span></td><td><div class="progress-label">45%</div><div class="progress"><div class="progress-bar" style="width:45%"></div></div></td><td><span class="status status-progress">進行中</span></td><td><button class="icon-button edit-task" aria-label="ログイン機能の開発を編集"><i class="bi bi-three-dots"></i></button></td></tr>
+</tbody></table></div>
+<div class="table-footer"><span id="resultCount">5件を表示中</span><div class="pagination-lite"><button disabled aria-label="前のページ"><i class="bi bi-chevron-left"></i></button><button class="current-page">1</button><button aria-label="次のページ"><i class="bi bi-chevron-right"></i></button></div></div>
+</section>
+</main></div>
+<div id="toastArea" class="toast-area" aria-live="polite"></div>
+</body></html>
