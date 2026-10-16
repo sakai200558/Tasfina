@@ -380,13 +380,39 @@
     font-weight: 600;
 }
 
+
+/* ========================================
+   ステータス表示の修正
+======================================== */
+
 .gantt-status {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 80px;
+    min-height: 28px;
+
+    padding: 4px 14px;
     border-radius: 20px;
-    padding: 4px 12px;
+
     font-size: 13px;
     font-weight: 600;
+    line-height: 1.4;
+
+    white-space: nowrap;
+    flex-shrink: 0;
 }
+
+/* 詳細項目の表示幅 */
+.gantt-detail dl {
+    grid-template-columns: 115px minmax(0, 1fr);
+}
+
+.gantt-detail dd {
+    min-width: 0;
+}
+
 
 .gantt-status.progress {
     background: #dceeff;
