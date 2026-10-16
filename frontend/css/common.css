@@ -1,4 +1,9 @@
 
+/* ========================================
+   Tasfina 共通CSS
+======================================== */
+
+/* 全体 */
 * {
     box-sizing: border-box;
 }
@@ -7,27 +12,8 @@ body {
     margin: 0;
     font-family: "Yu Gothic", "Meiryo", sans-serif;
     color: #17213a;
-    background-color: #f8fafc;
+    background-color: #ffffff;
 }
-
-/* ヘッダー */
-.site-header {
-    height: 80px;
-    background-color: #204a7d;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-}
-
-.site-logo {
-    font-size: 36px;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-}
-
 
 /* ========================================
    共通ヘッダー
@@ -57,14 +43,13 @@ body {
     color: #ffffff;
 }
 
-/* 右側のアイコン */
+/* ヘッダー右側 */
 .header-actions {
     display: flex;
     align-items: center;
     gap: 28px;
 }
 
-/* アイコンのリンク */
 .header-actions a {
     color: #ffffff;
     font-size: 30px;
@@ -75,68 +60,159 @@ body {
     justify-content: center;
 }
 
-/* Bootstrap Icons */
 .header-actions i {
     color: #ffffff;
 }
 
-/* マウスを合わせたとき */
 .header-actions a:hover {
-    color: #ffffff;
     opacity: 0.8;
 }
 
+/* ========================================
+   ヘッダー下の共通レイアウト
+======================================== */
 
-/* ヘッダーより下のレイアウト */
 .app-layout {
     display: flex;
     min-height: calc(100vh - 80px);
 }
 
-/* サイドメニュー */
-.sidebar {
+/* 共通サイドメニュー */
+#sidebar {
     width: 240px;
     flex-shrink: 0;
-    background: white;
+    display: flex;
+}
+
+/* サイドメニュー本体 */
+.sidebar {
+    width: 100%;
+    background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
-    padding: 24px;
+
+    padding: 24px 16px;
+
     display: flex;
     flex-direction: column;
 }
 
+/* メニュー見出し */
 .sidebar h3 {
-    margin-top: 0;
+    margin: 0 0 16px;
+    padding-left: 12px;
+
+    font-size: 18px;
+    font-weight: bold;
 }
 
+/* メニュー一覧 */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
+/* メニューリンク */
 .sidebar a {
     display: block;
-    padding: 12px;
+    padding: 10px 12px;
+
     color: #24324b;
+    font-size: 15px;
     text-decoration: none;
+
     border-radius: 6px;
 }
 
+/* 選択中・ホバー */
 .sidebar a:hover,
 .sidebar a.active {
     background-color: #e5f0fc;
     color: #0065c8;
 }
 
+/* ログアウト */
 .sidebar-footer {
     margin-top: auto;
     border-top: 1px solid #e2e8f0;
     padding-top: 16px;
 }
 
-/* 各ページのメイン部分 */
+/* ========================================
+   メインコンテンツ
+======================================== */
+
 .main-content {
     flex: 1;
     min-width: 0;
     padding: 24px;
+}
+
+/* ========================================
+   画面幅が小さい場合
+======================================== */
+
+@media screen and (max-width: 768px) {
+
+    .site-header {
+        height: 64px;
+        padding: 0 16px;
+    }
+
+    .site-logo {
+        font-size: 28px;
+    }
+
+    .header-actions {
+        gap: 16px;
+    }
+
+    .header-actions a {
+        font-size: 24px;
+    }
+
+    .app-layout {
+        min-height: calc(100vh - 64px);
+    }
+
+    #sidebar {
+        width: 170px;
+    }
+
+    .sidebar {
+        padding: 16px 8px;
+    }
+
+    .sidebar a {
+        font-size: 13px;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+
+    .app-layout {
+        flex-direction: column;
+    }
+
+    #sidebar {
+        width: 100%;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .sidebar-footer {
+        margin-top: 12px;
+    }
 }

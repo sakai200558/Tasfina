@@ -1,0 +1,375 @@
+
+/* ========================================
+   Tasfina マイページ専用CSS
+======================================== */
+
+/* マイページ全体 */
+.mypage-main {
+    background-color: #ffffff;
+    max-width: 1400px;
+}
+
+/* ページタイトル */
+.mypage-title {
+    margin: 0 0 16px;
+
+    font-size: 24px;
+    font-weight: normal;
+    color: #17213a;
+}
+
+/* ========================================
+   プロフィール
+======================================== */
+
+.mypage-profile {
+    position: relative;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    padding: 20px 24px;
+    margin-bottom: 16px;
+
+    border: 1px solid #222222;
+    border-radius: 18px;
+
+    background-color: #ffffff;
+}
+
+/* アバター */
+.profile-avatar {
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+
+    border: 1px solid #4e85c2;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #554080;
+    font-size: 32px;
+}
+
+/* プロフィール情報 */
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-info h2 {
+    margin: 0 0 3px;
+
+    font-size: 23px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.profile-info p {
+    margin: 0;
+
+    font-size: 13px;
+    color: #777777;
+}
+
+/* 部門コード */
+.profile-department {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-top: 5px;
+
+    font-size: 13px;
+    color: #777777;
+}
+
+/* コピーアイコン */
+.profile-copy-button {
+    border: none;
+    background: transparent;
+
+    color: #4e85c2;
+    font-size: 24px;
+
+    cursor: pointer;
+}
+
+.profile-copy-button:hover {
+    color: #0065c8;
+}
+
+/* 編集アイコン */
+.profile-edit-button {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+
+    color: #555555;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.profile-edit-button:hover {
+    color: #0065c8;
+}
+
+/* ========================================
+   ステータスカード
+======================================== */
+
+.mypage-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+/* カード */
+.stat-card {
+    min-height: 105px;
+
+    padding: 18px;
+
+    border: 1px solid #222222;
+    border-radius: 18px;
+
+    background-color: #ffffff;
+    text-decoration: none;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card:hover {
+    background-color: #f3f8ff;
+}
+
+/* ラベル */
+.stat-label {
+    font-size: 15px;
+    color: #000000;
+}
+
+/* 数値 */
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0065c8;
+}
+
+/* ========================================
+   共通パネル（マイページ専用）
+======================================== */
+
+.mypage-panel {
+    margin-bottom: 16px;
+
+    border: 1px solid #222222;
+    border-radius: 18px;
+
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+/* パネル見出し */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 16px 20px 8px;
+}
+
+.panel-header h2 {
+    margin: 0;
+
+    font-size: 23px;
+    font-weight: bold;
+    color: #000000;
+}
+
+/* 詳細リンク */
+.panel-header a {
+    color: #0065c8;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.panel-header a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   本日のシフト
+======================================== */
+
+.shift-summary {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    padding: 8px 20px 24px;
+}
+
+.shift-time,
+.shift-type {
+    font-size: 14px;
+    color: #000000;
+}
+
+/* ========================================
+   最近のタスク
+======================================== */
+
+.recent-task-list {
+    padding: 0;
+}
+
+.recent-task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+
+    padding: 12px 20px;
+}
+
+.recent-task-item + .recent-task-item {
+    border-top: 1px solid #cccccc;
+}
+
+.task-name {
+    font-size: 14px;
+    color: #000000;
+}
+
+.task-status {
+    font-size: 13px;
+    color: #777777;
+}
+
+/* ========================================
+   最新のお知らせ
+======================================== */
+
+.notification-summary {
+    padding: 8px 20px 24px;
+}
+
+.notification-summary p {
+    margin: 0 0 10px;
+
+    font-size: 14px;
+    color: #000000;
+}
+
+.notification-summary a {
+    color: #0065c8;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.notification-summary a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   コピー完了メッセージ
+======================================== */
+
+.copy-message {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+
+    padding: 12px 20px;
+
+    background-color: #204a7d;
+    color: #ffffff;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: opacity 0.2s;
+    z-index: 1000;
+}
+
+.copy-message.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+@media screen and (max-width: 768px) {
+
+    .mypage-stats {
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px;
+        min-height: 90px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+    }
+
+    .panel-header h2 {
+        font-size: 19px;
+    }
+
+    .mypage-profile {
+        padding: 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+
+    .mypage-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .mypage-profile {
+        gap: 10px;
+    }
+
+    .profile-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 26px;
+    }
+
+    .profile-info h2 {
+        font-size: 18px;
+    }
+
+    .profile-department {
+        flex-wrap: wrap;
+    }
+
+    .panel-header {
+        padding: 14px 16px 8px;
+    }
+
+    .shift-summary {
+        flex-wrap: wrap;
+    }
+}

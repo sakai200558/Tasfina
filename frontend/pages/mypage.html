@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>マイページ | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- マイページ専用CSS -->
+    <link rel="stylesheet" href="../css/mypage.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- マイページ専用JavaScript -->
+    <script src="../js/mypage.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <!-- 共通レイアウト -->
+    <div class="app-layout">
+
+        <!-- 共通サイドメニュー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content mypage-main">
+
+            <h1 class="mypage-title">マイページ</h1>
+
+            <!-- =========================
+                 プロフィール
+            ========================== -->
+            <section class="mypage-profile">
+
+                <div class="profile-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div class="profile-info">
+
+                    <h2>山田太郎</h2>
+
+                    <p class="profile-role">
+                        営業部／一般メンバー
+                    </p>
+
+                    <p class="profile-email">
+                        yamada@example.com
+                    </p>
+
+                    <div class="profile-department">
+
+                        <span>
+                            所属部門コード：ABCD123
+                        </span>
+
+                        <button
+                            type="button"
+                            id="copyDeptCode"
+                            class="profile-copy-button"
+                            data-code="ABCD123"
+                            aria-label="所属部門コードをコピー"
+                            title="所属部門コードをコピー"
+                        >
+                            <i class="bi bi-copy"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- プロフィール編集 -->
+                <a
+                    href="#"
+                    id="editProfileButton"
+                    class="profile-edit-button"
+                    aria-label="プロフィール編集"
+                >
+                    <i class="bi bi-pencil"></i>
+                </a>
+
+            </section>
+
+
+            <!-- =========================
+                 ステータスカード
+            ========================== -->
+            <section class="mypage-stats">
+
+                <a href="tasks.html" class="stat-card">
+
+                    <span class="stat-label">
+                        担当タスク
+                    </span>
+
+                    <strong class="stat-value">
+                        5件
+                    </strong>
+
+                </a>
+
+                <a href="tasks.html" class="stat-card">
+
+                    <span class="stat-label">
+                        承認待ち
+                    </span>
+
+                    <strong class="stat-value">
+                        2件
+                    </strong>
+
+                </a>
+
+                <a href="ranking.html" class="stat-card">
+
+                    <span class="stat-label">
+                        負担スコア
+                    </span>
+
+                    <strong class="stat-value">
+                        24.5pt
+                    </strong>
+
+                </a>
+
+            </section>
+
+
+            <!-- =========================
+                 本日のシフト
+            ========================== -->
+            <section class="mypage-panel">
+
+                <div class="panel-header">
+
+                    <h2>本日のシフト</h2>
+
+                    <a href="shifts.html">
+                        詳細
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+                <div class="shift-summary">
+
+                    <span class="shift-time">
+                        09:00～18:00
+                    </span>
+
+                    <span class="shift-type">
+                        通常出勤
+                    </span>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 最近のタスク
+            ========================== -->
+            <section class="mypage-panel">
+
+                <div class="panel-header">
+
+                    <h2>最近のタスク</h2>
+
+                    <a href="tasks.html">
+                        一覧を見る
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+                <div class="recent-task-list">
+
+                    <div class="recent-task-item">
+
+                        <span class="task-name">
+                            資料作成
+                        </span>
+
+                        <span class="task-status">
+                            進行中
+                        </span>
+
+                    </div>
+
+                    <div class="recent-task-item">
+
+                        <span class="task-name">
+                            月次報告
+                        </span>
+
+                        <span class="task-status">
+                            承認待ち
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 最新のお知らせ
+            ========================== -->
+            <section class="mypage-panel">
+
+                <div class="panel-header">
+
+                    <h2>最新のお知らせ</h2>
+
+                </div>
+
+                <div class="notification-summary">
+
+                    <p>
+                        タスクの完了申請が承認されました
+                    </p>
+
+                    <a href="notifications.html">
+                        通知一覧を見る
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- コピー完了メッセージ -->
+    <div
+        id="copyMessage"
+        class="copy-message"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+</body>
+</html>
