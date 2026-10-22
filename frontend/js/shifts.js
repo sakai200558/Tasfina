@@ -74,4 +74,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === busyModal) {
             busyModal.classList.add('hidden');
         }
-    });
+    })});
