@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>新規タスク作成 | Tasfina</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet"><link rel="stylesheet" href="../css/common.css"><link rel="stylesheet" href="../css/task-create.css"><script src="../js/common.js" defer></script><script src="../js/task-create.js" defer></script></head>
@@ -12,3 +13,263 @@
 <div class="field-row"><div class="field-group"><label for="startDate">開始日 <span class="required">必須</span></label><input class="form-control" type="date" id="startDate" name="startDate" required></div><div class="field-group"><label for="dueDate">期限 <span class="required">必須</span></label><input class="form-control" type="date" id="dueDate" name="dueDate" required></div></div>
 <div class="form-actions"><a href="tasks.html" class="btn btn-light">キャンセル</a><button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> タスクを作成</button></div><p id="formMessage" class="form-message" role="status" aria-live="polite"></p>
 </form></section></main></div><div id="toastArea" class="toast-area" aria-live="polite"></div></body></html>
+=======
+
+<!-- ========================================
+     新規タスク作成モーダル
+======================================== -->
+
+<div
+    class="modal fade"
+    id="taskCreateModal"
+    tabindex="-1"
+    aria-labelledby="taskCreateModalLabel"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content task-create-modal">
+
+            <form id="taskCreateForm" novalidate>
+
+                <!-- モーダルヘッダー -->
+                <div class="modal-header">
+
+                    <div>
+                        <p class="task-create-eyebrow">
+                            TASK MANAGEMENT
+                        </p>
+
+                        <h2
+                            class="modal-title"
+                            id="taskCreateModalLabel"
+                        >
+                            新規タスク作成
+                        </h2>
+
+                        <p class="task-create-description">
+                            必要な情報を入力してタスクを作成します。
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="閉じる"
+                    ></button>
+
+                </div>
+
+                <!-- モーダル本体 -->
+                <div class="modal-body">
+
+                    <!-- 基本情報 -->
+                    <div class="task-create-section">
+
+                        <span class="task-create-section-number">
+                            01
+                        </span>
+
+                        <div>
+                            <h3>基本情報</h3>
+                            <p>タスクの名前や概要を入力してください。</p>
+                        </div>
+
+                    </div>
+
+                    <!-- タスク名 -->
+                    <div class="mb-3">
+
+                        <label
+                            for="taskTitle"
+                            class="form-label"
+                        >
+                            タスク名
+                            <span class="task-create-required">必須</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="taskTitle"
+                            name="title"
+                            class="form-control"
+                            maxlength="100"
+                            placeholder="例：ログイン機能の開発"
+                            required
+                        >
+
+                        <div
+                            id="titleError"
+                            class="task-create-error"
+                        ></div>
+
+                    </div>
+
+                    <!-- タスクの説明 -->
+                    <div class="mb-3">
+
+                        <label
+                            for="taskDescription"
+                            class="form-label"
+                        >
+                            タスクの説明
+                        </label>
+
+                        <textarea
+                            id="taskDescription"
+                            name="description"
+                            class="form-control"
+                            rows="3"
+                            placeholder="タスクの目的や作業内容を入力してください。"
+                        ></textarea>
+
+                    </div>
+
+                    <!-- 担当者・優先度 -->
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="assignee"
+                                class="form-label"
+                            >
+                                担当者
+                                <span class="task-create-required">必須</span>
+                            </label>
+
+                            <select
+                                id="assignee"
+                                name="assignee"
+                                class="form-select"
+                                required
+                            >
+                                <option value="">担当者を選択</option>
+                                <option>田中 龍之介</option>
+                                <option>佐藤 花子</option>
+                                <option>鈴木 一郎</option>
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="priority"
+                                class="form-label"
+                            >
+                                優先度
+                            </label>
+
+                            <select
+                                id="priority"
+                                name="priority"
+                                class="form-select"
+                            >
+                                <option>中</option>
+                                <option>高</option>
+                                <option>低</option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- スケジュール -->
+                    <div class="task-create-section second-section">
+
+                        <span class="task-create-section-number">
+                            02
+                        </span>
+
+                        <div>
+                            <h3>スケジュール</h3>
+                            <p>開始日と期限を設定してください。</p>
+                        </div>
+
+                    </div>
+
+                    <!-- 開始日・期限 -->
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="startDate"
+                                class="form-label"
+                            >
+                                開始日
+                                <span class="task-create-required">必須</span>
+                            </label>
+
+                            <input
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                class="form-control"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="dueDate"
+                                class="form-label"
+                            >
+                                期限
+                                <span class="task-create-required">必須</span>
+                            </label>
+
+                            <input
+                                type="date"
+                                id="dueDate"
+                                name="dueDate"
+                                class="form-control"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                    <p
+                        id="formMessage"
+                        class="task-create-error"
+                        role="alert"
+                    ></p>
+
+                </div>
+
+                <!-- モーダルフッター -->
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        キャンセル
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-check2"></i>
+                        タスクを作成
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+>>>>>>> 055901f (設定)

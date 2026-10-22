@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -39,3 +40,556 @@
 </main></div>
 <div id="toastArea" class="toast-area" aria-live="polite"></div>
 </body></html>
+=======
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>タスク管理 | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/tasks.css">
+    <link rel="stylesheet" href="../css/task-create.css">
+
+    <!-- JavaScript -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        defer
+    ></script>
+
+    <script src="../js/common.js" defer></script>
+    <script src="../js/tasks.js" defer></script>
+    <script src="../js/task-create.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <main class="page-main tasks-page">
+
+            <!-- ========================================
+                 ページ見出し
+            ======================================== -->
+
+            <div class="page-heading">
+
+                <h1>タスク管理</h1>
+
+               <button
+                 type="button"
+                 id="openTaskCreateModal"
+                 class="btn btn-primary"
+                >
+                 <i class="bi bi-plus-lg"></i>
+                新規タスク作成
+                </button>
+
+            </div>
+
+            <!-- ========================================
+                 集計カード
+            ======================================== -->
+
+            <section
+                class="task-summary"
+                aria-label="タスク概要"
+            >
+
+                <article class="task-summary-card">
+
+                    <p>進行中</p>
+
+                    <strong id="progressCount">0件</strong>
+
+                </article>
+
+                <article class="task-summary-card">
+
+                    <p>承認待ち</p>
+
+                    <strong id="pendingCount">0件</strong>
+
+                </article>
+
+                <article class="task-summary-card">
+
+                    <p>完了</p>
+
+                    <strong id="doneCount">0件</strong>
+
+                </article>
+
+            </section>
+
+            <!-- ========================================
+                 タスク一覧
+            ======================================== -->
+
+            <section class="task-panel">
+
+                <!-- タブ -->
+                <div
+                    class="task-tabs"
+                    role="tablist"
+                    aria-label="タスク分類"
+                >
+
+                    <button
+                        type="button"
+                        class="task-tab active"
+                        data-tab="mine"
+                        role="tab"
+                        aria-selected="true"
+                    >
+                        自分のタスク
+                    </button>
+
+                    <button
+                        type="button"
+                        class="task-tab"
+                        data-tab="others"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        他メンバー
+                    </button>
+
+                    <button
+                        type="button"
+                        class="task-tab"
+                        data-tab="requested"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        依頼タスク
+                    </button>
+
+                    <button
+                        type="button"
+                        class="task-tab"
+                        data-tab="pending"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        承認待ち
+                    </button>
+
+                </div>
+
+                <!-- 検索・担当者フィルター -->
+                <div class="task-filters">
+
+                    <div class="task-search">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="search"
+                            id="taskSearch"
+                            placeholder="タスク名で検索"
+                            aria-label="タスク名で検索"
+                        >
+
+                    </div>
+
+                    <select
+                        id="assigneeFilter"
+                        class="form-select"
+                        aria-label="担当者で絞り込み"
+                    >
+                        <option value="">担当者：全員</option>
+                    </select>
+
+                </div>
+
+                <!-- 一覧テーブル -->
+                <div class="table-responsive">
+
+                    <table class="table task-table">
+
+                        <thead>
+                            <tr>
+                                <th>タスク名</th>
+                                <th>担当者</th>
+                                <th>期限</th>
+                                <th>状態</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="taskTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="task-panel-footer">
+
+                    <span id="taskResultCount"></span>
+
+                    <a href="gantt.html">
+                        詳細を見る
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+            </section>
+
+            <!-- ========================================
+                 選択中のタスク詳細
+            ======================================== -->
+
+            <section class="task-detail-panel">
+
+                <h2>選択中のタスク詳細</h2>
+
+                <div id="selectedTaskDetail">
+
+                    <p class="task-empty">
+                        タスクを選択してください。
+                    </p>
+
+                </div>
+
+                <div class="task-detail-actions">
+
+                    <button
+                        type="button"
+                        id="requestHoursButton"
+                        class="btn btn-outline-secondary"
+                        disabled
+                    >
+                        工数変更申請
+                    </button>
+
+                    <button
+                        type="button"
+                        id="requestCompleteButton"
+                        class="btn btn-primary"
+                        disabled
+                    >
+                        完了申請
+                    </button>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- ========================================
+         工数変更申請モーダル
+    ======================================== -->
+
+    <div
+        class="modal fade"
+        id="workHoursModal"
+        tabindex="-1"
+        aria-labelledby="workHoursModalLabel"
+        aria-hidden="true"
+    >
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content task-modal">
+
+                <form id="workHoursForm">
+
+                    <div class="modal-header">
+
+                        <h2
+                            class="modal-title fs-5"
+                            id="workHoursModalLabel"
+                        >
+                            <i class="bi bi-clock-history"></i>
+                            工数変更申請
+                        </h2>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="閉じる"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p class="modal-task-name" id="hoursTaskName"></p>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="currentHours"
+                                class="form-label"
+                            >
+                                現在の想定工数
+                            </label>
+
+                            <input
+                                type="number"
+                                id="currentHours"
+                                class="form-control"
+                                readonly
+                            >
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="requestedHours"
+                                class="form-label"
+                            >
+                                変更後の想定工数（時間）
+                            </label>
+
+                            <input
+                                type="number"
+                                id="requestedHours"
+                                class="form-control"
+                                min="0.1"
+                                step="0.1"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="hoursReason"
+                                class="form-label"
+                            >
+                                変更理由
+                            </label>
+
+                            <textarea
+                                id="hoursReason"
+                                class="form-control"
+                                rows="4"
+                                maxlength="500"
+                                required
+                            ></textarea>
+
+                        </div>
+
+                        <p
+                            id="hoursError"
+                            class="form-error"
+                            role="alert"
+                        ></p>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            キャンセル
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            申請する
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================
+         完了申請モーダル
+    ======================================== -->
+
+    <div
+        class="modal fade"
+        id="taskCompleteModal"
+        tabindex="-1"
+        aria-labelledby="taskCompleteModalLabel"
+        aria-hidden="true"
+    >
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content task-modal">
+
+                <form id="taskCompleteForm">
+
+                    <div class="modal-header">
+
+                        <h2
+                            class="modal-title fs-5"
+                            id="taskCompleteModalLabel"
+                        >
+                            <i class="bi bi-check-circle"></i>
+                            タスク完了申請
+                        </h2>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="閉じる"
+                        ></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p
+                            class="modal-task-name"
+                            id="completeTaskName"
+                        ></p>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="actualHours"
+                                class="form-label"
+                            >
+                                実績工数（時間）
+                            </label>
+
+                            <input
+                                type="number"
+                                id="actualHours"
+                                class="form-control"
+                                min="0.1"
+                                step="0.1"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="completeReport"
+                                class="form-label"
+                            >
+                                完了報告
+                            </label>
+
+                            <textarea
+                                id="completeReport"
+                                class="form-control"
+                                rows="4"
+                                maxlength="1000"
+                                required
+                            ></textarea>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label
+                                for="completeEvidence"
+                                class="form-label"
+                            >
+                                エビデンス（任意）
+                            </label>
+
+                            <input
+                                type="file"
+                                id="completeEvidence"
+                                class="form-control"
+                                accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx"
+                            >
+
+                            <div class="form-text">
+                                PDF・画像・Word・Excel（最大10MB）
+                            </div>
+
+                        </div>
+
+                        <p
+                            id="completeError"
+                            class="form-error"
+                            role="alert"
+                        ></p>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            キャンセル
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            完了申請する
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 通知表示 -->
+    <div
+        id="toastArea"
+        class="toast-area"
+        aria-live="polite"
+    ></div>
+<!-- ========================================
+     新規タスク作成モーダルの読み込み先
+======================================== -->
+
+<div id="taskCreateModalContainer"></div>
+</body>
+</html>
+>>>>>>> 055901f (設定)

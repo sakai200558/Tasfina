@@ -1,1 +1,866 @@
-設定　全般
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>設定 | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- 設定画面専用CSS -->
+    <link rel="stylesheet" href="../css/settings.css">
+
+    <!-- Bootstrap JavaScript -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        defer
+    ></script>
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- 設定画面専用JavaScript -->
+    <script src="../js/setting.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content settings-page">
+
+            <!-- ========================================
+                 ページ見出し
+            ======================================== -->
+
+            <div class="settings-heading">
+                <h1>設定</h1>
+                <p>システム全体の設定を管理します。</p>
+            </div>
+
+            <!-- ========================================
+                 設定タブ
+            ======================================== -->
+
+            <nav class="settings-tabs" aria-label="設定カテゴリー">
+
+                <button
+                    type="button"
+                    class="settings-tab active"
+                    data-tab="general"
+                    aria-current="page"
+                >
+                    <i class="bi bi-gear-fill"></i>
+                    全般設定
+                </button>
+
+                <a
+    href="settings-shifts.html"
+    class="settings-tab"
+>
+    <i class="bi bi-calendar-week"></i>
+    シフト設定
+</a>
+
+                <button
+                    type="button"
+                    class="settings-tab"
+                    data-tab="score"
+                >
+                    <i class="bi bi-shield-check"></i>
+                    負担スコア設定
+                </button>
+
+                <button
+                    type="button"
+                    class="settings-tab"
+                    data-tab="notification"
+                >
+                    <i class="bi bi-bell"></i>
+                    通知設定
+                </button>
+
+                <button
+                    type="button"
+                    class="settings-tab"
+                    data-tab="account"
+                >
+                    <i class="bi bi-people-fill"></i>
+                    アカウント管理
+                </button>
+
+                <button
+                    type="button"
+                    class="settings-tab"
+                    data-tab="system"
+                >
+                    <i class="bi bi-sliders"></i>
+                    システム設定
+                </button>
+
+            </nav>
+
+            <!-- ========================================
+                 全般設定
+            ======================================== -->
+
+            <section
+                id="generalPanel"
+                class="settings-tab-panel"
+                data-panel="general"
+            >
+
+                <div class="settings-grid">
+
+                    <!-- 左側 -->
+                    <div class="settings-column">
+
+                        <!-- 企業情報 -->
+                        <section class="settings-card">
+
+                            <h2>企業情報</h2>
+
+                            <div class="company-grid">
+
+                                <div class="company-fields">
+
+                                    <div class="settings-field">
+                                        <label for="systemName">
+                                            システム名
+                                            <span class="required-mark">*</span>
+                                        </label>
+
+                                        <div>
+                                            <input
+                                                type="text"
+                                                id="systemName"
+                                                class="form-control"
+                                                value="Tasfina"
+                                                maxlength="50"
+                                                required
+                                            >
+
+                                            <p
+                                                class="character-count"
+                                                id="systemNameCount"
+                                            >
+                                                7 / 50
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label for="companyName">
+                                            企業名
+                                            <span class="required-mark">*</span>
+                                        </label>
+
+                                        <div>
+                                            <input
+                                                type="text"
+                                                id="companyName"
+                                                class="form-control"
+                                                value="株式会社Tasfina"
+                                                maxlength="100"
+                                                required
+                                            >
+
+                                            <p
+                                                class="character-count"
+                                                id="companyNameCount"
+                                            >
+                                                12 / 100
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label for="logoFile">
+                                            ロゴ画像
+                                        </label>
+
+                                        <div>
+                                            <input
+                                                type="file"
+                                                id="logoFile"
+                                                class="form-control"
+                                                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                                            >
+
+                                            <p class="settings-help">
+                                                推奨サイズ：横200px × 縦60px（PNG、JPG）
+                                            </p>
+
+                                            <p
+                                                class="settings-help"
+                                                id="logoFileName"
+                                            ></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="company-fields">
+
+                                    <div class="settings-field">
+                                        <label for="timeZone">
+                                            タイムゾーン
+                                        </label>
+
+                                        <select
+                                            id="timeZone"
+                                            class="form-select"
+                                        >
+                                            <option value="Asia/Tokyo">
+                                                (UTC+09:00) 東京
+                                            </option>
+                                            <option value="UTC">
+                                                (UTC+00:00) UTC
+                                            </option>
+                                            <option value="Asia/Seoul">
+                                                (UTC+09:00) ソウル
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label for="weekStart">
+                                            週の開始曜日
+                                        </label>
+
+                                        <select
+                                            id="weekStart"
+                                            class="form-select"
+                                        >
+                                            <option value="monday">月曜日</option>
+                                            <option value="sunday">日曜日</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label for="dateFormat">
+                                            日付の表示形式
+                                        </label>
+
+                                        <select
+                                            id="dateFormat"
+                                            class="form-select"
+                                        >
+                                            <option value="yyyy/mm/dd">
+                                                2024/10/17
+                                            </option>
+                                            <option value="yyyy-mm-dd">
+                                                2024-10-17
+                                            </option>
+                                            <option value="mm/dd/yyyy">
+                                                10/17/2024
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label for="timeFormat">
+                                            時間の表示形式
+                                        </label>
+
+                                        <select
+                                            id="timeFormat"
+                                            class="form-select"
+                                        >
+                                            <option value="24">
+                                                24時間形式（例：09:00）
+                                            </option>
+                                            <option value="12">
+                                                12時間形式（例：9:00 AM）
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <!-- パスワードポリシー -->
+                        <section class="settings-card">
+
+                            <h2>パスワードポリシー</h2>
+
+                            <div class="password-policy-grid">
+
+                                <div class="settings-field">
+                                    <label for="minimumPasswordLength">
+                                        最小文字数
+                                    </label>
+
+                                    <div class="inline-control">
+                                        <input
+                                            type="number"
+                                            id="minimumPasswordLength"
+                                            class="form-control small-number-input"
+                                            min="8"
+                                            max="128"
+                                            value="8"
+                                        >
+                                        <span>文字</span>
+                                    </div>
+                                </div>
+
+                                <div class="settings-field">
+                                    <span class="settings-field-label">
+                                        必須文字種
+                                    </span>
+
+                                    <div class="checkbox-list">
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                id="requireUppercase"
+                                                checked
+                                            >
+                                            英大文字
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                id="requireLowercase"
+                                                checked
+                                            >
+                                            英小文字
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                id="requireNumber"
+                                                checked
+                                            >
+                                            数字
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                id="requireSymbol"
+                                            >
+                                            記号
+                                        </label>
+
+                                    </div>
+                                </div>
+
+                                <div class="settings-field">
+                                    <label for="passwordExpiry">
+                                        有効期限
+                                    </label>
+
+                                    <select
+                                        id="passwordExpiry"
+                                        class="form-select"
+                                    >
+                                        <option value="30">30日</option>
+                                        <option value="60">60日</option>
+                                        <option value="90" selected>90日</option>
+                                        <option value="180">180日</option>
+                                        <option value="0">無期限</option>
+                                    </select>
+                                </div>
+
+                                <div class="settings-field">
+                                    <label for="passwordHistory">
+                                        履歴の保持数
+                                    </label>
+
+                                    <select
+                                        id="passwordHistory"
+                                        class="form-select"
+                                    >
+                                        <option value="0">保持しない</option>
+                                        <option value="3">3回</option>
+                                        <option value="5" selected>5回</option>
+                                        <option value="10">10回</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <!-- バックアップ -->
+                        <section class="settings-card">
+
+                            <h2>バックアップ設定</h2>
+
+                            <div class="backup-settings">
+
+                                <div class="settings-field">
+                                    <span class="settings-field-label">
+                                        自動バックアップ
+                                    </span>
+
+                                    <div>
+                                        <label class="switch-control">
+                                            <input
+                                                type="checkbox"
+                                                id="autoBackup"
+                                                checked
+                                            >
+                                            <span class="switch-slider"></span>
+                                            <span class="switch-state">ON</span>
+                                        </label>
+
+                                        <p class="settings-help">
+                                            毎日深夜に自動でバックアップを作成します。
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="settings-field">
+                                    <label for="backupRetention">
+                                        保持期間
+                                    </label>
+
+                                    <div class="backup-actions">
+
+                                        <select
+                                            id="backupRetention"
+                                            class="form-select"
+                                        >
+                                            <option value="7">7日</option>
+                                            <option value="14">14日</option>
+                                            <option value="30" selected>30日</option>
+                                            <option value="90">90日</option>
+                                        </select>
+
+                                        <button
+                                            type="button"
+                                            id="runBackupButton"
+                                            class="btn btn-outline-primary"
+                                        >
+                                            <i class="bi bi-database"></i>
+                                            今すぐバックアップを実行
+                                        </button>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                    </div>
+
+                    <!-- 右側 -->
+                    <div class="settings-column">
+
+                        <!-- 表示設定 -->
+                        <section class="settings-card">
+
+                            <h2>表示設定</h2>
+
+                            <div class="settings-field">
+                                <span class="settings-field-label">
+                                    テーマカラー
+                                </span>
+
+                                <div
+                                    class="theme-colors"
+                                    id="themeColors"
+                                    role="group"
+                                    aria-label="テーマカラー"
+                                >
+
+                                    <button
+                                        type="button"
+                                        class="theme-color selected"
+                                        data-color="#0065c8"
+                                        aria-label="青"
+                                        aria-pressed="true"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#55c7b5"
+                                        aria-label="ミント"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#9bd36c"
+                                        aria-label="緑"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#ffbd59"
+                                        aria-label="オレンジ"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#ff7078"
+                                        aria-label="赤"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#aa80d8"
+                                        aria-label="紫"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="theme-color"
+                                        data-color="#aeb7c6"
+                                        aria-label="グレー"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                </div>
+                            </div>
+
+                            <div class="settings-field">
+                                <span class="settings-field-label">
+                                    サイドメニュー表示
+                                </span>
+
+                                <label class="switch-control">
+                                    <input
+                                        type="checkbox"
+                                        id="showSidebar"
+                                        checked
+                                    >
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-state">ON</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-field">
+                                <span class="settings-field-label">
+                                    アニメーション効果
+                                </span>
+
+                                <label class="switch-control">
+                                    <input
+                                        type="checkbox"
+                                        id="enableAnimation"
+                                        checked
+                                    >
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-state">ON</span>
+                                </label>
+                            </div>
+
+                            <div class="settings-field">
+                                <label for="itemsPerPage">
+                                    1ページの表示件数
+                                </label>
+
+                                <select
+                                    id="itemsPerPage"
+                                    class="form-select"
+                                >
+                                    <option value="10">10件</option>
+                                    <option value="20" selected>20件</option>
+                                    <option value="50">50件</option>
+                                    <option value="100">100件</option>
+                                </select>
+                            </div>
+
+                        </section>
+
+                        <!-- 機能設定 -->
+                        <section class="settings-card">
+
+                            <h2>機能設定</h2>
+
+                            <div class="feature-list">
+
+                                <div class="feature-row">
+                                    <span>チャット機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureChat" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>ファイル共有機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureFiles" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>タスク管理機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureTasks" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>ガントチャート機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureGantt" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>ランキング機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureRanking" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>組織図機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureOrgChart" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                                <div class="feature-row">
+                                    <span>シフトルーレット機能</span>
+                                    <label class="switch-control">
+                                        <input type="checkbox" id="featureShiftRoulette" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-state">ON</span>
+                                    </label>
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <!-- 危険な操作 -->
+                        <section class="settings-card danger-card">
+
+                            <h2>危険な操作</h2>
+
+                            <button
+                                type="button"
+                                id="deleteAllDataButton"
+                                class="btn btn-outline-danger danger-button"
+                            >
+                                <i class="bi bi-trash3"></i>
+                                全データの削除
+                            </button>
+
+                            <p class="danger-help">
+                                ※ この操作は取り消せません。慎重に実行してください。
+                            </p>
+
+                        </section>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- ========================================
+                 その他のタブ
+            ======================================== -->
+
+            <section
+                class="settings-tab-panel"
+                data-panel="shift"
+                hidden
+            >
+                <div class="settings-card placeholder-card">
+                    <h2>シフト設定</h2>
+                    <p>シフト管理に関する設定を行う画面です。</p>
+                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
+                </div>
+            </section>
+
+            <section
+                class="settings-tab-panel"
+                data-panel="score"
+                hidden
+            >
+                <div class="settings-card placeholder-card">
+                    <h2>負担スコア設定</h2>
+                    <p>業務負担の算出ルールを設定する画面です。</p>
+                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
+                </div>
+            </section>
+
+            <section
+                class="settings-tab-panel"
+                data-panel="notification"
+                hidden
+            >
+                <div class="settings-card placeholder-card">
+                    <h2>通知設定</h2>
+                    <p>通知方法や通知対象を設定する画面です。</p>
+                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
+                </div>
+            </section>
+
+            <section
+                class="settings-tab-panel"
+                data-panel="account"
+                hidden
+            >
+                <div class="settings-card placeholder-card">
+                    <h2>アカウント管理</h2>
+                    <p>ユーザーや権限を管理する画面です。</p>
+                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
+                </div>
+            </section>
+
+            <section
+                class="settings-tab-panel"
+                data-panel="system"
+                hidden
+            >
+                <div class="settings-card placeholder-card">
+                    <h2>システム設定</h2>
+                    <p>システムの動作に関する設定を行う画面です。</p>
+                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
+                </div>
+            </section>
+
+            <!-- 設定保存 -->
+            <div class="settings-footer">
+
+                <p
+                    id="settingsMessage"
+                    class="settings-message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <button
+                    type="button"
+                    id="saveSettingsButton"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-floppy"></i>
+                    設定を保存
+                </button>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- ========================================
+         全データ削除確認モーダル
+    ======================================== -->
+
+    <div
+        class="modal fade"
+        id="deleteConfirmModal"
+        tabindex="-1"
+        aria-labelledby="deleteConfirmModalLabel"
+        aria-hidden="true"
+    >
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h2
+                        class="modal-title fs-5"
+                        id="deleteConfirmModalLabel"
+                    >
+                        全データの削除
+                    </h2>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="閉じる"
+                    ></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        全データ削除は取り消すことができません。
+                    </p>
+
+                    <p class="text-danger mb-0">
+                        現在はデモ画面のため、実際のデータ削除は行いません。
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        キャンセル
+                    </button>
+
+                    <button
+                        type="button"
+                        id="confirmDeleteButton"
+                        class="btn btn-danger"
+                    >
+                        デモを確認
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

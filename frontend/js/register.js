@@ -1,28 +1,29 @@
 
 /* ========================================
-   Tasfina 新規登録画面専用JavaScript
+   Tasfina 新規登録画面
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    /* ========================================
+       要素の取得
+    ======================================== */
 
     const registerForm = document.getElementById("registerForm");
 
     const usernameInput = document.getElementById("username");
     const emailInput = document.getElementById("email");
-
     const passwordInput = document.getElementById("password");
-    const passwordConfirmInput =
-        document.getElementById("passwordConfirm");
-
+    const passwordConfirmInput = document.getElementById("passwordConfirm");
     const deptCodeInput = document.getElementById("deptCode");
     const specialCodeInput = document.getElementById("specialCode");
 
+    const registerButton = document.getElementById("registerButton");
     const registerError = document.getElementById("registerError");
 
-
-    // =====================================
-    // エラー表示
-    // =====================================
+    /* ========================================
+       エラーメッセージ表示
+    ======================================== */
 
     function showError(message) {
         registerError.textContent = message;
@@ -34,140 +35,201 @@ document.addEventListener("DOMContentLoaded", () => {
         registerError.hidden = true;
     }
 
+    /* ========================================
+       パスワード表示・非表示切り替え
+    ======================================== */
 
-    // =====================================
-    // パスワード表示切替
-    // =====================================
+    const passwordToggleButtons = document.querySelectorAll(
+        ".register-password-toggle"
+    );
 
-    document.querySelectorAll(".register-password-toggle")
-        .forEach(button => {
+    passwordToggleButtons.forEach(button => {
 
-            button.addEventListener("click", () => {
+        button.addEventListener("click", () => {
 
-                const targetId = button.dataset.target;
-                const input = document.getElementById(targetId);
+            const targetId = button.dataset.target;
+            const targetInput = document.getElementById(targetId);
 
-                const isHidden = input.type === "password";
+            if (!targetInput) {
+                return;
+            }
 
-                input.type = isHidden ? "text" : "password";
+            const isPassword = targetInput.type === "password";
 
-                const icon = button.querySelector("i");
+            targetInput.type = isPassword ? "text" : "password";
 
-                icon.className = isHidden
+            button.setAttribute(
+                "aria-pressed",
+                String(isPassword)
+            );
+
+            button.setAttribute(
+                "aria-label",
+                isPassword
+                    ? "パスワードを非表示"
+                    : "パスワードを表示"
+            );
+
+            const icon = button.querySelector("i");
+
+            if (icon) {
+                icon.className = isPassword
                     ? "bi bi-eye-slash"
                     : "bi bi-eye";
-
-                button.setAttribute(
-                    "aria-pressed",
-                    String(isHidden)
-                );
-
-                button.setAttribute(
-                    "aria-label",
-                    isHidden
-                        ? "パスワードを隠す"
-                        : "パスワードを表示"
-                );
-
-            });
+            }
 
         });
 
+    });
 
-    // =====================================
-    // 新規登録処理
-    // =====================================
+    /* ========================================
+       新規登録フォーム送信
+    ======================================== */
 
-    registerForm.addEventListener("submit", (event) => {
+    registerForm.addEventListener("submit", async (event) => {
 
+        // 通常のフォーム送信を停止
         event.preventDefault();
 
         clearError();
 
-        // 入力値取得
+        /* ========================================
+           入力値の取得
+        ======================================== */
+
         const username = usernameInput.value.trim();
         const email = emailInput.value.trim();
-
         const password = passwordInput.value;
         const passwordConfirm = passwordConfirmInput.value;
-
         const deptCode = deptCodeInput.value.trim();
         const specialCode = specialCodeInput.value.trim();
 
+        /* ========================================
+           入力チェック
+        ======================================== */
 
-        // ユーザー名チェック
-        if (username === "") {
+        if (!username) {
             showError("ユーザー名を入力してください。");
             usernameInput.focus();
             return;
         }
 
-        // メールアドレス未入力
-        if (email === "") {
+        if (!email) {
             showError("メールアドレスを入力してください。");
             emailInput.focus();
             return;
         }
 
-        // メールアドレス形式チェック
-        if (!emailInput.validity.valid) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailPattern.test(email)) {
             showError("正しいメールアドレスを入力してください。");
             emailInput.focus();
             return;
         }
 
-        // パスワード未入力
-        if (password === "") {
+        if (!password) {
             showError("パスワードを入力してください。");
             passwordInput.focus();
             return;
         }
 
-        // 半角英数字8文字以上
-        const passwordPattern = /^[a-zA-Z0-9]{8,}$/;
-
-        if (!passwordPattern.test(password)) {
-            showError(
-                "パスワードは半角英数字8文字以上で入力してください。"
-            );
+        if (password.length < 8) {
+            showError("パスワードは8文字以上で入力してください。");
             passwordInput.focus();
             return;
         }
 
-        // 確認用パスワード未入力
-        if (passwordConfirm === "") {
-            showError("確認用パスワードを入力してください。");
-            passwordConfirmInput.focus();
-            return;
-        }
-
-        // パスワード一致チェック
         if (password !== passwordConfirm) {
             showError("パスワードが一致していません。");
             passwordConfirmInput.focus();
             return;
         }
 
-        // =====================================
-        // バックエンド連携予定
-        // =====================================
+        /* ========================================
+           PHPに送信するJSONデータ
+        ======================================== */
 
-        // 今後、ここで登録APIへ送信する
-        // 例：
-        // POST /api/register
-        //
-        // {
-        //   username,
-        //   email,
-        //   password,
-        //   dept_code: deptCode,
-        //   special_code: specialCode
-        // }
+        const registerData = {
+            username: username,
+            email: email,
+            password: password,
+            deptCode: deptCode,
+            specialCode: specialCode
+        };
 
-        // 現在は認証・登録API未接続
-        showError(
-            "現在、新規登録機能を準備中です。入力チェックのみ確認できます。"
-        );
+        /* ========================================
+           二重送信防止
+        ======================================== */
+
+        registerButton.disabled = true;
+        registerButton.textContent = "登録中...";
+
+        /* ========================================
+           register.phpへPOST送信
+        ======================================== */
+
+        try {
+
+            const response = await fetch(
+                "../../backend/register.php",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+
+                    body: JSON.stringify(registerData)
+                }
+            );
+
+            /* ========================================
+               PHPからのJSONレスポンス
+            ======================================== */
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                showError(
+                    result.message || "登録処理に失敗しました。"
+                );
+                return;
+            }
+
+            /* ========================================
+               登録成功
+            ======================================== */
+
+            if (result.register === true) {
+
+                // 登録成功後はログイン画面へ
+                window.location.href = "login.html";
+
+            } else {
+
+                showError(
+                    result.message || "新規登録に失敗しました。"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error("新規登録エラー:", error);
+
+            showError(
+                "サーバーとの通信に失敗しました。時間をおいて再度お試しください。"
+            );
+
+        } finally {
+
+            // 送信ボタンを元に戻す
+            registerButton.disabled = false;
+            registerButton.textContent = "新規アカウント登録";
+
+        }
 
     });
 

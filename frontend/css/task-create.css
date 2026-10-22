@@ -1,1 +1,362 @@
+<<<<<<< HEAD
 .page-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}.page-heading h1{font-size:27px;font-weight:750;margin:0 0 7px}.eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:800;color:var(--primary);margin:0 0 5px}.page-description{margin:0;color:var(--muted)}.form-panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:30px;max-width:900px}.form-section-title{display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:23px}.section-number{display:grid;place-items:center;width:38px;height:38px;background:#eef1ff;color:var(--primary);border-radius:10px;font-weight:800}.form-section-title h2{font-size:16px;font-weight:750;margin:0 0 5px}.form-section-title p{font-size:12px;color:var(--muted);margin:0}.field-group{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;flex:1;min-width:0}.field-group label{font-size:12px;font-weight:700;color:#4b566a}.required{font-size:10px;color:#e05d5d;background:#fff0ef;padding:3px 6px;border-radius:4px;margin-left:6px}.field-row{display:flex;gap:20px}.field-group textarea{resize:vertical}.second-section{margin-top:32px}.form-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:22px;border-top:1px solid var(--line)}.form-message{margin:14px 0 0;text-align:right;color:#2b9a70;font-size:12px}.field-error{font-size:11px;color:#d84c4c;min-height:0}.is-invalid{border-color:#dc6262!important}@media(max-width:600px){.form-panel{padding:20px 15px}.field-row{flex-direction:column;gap:0}.page-heading{align-items:flex-start;flex-direction:column}}
+=======
+
+/* ========================================
+   ページ見出し
+======================================== */
+
+.page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.page-heading h1 {
+    font-size: 27px;
+    font-weight: 750;
+    margin: 0 0 7px;
+}
+
+.eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0 0 5px;
+}
+
+.page-description {
+    margin: 0;
+    color: var(--muted);
+}
+
+
+/* ========================================
+   フォーム全体
+======================================== */
+
+.form-panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    padding: 30px;
+    max-width: 900px;
+}
+
+
+/* ========================================
+   フォームセクション見出し
+======================================== */
+
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 23px;
+}
+
+.section-number {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    background: #eef1ff;
+    color: var(--primary);
+    border-radius: 10px;
+    font-weight: 800;
+}
+
+.form-section-title h2 {
+    font-size: 16px;
+    font-weight: 750;
+    margin: 0 0 5px;
+}
+
+.form-section-title p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+}
+
+
+/* ========================================
+   入力フォーム
+======================================== */
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+    flex: 1;
+    min-width: 0;
+}
+
+.field-group label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4b566a;
+}
+
+/* 必須項目 */
+
+.required {
+    font-size: 10px;
+    color: #e05d5d;
+    background: #fff0ef;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+
+/* 入力欄の横並び */
+
+.field-row {
+    display: flex;
+    gap: 20px;
+}
+
+/* テキストエリア */
+
+.field-group textarea {
+    resize: vertical;
+}
+
+
+/* ========================================
+   2番目のフォームセクション
+======================================== */
+
+.second-section {
+    margin-top: 32px;
+}
+
+
+/* ========================================
+   フォーム操作ボタン
+======================================== */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+}
+
+
+/* ========================================
+   フォームメッセージ
+======================================== */
+
+.form-message {
+    margin: 14px 0 0;
+    text-align: right;
+    color: #2b9a70;
+    font-size: 12px;
+}
+
+
+/* ========================================
+   入力エラー表示
+======================================== */
+
+.field-error {
+    font-size: 11px;
+    color: #d84c4c;
+    min-height: 0;
+}
+
+.is-invalid {
+    border-color: #dc6262 !important;
+}
+
+
+/* ========================================
+   レスポンシブ対応
+   画面幅600px以下
+======================================== */
+
+@media (max-width: 600px) {
+
+    /* フォーム全体 */
+
+    .form-panel {
+        padding: 20px 15px;
+    }
+
+    /* 入力欄を縦並びに変更 */
+
+    .field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* ページ見出しを縦並びに変更 */
+
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+/* ========================================
+   新規タスク作成モーダル
+======================================== */
+
+.task-create-modal {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ヘッダー */
+
+.task-create-modal .modal-header {
+    padding: 22px 26px;
+    align-items: flex-start;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.task-create-eyebrow {
+    margin: 0 0 5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #0065c8;
+}
+
+.task-create-modal .modal-title {
+    margin: 0 0 6px;
+    font-size: 23px;
+    font-weight: 700;
+    color: #17213a;
+}
+
+.task-create-description {
+    margin: 0;
+    font-size: 13px;
+    color: #758195;
+}
+
+/* 本体 */
+
+.task-create-modal .modal-body {
+    padding: 25px 26px;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.task-create-modal .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.task-create-modal .form-control,
+.task-create-modal .form-select {
+    min-height: 42px;
+    border-color: #d8e0eb;
+    font-size: 14px;
+}
+
+.task-create-modal textarea.form-control {
+    min-height: 90px;
+}
+
+.task-create-modal .form-control:focus,
+.task-create-modal .form-select:focus {
+    border-color: #0065c8;
+    box-shadow: 0 0 0 3px rgba(0, 101, 200, 0.1);
+}
+
+/* セクション見出し */
+
+.task-create-section {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.task-create-section.second-section {
+    margin-top: 30px;
+}
+
+.task-create-section-number {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: #e5f0fc;
+    color: #0065c8;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.task-create-section h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.task-create-section p {
+    margin: 0;
+    font-size: 12px;
+    color: #758195;
+}
+
+/* 必須表示 */
+
+.task-create-required {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #fff0ef;
+    color: #dc6262;
+    font-size: 10px;
+}
+
+/* エラー */
+
+.task-create-error {
+    margin-top: 6px;
+    color: #dc3545;
+    font-size: 12px;
+}
+
+.task-create-error:empty {
+    display: none;
+}
+
+/* フッター */
+
+.task-create-modal .modal-footer {
+    padding: 17px 26px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* スマートフォン */
+
+@media (max-width: 600px) {
+
+    .task-create-modal .modal-header,
+    .task-create-modal .modal-body,
+    .task-create-modal .modal-footer {
+        padding: 17px;
+    }
+
+    .task-create-modal .modal-title {
+        font-size: 20px;
+    }
+}
+>>>>>>> 055901f (設定)

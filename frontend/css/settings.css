@@ -1,0 +1,555 @@
+
+/* ========================================
+   Tasfina 設定画面
+======================================== */
+
+.settings-page {
+    background-color: #ffffff;
+    color: #17213a;
+}
+
+/* ========================================
+   ページ見出し
+======================================== */
+
+.settings-heading {
+    margin-bottom: 18px;
+}
+
+.settings-heading h1 {
+    margin: 0 0 5px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.settings-heading p {
+    margin: 0;
+    font-size: 13px;
+    color: #73809a;
+}
+
+/* ========================================
+   設定タブ
+======================================== */
+
+.settings-tabs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.settings-tab {
+    min-height: 44px;
+    padding: 10px 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    background: #f7f9fc;
+    color: #44516a;
+
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.settings-tab:hover {
+    background: #eaf2fd;
+    color: #0065c8;
+}
+
+.settings-tab.active {
+    background: #0065c8;
+    border-color: #0065c8;
+    color: #ffffff;
+}
+
+.settings-tab i {
+    font-size: 15px;
+}
+
+.settings-tab-panel[hidden] {
+    display: none;
+}
+
+/* ========================================
+   2カラムレイアウト
+======================================== */
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.settings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* ========================================
+   共通設定カード
+======================================== */
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid #dce4ef;
+    border-radius: 8px;
+    padding: 18px;
+    min-width: 0;
+}
+
+.settings-card h2 {
+    margin: 0 0 18px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.settings-card .form-control,
+.settings-card .form-select {
+    min-height: 40px;
+    border-color: #d7dfeb;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #34415a;
+}
+
+.settings-card .form-control:focus,
+.settings-card .form-select:focus {
+    border-color: #0065c8;
+    box-shadow: 0 0 0 3px rgba(0, 101, 200, 0.1);
+}
+
+.settings-help {
+    margin: 6px 0 0;
+    color: #78859d;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.required-mark {
+    color: #ed4f5b;
+}
+
+/* ========================================
+   共通フォーム項目
+======================================== */
+
+.settings-field {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.settings-field:last-child {
+    margin-bottom: 0;
+}
+
+.settings-field > label,
+.settings-field-label {
+    color: #34415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.settings-field > div {
+    min-width: 0;
+}
+
+/* ========================================
+   企業情報
+======================================== */
+
+.company-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+}
+
+.company-fields {
+    min-width: 0;
+}
+
+.character-count {
+    margin: 4px 0 0;
+    color: #8190a5;
+    font-size: 11px;
+    text-align: right;
+}
+
+/* ========================================
+   パスワードポリシー
+======================================== */
+
+.password-policy-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 22px;
+}
+
+.password-policy-grid .settings-field {
+    margin-bottom: 0;
+}
+
+.inline-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-card .small-number-input {
+    width: 90px;
+}
+
+.inline-control span {
+    font-size: 12px;
+    color: #536079;
+}
+
+.checkbox-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-list label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    font-size: 12px;
+    color: #46536c;
+}
+
+.checkbox-list input {
+    accent-color: #0065c8;
+}
+
+/* ========================================
+   バックアップ設定
+======================================== */
+
+.backup-settings .settings-field {
+    grid-template-columns: 140px minmax(0, 1fr);
+    margin-bottom: 18px;
+}
+
+.backup-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.backup-actions .form-select {
+    flex: 1;
+    min-width: 100px;
+}
+
+.backup-actions .btn {
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ========================================
+   表示設定
+======================================== */
+
+.theme-colors {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.theme-color {
+    width: 25px;
+    height: 25px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    background-color: var(--theme-swatch);
+}
+
+.theme-color[data-color="#0065c8"] {
+    --theme-swatch: #0065c8;
+}
+
+.theme-color[data-color="#55c7b5"] {
+    --theme-swatch: #55c7b5;
+}
+
+.theme-color[data-color="#9bd36c"] {
+    --theme-swatch: #9bd36c;
+}
+
+.theme-color[data-color="#ffbd59"] {
+    --theme-swatch: #ffbd59;
+}
+
+.theme-color[data-color="#ff7078"] {
+    --theme-swatch: #ff7078;
+}
+
+.theme-color[data-color="#aa80d8"] {
+    --theme-swatch: #aa80d8;
+}
+
+.theme-color[data-color="#aeb7c6"] {
+    --theme-swatch: #aeb7c6;
+}
+
+.theme-color.selected::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.theme-color:focus-visible {
+    outline: 2px solid #17213a;
+    outline-offset: 3px;
+}
+
+/* ========================================
+   ON/OFFスイッチ
+======================================== */
+
+.switch-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.switch-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.switch-slider {
+    position: relative;
+    width: 46px;
+    height: 25px;
+    background: #c7cfdb;
+    border-radius: 99px;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.switch-slider::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.switch-control input:checked + .switch-slider {
+    background: #0065c8;
+}
+
+.switch-control input:checked + .switch-slider::after {
+    transform: translateX(21px);
+}
+
+.switch-control input:focus-visible + .switch-slider {
+    outline: 3px solid rgba(0, 101, 200, 0.35);
+    outline-offset: 3px;
+}
+
+.switch-state {
+    min-width: 30px;
+    color: #536079;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ========================================
+   機能設定
+======================================== */
+
+.feature-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.feature-row:last-child {
+    border-bottom: none;
+}
+
+.feature-row > span {
+    color: #34415a;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* ========================================
+   危険な操作
+======================================== */
+
+.danger-card h2 {
+    margin-bottom: 12px;
+}
+
+.danger-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.danger-help {
+    margin: 9px 0 0;
+    font-size: 11px;
+    color: #ed4f5b;
+}
+
+/* ========================================
+   その他タブ
+======================================== */
+
+.placeholder-card {
+    min-height: 240px;
+}
+
+.placeholder-card p {
+    font-size: 14px;
+    color: #536079;
+}
+
+/* ========================================
+   設定保存
+======================================== */
+
+.settings-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 18px;
+    padding-bottom: 15px;
+}
+
+.settings-footer .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.settings-message {
+    margin: 0;
+    font-size: 13px;
+    color: #25875d;
+}
+
+.settings-message.error {
+    color: #dc3545;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+@media (max-width: 1200px) {
+
+    .settings-tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+
+    .company-grid,
+    .password-policy-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .settings-heading h1 {
+        font-size: 25px;
+    }
+
+    .settings-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .settings-tab {
+        font-size: 12px;
+    }
+
+    .settings-card {
+        padding: 15px;
+    }
+
+    .settings-field,
+    .backup-settings .settings-field {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .backup-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .settings-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .settings-footer .btn {
+        width: 100%;
+    }
+}
+/* ========================================
+   設定タブのリンク装飾を削除
+======================================== */
+
+.settings-tab,
+.settings-tab:visited,
+.settings-tab:hover,
+.settings-tab:focus {
+    text-decoration: none;
+}

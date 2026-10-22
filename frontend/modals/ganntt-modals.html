@@ -1,0 +1,265 @@
+
+<!-- ========================================
+     工数変更申請モーダル
+======================================== -->
+<div class="modal fade"
+     id="workHoursModal"
+     tabindex="-1"
+     aria-labelledby="workHoursModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content gantt-modal">
+
+            <div class="modal-header">
+                <h2 class="modal-title fs-5"
+                    id="workHoursModalLabel">
+                    <i class="bi bi-clock-history"></i>
+                    工数変更申請
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="閉じる"></button>
+            </div>
+
+            <form id="workHoursForm" novalidate>
+                <div class="modal-body">
+
+                    <div class="gantt-modal-task">
+                        <div class="gantt-modal-caption">
+                            対象タスク
+                        </div>
+                        <strong id="hoursTaskName"></strong>
+                        <p id="hoursTaskMeta"></p>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label for="currentHours"
+                                   class="form-label">
+                                現在の予定工数
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       id="currentHours"
+                                       class="form-control"
+                                       readonly>
+                                <span class="input-group-text">
+                                    時間
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label for="requestedHours"
+                                   class="form-label">
+                                変更後の予定工数
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       id="requestedHours"
+                                       name="requested_hours"
+                                       class="form-control"
+                                       min="0.1"
+                                       max="9999"
+                                       step="0.1"
+                                       required>
+                                <span class="input-group-text">
+                                    時間
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="hoursReason"
+                               class="form-label">
+                            変更理由
+                            <span class="required">*</span>
+                        </label>
+                        <textarea id="hoursReason"
+                                  name="reason"
+                                  class="form-control"
+                                  rows="4"
+                                  maxlength="500"
+                                  placeholder="工数変更が必要な理由を入力してください"
+                                  required></textarea>
+                        <div class="gantt-modal-count">
+                            <span id="hoursReasonCount">0</span>
+                            / 500
+                        </div>
+                    </div>
+
+                    <div class="gantt-modal-notice">
+                        <i class="bi bi-info-circle"></i>
+                        申請後は管理者の承認待ちになります。
+                        承認されるまで予定工数は変更されません。
+                    </div>
+
+                    <div class="gantt-modal-error"
+                         id="hoursError"
+                         role="alert"
+                         hidden></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        キャンセル
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="submitHoursButton">
+                        <i class="bi bi-send"></i>
+                        申請する
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================
+     完了申請モーダル
+======================================== -->
+<div class="modal fade"
+     id="taskCompleteModal"
+     tabindex="-1"
+     aria-labelledby="taskCompleteModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content gantt-modal">
+
+            <div class="modal-header">
+                <h2 class="modal-title fs-5"
+                    id="taskCompleteModalLabel">
+                    <i class="bi bi-check-circle"></i>
+                    タスク完了申請
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="閉じる"></button>
+            </div>
+
+            <form id="taskCompleteForm" novalidate>
+                <div class="modal-body">
+
+                    <div class="gantt-modal-task">
+                        <div class="gantt-modal-caption">
+                            対象タスク
+                        </div>
+                        <strong id="completeTaskName"></strong>
+                        <p id="completeTaskMeta"></p>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label for="plannedHours"
+                                   class="form-label">
+                                予定工数
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       id="plannedHours"
+                                       class="form-control"
+                                       readonly>
+                                <span class="input-group-text">
+                                    時間
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label for="actualHours"
+                                   class="form-label">
+                                実績工数
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       id="actualHours"
+                                       name="actual_hours"
+                                       class="form-control"
+                                       min="0.1"
+                                       max="9999"
+                                       step="0.1"
+                                       required>
+                                <span class="input-group-text">
+                                    時間
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="completeReport"
+                               class="form-label">
+                            完了報告
+                            <span class="required">*</span>
+                        </label>
+                        <textarea id="completeReport"
+                                  name="report"
+                                  class="form-control"
+                                  rows="4"
+                                  maxlength="1000"
+                                  placeholder="実施した作業内容や成果を入力してください"
+                                  required></textarea>
+                        <div class="gantt-modal-count">
+                            <span id="completeReportCount">0</span>
+                            / 1000
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="completeEvidence"
+                               class="form-label">
+                            エビデンス（任意）
+                        </label>
+                        <input type="file"
+                               id="completeEvidence"
+                               name="evidence"
+                               class="form-control"
+                               accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx">
+                        <div class="form-text">
+                            PDF・画像・Word・Excel
+                            （最大10MB）
+                        </div>
+                    </div>
+
+                    <div class="gantt-modal-notice">
+                        <i class="bi bi-info-circle"></i>
+                        完了申請後は管理者の承認待ちになります。
+                        承認後にタスクが完了扱いになります。
+                    </div>
+
+                    <div class="gantt-modal-error"
+                         id="completeError"
+                         role="alert"
+                         hidden></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        キャンセル
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="submitCompleteButton">
+                        <i class="bi bi-check2-circle"></i>
+                        完了申請する
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

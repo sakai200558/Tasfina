@@ -1,0 +1,523 @@
+
+/* ========================================
+   シフト設定画面
+======================================== */
+
+.settings-shifts-page {
+    padding: 18px 20px;
+    background: #ffffff;
+    color: #17213a;
+    font-size: 13px;
+}
+
+/* ========================================
+   ページ見出し
+======================================== */
+
+.shift-page-heading {
+    margin-bottom: 17px;
+}
+
+.shift-page-heading h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.shift-page-heading p {
+    margin: 0;
+    color: #75829b;
+    font-size: 12px;
+}
+
+/* ========================================
+   設定ナビゲーション
+======================================== */
+
+.settings-navigation {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.settings-nav-item {
+    min-height: 43px;
+    padding: 9px 7px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    border: 1px solid #e1e7f0;
+    border-radius: 6px;
+
+    background: #f8fafc;
+    color: #46536c;
+
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.settings-nav-item:hover {
+    background: #eaf2fd;
+    color: #0065c8;
+}
+
+.settings-nav-item.active {
+    background: #0065c8;
+    border-color: #0065c8;
+    color: #ffffff;
+}
+
+.settings-nav-item i {
+    font-size: 15px;
+}
+
+/* ========================================
+   上部レイアウト
+======================================== */
+
+.shift-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.85fr) minmax(290px, 0.65fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.shift-settings-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.shift-settings-right {
+    min-width: 0;
+}
+
+/* ========================================
+   カード共通
+======================================== */
+
+.shift-card {
+    min-width: 0;
+    padding: 14px;
+
+    background: #ffffff;
+    border: 1px solid #e0e6ef;
+    border-radius: 7px;
+}
+
+.shift-card h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.shift-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 12px;
+}
+
+.shift-card-heading p {
+    margin: 5px 0 0;
+    color: #75829b;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.shift-add-button {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ========================================
+   テーブル
+======================================== */
+
+.shift-table {
+    width: 100%;
+    margin-bottom: 0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.shift-table thead th {
+    padding: 9px 8px;
+
+    background: #f7f9fc;
+    color: #44516a;
+
+    border: 1px solid #e5ebf3;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.shift-table tbody td {
+    padding: 8px;
+
+    color: #4a5871;
+    border: 1px solid #e5ebf3;
+
+    font-size: 11px;
+}
+
+.shift-table tbody tr {
+    cursor: pointer;
+}
+
+.shift-table tbody tr:hover {
+    background: #f3f8ff;
+}
+
+.shift-table tbody tr.selected-row td {
+    background: #eaf4ff;
+}
+
+.shift-table td:first-child {
+    font-weight: 600;
+}
+
+/* ========================================
+   忙しさレベル
+======================================== */
+
+.busy-level {
+    display: inline-block;
+    min-width: 82px;
+    padding: 5px 8px;
+
+    border-radius: 5px;
+    text-align: center;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.busy-level.very-high {
+    background: #ffe0e1;
+    color: #e03d45;
+}
+
+.busy-level.high {
+    background: #ffebdc;
+    color: #d87528;
+}
+
+.busy-level.medium-high {
+    background: #fff3d4;
+    color: #bd8522;
+}
+
+.busy-level.normal {
+    background: #e8f7ed;
+    color: #28885c;
+}
+
+/* 負担スコア補正 */
+.busy-score {
+    color: #e84940;
+    font-weight: 700;
+}
+
+/* ========================================
+   シフト種別の表示色
+======================================== */
+
+.shift-color-dot {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+
+    border-radius: 50%;
+    border: 1px solid #dce3ed;
+
+    background-color: var(--shift-dot-color, #cccccc);
+    vertical-align: middle;
+}
+
+/* ========================================
+   テーブル操作ボタン
+======================================== */
+
+.shift-table-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.shift-action-button {
+    padding: 3px 5px;
+    border: none;
+    border-radius: 4px;
+
+    background: transparent;
+    color: #0065c8;
+    font-size: 14px;
+}
+
+.shift-action-button:hover {
+    background: #e5f0fc;
+}
+
+.shift-action-button.delete {
+    color: #ed4f5b;
+}
+
+.shift-action-button.delete:hover {
+    background: #fff0f1;
+}
+
+/* ========================================
+   右側の編集フォーム
+======================================== */
+
+.shift-editor-card {
+    height: 100%;
+    padding: 15px;
+}
+
+.shift-editor-card h2 {
+    margin-bottom: 20px;
+}
+
+.shift-form-group {
+    margin-bottom: 17px;
+}
+
+.shift-form-group label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #35415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.shift-required {
+    color: #e94d56;
+}
+
+.shift-form-group .form-control,
+.shift-form-group .form-select {
+    min-height: 38px;
+    padding: 7px 10px;
+
+    border: 1px solid #d7dfeb;
+    border-radius: 5px;
+
+    color: #35415a;
+    font-size: 12px;
+}
+
+.shift-form-group textarea {
+    resize: vertical;
+}
+
+.shift-form-group .form-control:focus,
+.shift-form-group .form-select:focus {
+    border-color: #0065c8;
+    box-shadow: 0 0 0 3px rgba(0, 101, 200, 0.1);
+}
+
+.shift-form-group .form-control-color {
+    width: 65px;
+    height: 40px;
+    padding: 4px;
+}
+
+.shift-character-count {
+    margin: 4px 0 0;
+    text-align: right;
+
+    color: #8190a5;
+    font-size: 11px;
+}
+
+.shift-help {
+    margin: 5px 0 0;
+    color: #78859d;
+    font-size: 11px;
+}
+
+/* 期間・時間の範囲 */
+.shift-date-range {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.shift-date-range .form-control {
+    min-width: 0;
+    flex: 1;
+}
+
+.shift-date-range > span {
+    flex-shrink: 0;
+    color: #66748b;
+    font-size: 12px;
+}
+
+/* フォームボタン */
+.shift-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.shift-form-actions .btn {
+    padding: 8px 13px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* 非表示フォーム */
+#busyPeriodForm[hidden],
+#shiftTypeForm[hidden] {
+    display: none;
+}
+
+/* ========================================
+   自動調整ルール
+======================================== */
+
+.shift-rules-card {
+    margin-top: 8px;
+    padding: 14px 16px;
+}
+
+.shift-rules-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.25fr auto;
+    gap: 18px;
+    align-items: center;
+}
+
+.shift-rule-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.shift-rule-field label {
+    flex-shrink: 0;
+    margin: 0;
+
+    color: #35415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.shift-rule-field .form-control {
+    width: 80px;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+.shift-rule-field .form-select {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+.shift-rule-field > span {
+    flex-shrink: 0;
+}
+
+.shift-rules-save {
+    padding: 8px 22px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ========================================
+   メッセージ
+======================================== */
+
+.shift-settings-message {
+    min-height: 20px;
+    margin: 10px 0 0;
+
+    color: #25875d;
+    font-size: 12px;
+}
+
+.shift-settings-message.error {
+    color: #dc3545;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1450px) {
+
+    .shift-settings-grid {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+
+    .shift-rules-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1150px) {
+
+    .shift-settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shift-editor-card {
+        height: auto;
+    }
+
+    .settings-navigation {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+
+    .settings-shifts-page {
+        padding: 15px;
+    }
+
+    .shift-page-heading h1 {
+        font-size: 24px;
+    }
+
+    .settings-navigation {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shift-card-heading {
+        flex-direction: column;
+    }
+
+    .shift-rules-form {
+        grid-template-columns: 1fr;
+    }
+
+    .shift-rule-field {
+        flex-wrap: wrap;
+    }
+
+    .shift-rule-priority .form-select {
+        min-width: 150px;
+    }
+}

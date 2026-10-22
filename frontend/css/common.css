@@ -3,7 +3,14 @@
    Tasfina 共通CSS
 ======================================== */
 
+:root {
+    --primary: #0065c8;
+    --muted: #758195;
+    --line: #e2e8f0;
+}
+
 /* 全体 */
+
 * {
     box-sizing: border-box;
 }
@@ -31,7 +38,6 @@ body {
     padding: 0 32px;
 }
 
-/* システム名 */
 .site-logo {
     font-size: 36px;
     font-weight: bold;
@@ -43,7 +49,6 @@ body {
     color: #ffffff;
 }
 
-/* ヘッダー右側 */
 .header-actions {
     display: flex;
     align-items: center;
@@ -69,7 +74,7 @@ body {
 }
 
 /* ========================================
-   ヘッダー下の共通レイアウト
+   共通レイアウト
 ======================================== */
 
 .app-layout {
@@ -77,61 +82,50 @@ body {
     min-height: calc(100vh - 80px);
 }
 
-/* 共通サイドメニュー */
 #sidebar {
     width: 240px;
     flex-shrink: 0;
     display: flex;
 }
 
-/* サイドメニュー本体 */
 .sidebar {
     width: 100%;
     background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
-
     padding: 24px 16px;
 
     display: flex;
     flex-direction: column;
 }
 
-/* メニュー見出し */
 .sidebar h3 {
     margin: 0 0 16px;
     padding-left: 12px;
-
     font-size: 18px;
     font-weight: bold;
 }
 
-/* メニュー一覧 */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-/* メニューリンク */
 .sidebar a {
     display: block;
     padding: 10px 12px;
-
     color: #24324b;
     font-size: 15px;
     text-decoration: none;
-
     border-radius: 6px;
 }
 
-/* 選択中・ホバー */
 .sidebar a:hover,
 .sidebar a.active {
     background-color: #e5f0fc;
     color: #0065c8;
 }
 
-/* ログアウト */
 .sidebar-footer {
     margin-top: auto;
     border-top: 1px solid #e2e8f0;
@@ -142,14 +136,15 @@ body {
    メインコンテンツ
 ======================================== */
 
-.main-content {
+.main-content,
+.page-main {
     flex: 1;
     min-width: 0;
     padding: 24px;
 }
 
 /* ========================================
-   画面幅が小さい場合
+   レスポンシブ対応
 ======================================== */
 
 @media screen and (max-width: 768px) {
@@ -187,7 +182,8 @@ body {
         font-size: 13px;
     }
 
-    .main-content {
+    .main-content,
+    .page-main {
         padding: 16px;
     }
 }

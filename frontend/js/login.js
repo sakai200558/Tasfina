@@ -1,84 +1,159 @@
+
 /* ========================================
-   Tasfina ログイン専用JavaScript
+   Tasfina ログイン処理
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    /* ========================================
+       要素取得
+    ======================================== */
+
     const loginForm = document.getElementById("loginForm");
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
+
+    const emailInput = document.getElementById("email");
+
+    const passwordInput = document.getElementById("password");
+
     const togglePassword = document.getElementById("togglePassword");
+
     const loginError = document.getElementById("loginError");
+
     const loginButton = document.getElementById("loginButton");
 
-    /* =====================================
+
+    /* ========================================
+       エラー表示
+    ======================================== */
+
+    function showError(message) {
+
+        loginError.textContent = message;
+
+        loginError.hidden = false;
+    }
+
+
+    /* ========================================
+       エラーを消す
+    ======================================== */
+
+    function clearError() {
+
+        loginError.textContent = "";
+
+        loginError.hidden = true;
+
+        emailInput.classList.remove("is-invalid");
+
+        passwordInput.classList.remove("is-invalid");
+    }
+
+
+    /* ========================================
        パスワード表示切り替え
-    ===================================== */
+    ======================================== */
 
     togglePassword.addEventListener("click", () => {
 
-        const isHidden = password.type === "password";
+        const isPassword =
+            passwordInput.type === "password";
 
-        password.type = isHidden ? "text" : "password";
+        passwordInput.type = isPassword
+            ? "text"
+            : "password";
 
         togglePassword.setAttribute(
             "aria-pressed",
-            String(isHidden)
+            String(isPassword)
         );
 
         togglePassword.setAttribute(
             "aria-label",
-            isHidden ? "パスワードを隠す" : "パスワードを表示"
+            isPassword
+                ? "パスワードを隠す"
+                : "パスワードを表示"
         );
 
-        togglePassword.querySelector("i").className =
-            isHidden ? "bi bi-eye-slash" : "bi bi-eye";
+        const icon = togglePassword.querySelector("i");
+
+        icon.className = isPassword
+            ? "bi bi-eye-slash"
+            : "bi bi-eye";
 
     });
 
-    /* =====================================
-       ログインフォーム
-    ===================================== */
+
+    /* ========================================
+       ログインフォーム送信
+    ======================================== */
 
     loginForm.addEventListener("submit", async (event) => {
 
+        // 通常のフォーム送信を停止
         event.preventDefault();
 
-        // エラー表示を初期化
-        loginError.hidden = true;
-        loginError.textContent = "";
+        clearError();
 
-        email.classList.remove("is-invalid");
-        password.classList.remove("is-invalid");
 
-        let isValid = true;
+        /* ========================================
+           入力値取得
+        ======================================== */
 
-        // メールアドレスの入力チェック
-        if (!email.validity.valid) {
+        const email = emailInput.value.trim();
 
-            email.classList.add("is-invalid");
-            isValid = false;
+        const password = passwordInput.value;
 
-        }
 
-        // パスワードの入力チェック
-        if (!password.value.trim()) {
+        /* ========================================
+           入力チェック
+        ======================================== */
 
-            password.classList.add("is-invalid");
-            isValid = false;
+        if (!emailInput.validity.valid) {
 
-        }
+            emailInput.classList.add("is-invalid");
 
-        if (!isValid) {
+            showError(
+                "正しいメールアドレスを入力してください。"
+            );
+
             return;
         }
 
-        /* =====================================
-           PHPへログインリクエスト送信
-        ===================================== */
+        if (!password) {
+
+            passwordInput.classList.add("is-invalid");
+
+            showError(
+                "パスワードを入力してください。"
+            );
+
+            return;
+        }
+
+
+        /* ========================================
+           JSON形式に変換
+        ======================================== */
+
+        const loginData = {
+            email: email,
+            password: password
+        };
+
+
+        /* ========================================
+           ログインボタンを無効化
+        ======================================== */
 
         loginButton.disabled = true;
+
         loginButton.textContent = "ログイン中...";
+
+
+        /* ========================================
+           PHPにJSONを送信
+        ======================================== */
 
         try {
 
@@ -88,70 +163,59 @@ document.addEventListener("DOMContentLoaded", () => {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
 
-                    body: JSON.stringify({
-                        email: email.value.trim(),
-                        password: password.value
-                    })
+                    credentials: "same-origin",
+
+                    body: JSON.stringify(loginData)
                 }
             );
 
-            if (!response.ok) {
-                throw new Error("サーバーエラーが発生しました。");
-            }
+
+            /* ========================================
+               PHPのレスポンスを取得
+            ======================================== */
 
             const result = await response.json();
 
-            /* =====================================
-               ログイン成功
-            ===================================== */
 
-            if (result.success === true) {
+            /* ========================================
+               ログイン成功
+            ======================================== */
+
+            if (response.ok && result.login === true) {
 
                 window.location.href = "mypage.html";
 
-            } else {
-
-                loginError.textContent =
-                    result.message || "ログインに失敗しました。";
-
-                loginError.hidden = false;
-
+                return;
             }
+
+
+            /* ========================================
+               ログイン失敗
+            ======================================== */
+
+            showError(
+                result.message ||
+                "メールアドレスまたはパスワードが違います。"
+            );
 
         } catch (error) {
 
             console.error("ログインエラー:", error);
 
-            loginError.textContent =
-                "サーバーとの通信に失敗しました。";
-
-            loginError.hidden = false;
+            showError(
+                "サーバーとの通信に失敗しました。"
+            );
 
         } finally {
 
             loginButton.disabled = false;
+
             loginButton.textContent = "ログイン";
-
         }
-
-    });
-
-    /* =====================================
-       入力時にエラー表示を解除
-    ===================================== */
-
-    [email, password].forEach(input => {
-
-        input.addEventListener("input", () => {
-
-            input.classList.remove("is-invalid");
-
-            loginError.hidden = true;
-
-        });
 
     });
 
