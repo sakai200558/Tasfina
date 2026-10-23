@@ -1,0 +1,533 @@
+
+/* ========================================
+   Tasfina システム設定画面
+======================================== */
+
+.system-settings-page {
+    background: #ffffff;
+    color: #17213a;
+    --system-primary: #0065d8;
+    --system-border: #dce4ef;
+    --system-muted: #74829b;
+}
+
+/* ========================================
+   ページ見出し
+======================================== */
+
+.system-settings-heading {
+    margin-bottom: 16px;
+}
+
+.system-settings-heading h1 {
+    margin: 0 0 4px;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+.system-settings-heading p {
+    margin: 0;
+    color: var(--system-muted);
+    font-size: 13px;
+}
+
+/* ========================================
+   メインレイアウト
+======================================== */
+
+.system-settings-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.25fr)
+        minmax(0, 1fr)
+        minmax(0, .9fr);
+    gap: 12px;
+    align-items: start;
+    margin-top: 16px;
+}
+
+.system-settings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ========================================
+   カード
+======================================== */
+
+.system-settings-card {
+    min-width: 0;
+    background: #ffffff;
+    border: 1px solid var(--system-border);
+    border-radius: 7px;
+    padding: 16px;
+}
+
+.system-card-heading {
+    margin-bottom: 14px;
+}
+
+.system-card-heading h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.system-card-heading p {
+    margin: 0;
+    color: var(--system-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   共通フォーム
+======================================== */
+
+.system-form-field {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.system-form-field:last-child {
+    margin-bottom: 0;
+}
+
+.system-form-field > label,
+.system-field-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #34415a;
+}
+
+.required-mark {
+    color: #e94350;
+}
+
+.system-settings-card .form-control,
+.system-settings-card .form-select {
+    min-width: 0;
+    min-height: 37px;
+    border-color: #d8e0eb;
+    border-radius: 5px;
+    color: #34415a;
+    font-size: 12px;
+}
+
+.system-settings-card .form-control:focus,
+.system-settings-card .form-select:focus {
+    border-color: var(--system-primary);
+    box-shadow: 0 0 0 3px rgba(0, 101, 216, .1);
+}
+
+.system-character-count {
+    margin: 4px 0 0;
+    color: #8490a7;
+    font-size: 11px;
+    text-align: right;
+}
+
+.system-inline-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.system-inline-field span {
+    color: #65728c;
+    font-size: 12px;
+}
+
+.system-settings-card .system-number-input {
+    width: 115px;
+}
+
+/* ========================================
+   スイッチ
+======================================== */
+
+.system-switch-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #44536e;
+}
+
+.system-switch-line small {
+    font-size: 11px;
+    color: #6f7c95;
+}
+
+.system-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 25px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.system-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.system-switch-slider {
+    display: block;
+    width: 46px;
+    height: 25px;
+    background: #aeb8c9;
+    border-radius: 99px;
+    transition: background .2s;
+}
+
+.system-switch-slider::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform .2s;
+}
+
+.system-switch input:checked + .system-switch-slider {
+    background: var(--system-primary);
+}
+
+.system-switch input:checked + .system-switch-slider::after {
+    transform: translateX(21px);
+}
+
+.system-switch input:focus-visible + .system-switch-slider {
+    outline: 3px solid rgba(0, 101, 216, .35);
+    outline-offset: 3px;
+}
+
+.system-switch-state {
+    color: #63718c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.system-switch-state.is-on {
+    color: var(--system-primary);
+}
+
+/* ========================================
+   表示設定
+======================================== */
+
+.system-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.system-radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #34415a;
+    cursor: pointer;
+}
+
+.system-radio-group input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--system-primary);
+}
+
+.system-theme-colors {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+}
+
+.system-theme-color {
+    width: 23px;
+    height: 23px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    background: var(--swatch-color);
+}
+
+.system-theme-color[data-color="#0065d8"] {
+    --swatch-color: #0065d8;
+}
+
+.system-theme-color[data-color="#55c7a5"] {
+    --swatch-color: #55c7a5;
+}
+
+.system-theme-color[data-color="#f1c34d"] {
+    --swatch-color: #f1c34d;
+}
+
+.system-theme-color[data-color="#ff7078"] {
+    --swatch-color: #ff7078;
+}
+
+.system-theme-color[data-color="#a77bdf"] {
+    --swatch-color: #a77bdf;
+}
+
+.system-theme-color[data-color="#aeb7c6"] {
+    --swatch-color: #aeb7c6;
+}
+
+.system-theme-color.selected::after {
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.system-theme-color:focus-visible {
+    outline: 2px solid #17213a;
+    outline-offset: 3px;
+}
+
+.system-switch-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+/* ========================================
+   データ管理
+======================================== */
+
+.system-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.system-card-actions .btn,
+.system-export-actions .btn {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.system-export-section {
+    margin-top: 16px;
+    padding-top: 15px;
+    border-top: 1px solid #e6ebf2;
+}
+
+.system-export-section h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.system-export-section p {
+    color: var(--system-muted);
+    font-size: 11px;
+    margin: 0 0 10px;
+}
+
+.system-export-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.system-export-actions .form-select {
+    flex: 1;
+}
+
+/* ========================================
+   システム情報
+======================================== */
+
+.system-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.system-info-table th,
+.system-info-table td {
+    border: 1px solid #e6ebf2;
+    padding: 9px 10px;
+}
+
+.system-info-table th {
+    width: 47%;
+    color: #45536f;
+    font-weight: 700;
+    background: #fbfcfe;
+}
+
+.system-info-table td {
+    color: #34415a;
+    overflow-wrap: anywhere;
+}
+
+.system-info-note {
+    margin: 9px 0 0;
+    font-size: 10px;
+    color: #8a96aa;
+}
+
+/* ========================================
+   メンテナンス設定
+======================================== */
+
+.system-maintenance-switch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.system-help {
+    margin: 5px 0 16px;
+    font-size: 11px;
+    color: #8290a6;
+    line-height: 1.5;
+}
+
+.system-maintenance-field {
+    margin-bottom: 15px;
+}
+
+.system-maintenance-field > label {
+    display: block;
+    margin-bottom: 7px;
+    color: #34415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.system-datetime-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.system-datetime-group input {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+}
+
+.system-datetime-group span {
+    color: #65728c;
+    font-size: 12px;
+}
+
+.system-maintenance-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ========================================
+   保存操作
+======================================== */
+
+.system-settings-message {
+    margin: 12px 0 0;
+    text-align: right;
+    font-size: 12px;
+    color: #21845a;
+}
+
+.system-settings-message.error {
+    color: #dc3545;
+}
+
+.system-settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.system-settings-footer .btn {
+    min-width: 110px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 18px;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1450px) {
+
+    .system-settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .system-settings-column:last-child {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+}
+
+@media (max-width: 950px) {
+
+    .system-settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .system-settings-column:last-child {
+        grid-column: auto;
+        display: flex;
+    }
+}
+
+@media (max-width: 550px) {
+
+    .system-settings-card {
+        padding: 13px;
+    }
+
+    .system-form-field {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .system-export-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .system-settings-heading h1 {
+        font-size: 25px;
+    }
+
+    .system-settings-footer .btn {
+        flex: 1;
+    }
+}

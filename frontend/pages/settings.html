@@ -62,64 +62,10 @@
             </div>
 
             <!-- ========================================
-                 設定タブ
+                 共通設定ナビゲーション
             ======================================== -->
 
-            <nav class="settings-tabs" aria-label="設定カテゴリー">
-
-                <button
-                    type="button"
-                    class="settings-tab active"
-                    data-tab="general"
-                    aria-current="page"
-                >
-                    <i class="bi bi-gear-fill"></i>
-                    全般設定
-                </button>
-
-                <a
-    href="settings-shifts.html"
-    class="settings-tab"
->
-    <i class="bi bi-calendar-week"></i>
-    シフト設定
-</a>
-
-               <a
-    href="settings-scores.html"
-    class="settings-tab"
->
-    <i class="bi bi-shield-check"></i>
-    負担スコア設定
-</a>
-                <button
-                    type="button"
-                    class="settings-tab"
-                    data-tab="notification"
-                >
-                    <i class="bi bi-bell"></i>
-                    通知設定
-                </button>
-
-                <button
-                    type="button"
-                    class="settings-tab"
-                    data-tab="account"
-                >
-                    <i class="bi bi-people-fill"></i>
-                    アカウント管理
-                </button>
-
-                <button
-                    type="button"
-                    class="settings-tab"
-                    data-tab="system"
-                >
-                    <i class="bi bi-sliders"></i>
-                    システム設定
-                </button>
-
-            </nav>
+            <div id="settingsNav"></div>
 
             <!-- ========================================
                  全般設定
@@ -145,6 +91,7 @@
 
                                 <div class="company-fields">
 
+                                    <!-- システム名 -->
                                     <div class="settings-field">
                                         <label for="systemName">
                                             システム名
@@ -170,6 +117,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- 企業名 -->
                                     <div class="settings-field">
                                         <label for="companyName">
                                             企業名
@@ -195,6 +143,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- ロゴ画像 -->
                                     <div class="settings-field">
                                         <label for="logoFile">
                                             ロゴ画像
@@ -223,6 +172,7 @@
 
                                 <div class="company-fields">
 
+                                    <!-- タイムゾーン -->
                                     <div class="settings-field">
                                         <label for="timeZone">
                                             タイムゾーン
@@ -235,15 +185,18 @@
                                             <option value="Asia/Tokyo">
                                                 (UTC+09:00) 東京
                                             </option>
+
                                             <option value="UTC">
                                                 (UTC+00:00) UTC
                                             </option>
+
                                             <option value="Asia/Seoul">
                                                 (UTC+09:00) ソウル
                                             </option>
                                         </select>
                                     </div>
 
+                                    <!-- 週の開始曜日 -->
                                     <div class="settings-field">
                                         <label for="weekStart">
                                             週の開始曜日
@@ -253,11 +206,17 @@
                                             id="weekStart"
                                             class="form-select"
                                         >
-                                            <option value="monday">月曜日</option>
-                                            <option value="sunday">日曜日</option>
+                                            <option value="monday">
+                                                月曜日
+                                            </option>
+
+                                            <option value="sunday">
+                                                日曜日
+                                            </option>
                                         </select>
                                     </div>
 
+                                    <!-- 日付の表示形式 -->
                                     <div class="settings-field">
                                         <label for="dateFormat">
                                             日付の表示形式
@@ -270,15 +229,18 @@
                                             <option value="yyyy/mm/dd">
                                                 2024/10/17
                                             </option>
+
                                             <option value="yyyy-mm-dd">
                                                 2024-10-17
                                             </option>
+
                                             <option value="mm/dd/yyyy">
                                                 10/17/2024
                                             </option>
                                         </select>
                                     </div>
 
+                                    <!-- 時間の表示形式 -->
                                     <div class="settings-field">
                                         <label for="timeFormat">
                                             時間の表示形式
@@ -291,6 +253,7 @@
                                             <option value="24">
                                                 24時間形式（例：09:00）
                                             </option>
+
                                             <option value="12">
                                                 12時間形式（例：9:00 AM）
                                             </option>
@@ -303,13 +266,17 @@
 
                         </section>
 
-                        <!-- パスワードポリシー -->
+                        <!-- ========================================
+                             パスワードポリシー
+                        ======================================== -->
+
                         <section class="settings-card">
 
                             <h2>パスワードポリシー</h2>
 
                             <div class="password-policy-grid">
 
+                                <!-- 最小文字数 -->
                                 <div class="settings-field">
                                     <label for="minimumPasswordLength">
                                         最小文字数
@@ -324,10 +291,12 @@
                                             max="128"
                                             value="8"
                                         >
+
                                         <span>文字</span>
                                     </div>
                                 </div>
 
+                                <!-- 必須文字種 -->
                                 <div class="settings-field">
                                     <span class="settings-field-label">
                                         必須文字種
@@ -373,6 +342,7 @@
                                     </div>
                                 </div>
 
+                                <!-- 有効期限 -->
                                 <div class="settings-field">
                                     <label for="passwordExpiry">
                                         有効期限
@@ -390,6 +360,7 @@
                                     </select>
                                 </div>
 
+                                <!-- 履歴の保持数 -->
                                 <div class="settings-field">
                                     <label for="passwordHistory">
                                         履歴の保持数
@@ -410,13 +381,17 @@
 
                         </section>
 
-                        <!-- バックアップ -->
+                        <!-- ========================================
+                             バックアップ設定
+                        ======================================== -->
+
                         <section class="settings-card">
 
                             <h2>バックアップ設定</h2>
 
                             <div class="backup-settings">
 
+                                <!-- 自動バックアップ -->
                                 <div class="settings-field">
                                     <span class="settings-field-label">
                                         自動バックアップ
@@ -429,6 +404,7 @@
                                                 id="autoBackup"
                                                 checked
                                             >
+
                                             <span class="switch-slider"></span>
                                             <span class="switch-state">ON</span>
                                         </label>
@@ -439,6 +415,7 @@
                                     </div>
                                 </div>
 
+                                <!-- 保持期間 -->
                                 <div class="settings-field">
                                     <label for="backupRetention">
                                         保持期間
@@ -474,7 +451,10 @@
 
                     </div>
 
-                    <!-- 右側 -->
+                    <!-- ========================================
+                         右側
+                    ======================================== -->
+
                     <div class="settings-column">
 
                         <!-- 表示設定 -->
@@ -482,6 +462,7 @@
 
                             <h2>表示設定</h2>
 
+                            <!-- テーマカラー -->
                             <div class="settings-field">
                                 <span class="settings-field-label">
                                     テーマカラー
@@ -553,6 +534,7 @@
                                 </div>
                             </div>
 
+                            <!-- サイドメニュー表示 -->
                             <div class="settings-field">
                                 <span class="settings-field-label">
                                     サイドメニュー表示
@@ -564,11 +546,13 @@
                                         id="showSidebar"
                                         checked
                                     >
+
                                     <span class="switch-slider"></span>
                                     <span class="switch-state">ON</span>
                                 </label>
                             </div>
 
+                            <!-- アニメーション効果 -->
                             <div class="settings-field">
                                 <span class="settings-field-label">
                                     アニメーション効果
@@ -580,11 +564,13 @@
                                         id="enableAnimation"
                                         checked
                                     >
+
                                     <span class="switch-slider"></span>
                                     <span class="switch-state">ON</span>
                                 </label>
                             </div>
 
+                            <!-- 1ページの表示件数 -->
                             <div class="settings-field">
                                 <label for="itemsPerPage">
                                     1ページの表示件数
@@ -603,7 +589,10 @@
 
                         </section>
 
-                        <!-- 機能設定 -->
+                        <!-- ========================================
+                             機能設定
+                        ======================================== -->
+
                         <section class="settings-card">
 
                             <h2>機能設定</h2>
@@ -612,8 +601,13 @@
 
                                 <div class="feature-row">
                                     <span>チャット機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureChat" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureChat"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -621,8 +615,13 @@
 
                                 <div class="feature-row">
                                     <span>ファイル共有機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureFiles" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureFiles"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -630,8 +629,13 @@
 
                                 <div class="feature-row">
                                     <span>タスク管理機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureTasks" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureTasks"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -639,8 +643,13 @@
 
                                 <div class="feature-row">
                                     <span>ガントチャート機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureGantt" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureGantt"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -648,8 +657,13 @@
 
                                 <div class="feature-row">
                                     <span>ランキング機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureRanking" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureRanking"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -657,8 +671,13 @@
 
                                 <div class="feature-row">
                                     <span>組織図機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureOrgChart" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureOrgChart"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -666,8 +685,13 @@
 
                                 <div class="feature-row">
                                     <span>シフトルーレット機能</span>
+
                                     <label class="switch-control">
-                                        <input type="checkbox" id="featureShiftRoulette" checked>
+                                        <input
+                                            type="checkbox"
+                                            id="featureShiftRoulette"
+                                            checked
+                                        >
                                         <span class="switch-slider"></span>
                                         <span class="switch-state">ON</span>
                                     </label>
@@ -677,7 +701,10 @@
 
                         </section>
 
-                        <!-- 危険な操作 -->
+                        <!-- ========================================
+                             危険な操作
+                        ======================================== -->
+
                         <section class="settings-card danger-card">
 
                             <h2>危険な操作</h2>
@@ -704,70 +731,9 @@
             </section>
 
             <!-- ========================================
-                 その他のタブ
+                 設定保存
             ======================================== -->
 
-            <section
-                class="settings-tab-panel"
-                data-panel="shift"
-                hidden
-            >
-                <div class="settings-card placeholder-card">
-                    <h2>シフト設定</h2>
-                    <p>シフト管理に関する設定を行う画面です。</p>
-                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
-                </div>
-            </section>
-
-            <section
-                class="settings-tab-panel"
-                data-panel="score"
-                hidden
-            >
-                <div class="settings-card placeholder-card">
-                    <h2>負担スコア設定</h2>
-                    <p>業務負担の算出ルールを設定する画面です。</p>
-                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
-                </div>
-            </section>
-
-            <section
-                class="settings-tab-panel"
-                data-panel="notification"
-                hidden
-            >
-                <div class="settings-card placeholder-card">
-                    <h2>通知設定</h2>
-                    <p>通知方法や通知対象を設定する画面です。</p>
-                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
-                </div>
-            </section>
-
-            <section
-                class="settings-tab-panel"
-                data-panel="account"
-                hidden
-            >
-                <div class="settings-card placeholder-card">
-                    <h2>アカウント管理</h2>
-                    <p>ユーザーや権限を管理する画面です。</p>
-                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
-                </div>
-            </section>
-
-            <section
-                class="settings-tab-panel"
-                data-panel="system"
-                hidden
-            >
-                <div class="settings-card placeholder-card">
-                    <h2>システム設定</h2>
-                    <p>システムの動作に関する設定を行う画面です。</p>
-                    <p class="settings-help">このタブの詳細項目は今後実装します。</p>
-                </div>
-            </section>
-
-            <!-- 設定保存 -->
             <div class="settings-footer">
 
                 <p
@@ -809,6 +775,7 @@
             <div class="modal-content">
 
                 <div class="modal-header">
+
                     <h2
                         class="modal-title fs-5"
                         id="deleteConfirmModalLabel"
@@ -822,9 +789,11 @@
                         data-bs-dismiss="modal"
                         aria-label="閉じる"
                     ></button>
+
                 </div>
 
                 <div class="modal-body">
+
                     <p>
                         全データ削除は取り消すことができません。
                     </p>
@@ -832,6 +801,7 @@
                     <p class="text-danger mb-0">
                         現在はデモ画面のため、実際のデータ削除は行いません。
                     </p>
+
                 </div>
 
                 <div class="modal-footer">
