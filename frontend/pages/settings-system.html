@@ -1,1 +1,850 @@
-システム設定
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>システム設定 | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- システム設定専用CSS -->
+    <link rel="stylesheet" href="../css/settings-system.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- システム設定専用JavaScript -->
+    <script src="../js/settings-system.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <main class="main-content system-settings-page">
+
+            <!-- ページ見出し -->
+            <div class="system-settings-heading">
+                <h1>システム設定</h1>
+                <p>
+                    システム全体の基本設定や運用に関する設定を行います。
+                </p>
+            </div>
+
+            <!-- 共通設定ナビゲーション -->
+            <div id="settingsNav"></div>
+
+            <!-- 設定フォーム -->
+            <form id="systemSettingsForm">
+
+                <div class="system-settings-grid">
+
+                    <!-- =====================================
+                         左列
+                    ====================================== -->
+                    <div class="system-settings-column">
+
+                        <!-- 基本設定 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>基本設定</h2>
+                                <p>
+                                    システムの基本情報や表示に関する設定を行います。
+                                </p>
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="systemName">
+                                    システム名
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div>
+                                    <input
+                                        type="text"
+                                        id="systemName"
+                                        class="form-control"
+                                        value="Tasfina"
+                                        maxlength="50"
+                                        required
+                                    >
+
+                                    <p class="system-character-count">
+                                        <span id="systemNameCount">7</span> / 50
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="companyName">
+                                    企業名
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div>
+                                    <input
+                                        type="text"
+                                        id="companyName"
+                                        class="form-control"
+                                        value="株式会社Tasfina"
+                                        maxlength="100"
+                                        required
+                                    >
+
+                                    <p class="system-character-count">
+                                        <span id="companyNameCount">12</span> / 100
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="timezone">タイムゾーン</label>
+
+                                <select id="timezone" class="form-select">
+                                    <option value="Asia/Tokyo" selected>
+                                        (UTC+09:00) 東京
+                                    </option>
+                                    <option value="Asia/Seoul">
+                                        (UTC+09:00) ソウル
+                                    </option>
+                                    <option value="Asia/Shanghai">
+                                        (UTC+08:00) 上海
+                                    </option>
+                                    <option value="UTC">
+                                        (UTC+00:00) UTC
+                                    </option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="weekStart">週の開始曜日</label>
+
+                                <select id="weekStart" class="form-select">
+                                    <option value="monday" selected>月曜日</option>
+                                    <option value="sunday">日曜日</option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="dateFormat">日付の表示形式</label>
+
+                                <select id="dateFormat" class="form-select">
+                                    <option value="yyyy/mm/dd" selected>
+                                        2024/10/17
+                                    </option>
+                                    <option value="yyyy-mm-dd">
+                                        2024-10-17
+                                    </option>
+                                    <option value="mm/dd/yyyy">
+                                        10/17/2024
+                                    </option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="timeFormat">時間の表示形式</label>
+
+                                <select id="timeFormat" class="form-select">
+                                    <option value="24" selected>
+                                        24時間形式（例：09:00）
+                                    </option>
+                                    <option value="12">
+                                        12時間形式（例：9:00 AM）
+                                    </option>
+                                </select>
+
+                            </div>
+
+                        </section>
+
+                        <!-- セキュリティ設定 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>セキュリティ設定</h2>
+                                <p>
+                                    セキュリティに関する設定を行います。
+                                </p>
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="minimumPasswordLength">
+                                    パスワードの最小文字数
+                                </label>
+
+                                <div class="system-inline-field">
+                                    <input
+                                        type="number"
+                                        id="minimumPasswordLength"
+                                        class="form-control system-number-input"
+                                        value="8"
+                                        min="8"
+                                        max="128"
+                                    >
+                                    <span>文字</span>
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="passwordExpiry">
+                                    パスワードの有効期限
+                                </label>
+
+                                <select id="passwordExpiry" class="form-select">
+                                    <option value="0">無期限</option>
+                                    <option value="30">30日</option>
+                                    <option value="60">60日</option>
+                                    <option value="90" selected>90日</option>
+                                    <option value="180">180日</option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="loginLockEnabled">
+                                    ログイン失敗のロック
+                                </label>
+
+                                <div class="system-switch-line">
+
+                                    <label class="system-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="loginLockEnabled"
+                                            checked
+                                        >
+                                        <span class="system-switch-slider"></span>
+                                    </label>
+
+                                    <span class="system-switch-state" data-for="loginLockEnabled">
+                                        ON
+                                    </span>
+
+                                    <small>5回連続で30分間ロック</small>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="twoFactorEnabled">
+                                    二段階認証（2FA）
+                                </label>
+
+                                <div class="system-switch-line">
+
+                                    <label class="system-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="twoFactorEnabled"
+                                        >
+                                        <span class="system-switch-slider"></span>
+                                    </label>
+
+                                    <span class="system-switch-state" data-for="twoFactorEnabled">
+                                        OFF
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="sessionExpiry">
+                                    セッションの有効期限
+                                </label>
+
+                                <select id="sessionExpiry" class="form-select">
+                                    <option value="1">1時間</option>
+                                    <option value="4">4時間</option>
+                                    <option value="8" selected>8時間</option>
+                                    <option value="12">12時間</option>
+                                    <option value="24">24時間</option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="singleSessionEnabled">
+                                    同時ログイン制限
+                                </label>
+
+                                <div class="system-switch-line">
+
+                                    <label class="system-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="singleSessionEnabled"
+                                            checked
+                                        >
+                                        <span class="system-switch-slider"></span>
+                                    </label>
+
+                                    <span class="system-switch-state" data-for="singleSessionEnabled">
+                                        ON
+                                    </span>
+
+                                    <small>（1アカウント1セッションまで）</small>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="ipRestrictionEnabled">
+                                    IPアドレス制限
+                                </label>
+
+                                <div class="system-switch-line">
+
+                                    <label class="system-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="ipRestrictionEnabled"
+                                        >
+                                        <span class="system-switch-slider"></span>
+                                    </label>
+
+                                    <span class="system-switch-state" data-for="ipRestrictionEnabled">
+                                        OFF
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                    </div>
+
+                    <!-- =====================================
+                         中央列
+                    ====================================== -->
+                    <div class="system-settings-column">
+
+                        <!-- 表示設定 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>表示設定</h2>
+                                <p>画面の表示に関する設定を行います。</p>
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <span class="system-field-label">
+                                    テーマ設定
+                                </span>
+
+                                <div class="system-radio-group">
+
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="themeMode"
+                                            value="light"
+                                            checked
+                                        >
+                                        ライトモード
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="themeMode"
+                                            value="dark"
+                                        >
+                                        ダークモード
+                                    </label>
+
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="themeMode"
+                                            value="system"
+                                        >
+                                        システム設定に従う
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <span class="system-field-label">
+                                    メインカラー
+                                </span>
+
+                                <div class="system-theme-colors" id="themeColors">
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color selected"
+                                        data-color="#0065d8"
+                                        aria-label="ブルー"
+                                        aria-pressed="true"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color"
+                                        data-color="#55c7a5"
+                                        aria-label="グリーン"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color"
+                                        data-color="#f1c34d"
+                                        aria-label="イエロー"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color"
+                                        data-color="#ff7078"
+                                        aria-label="レッド"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color"
+                                        data-color="#a77bdf"
+                                        aria-label="パープル"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                    <button
+                                        type="button"
+                                        class="system-theme-color"
+                                        data-color="#aeb7c6"
+                                        aria-label="グレー"
+                                        aria-pressed="false"
+                                    ></button>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <span class="system-field-label">
+                                    サイドメニュー
+                                </span>
+
+                                <div class="system-switch-stack">
+
+                                    <div class="system-switch-line">
+                                        <label class="system-switch">
+                                            <input
+                                                type="checkbox"
+                                                id="sidebarAlwaysVisible"
+                                            >
+                                            <span class="system-switch-slider"></span>
+                                        </label>
+                                        <span>常に表示する</span>
+                                    </div>
+
+                                    <div class="system-switch-line">
+                                        <label class="system-switch">
+                                            <input
+                                                type="checkbox"
+                                                id="sidebarCollapsible"
+                                                checked
+                                            >
+                                            <span class="system-switch-slider"></span>
+                                        </label>
+                                        <span>クリックで表示（折りたたみ）</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="displayCount">
+                                    1ページの表示件数
+                                </label>
+
+                                <select id="displayCount" class="form-select">
+                                    <option value="10">10件</option>
+                                    <option value="20" selected>20件</option>
+                                    <option value="50">50件</option>
+                                    <option value="100">100件</option>
+                                </select>
+
+                            </div>
+
+                        </section>
+
+                        <!-- データ管理 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>データ管理</h2>
+                                <p>
+                                    データのバックアップや保守に関する設定を行います。
+                                </p>
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="automaticBackup">
+                                    自動バックアップ
+                                </label>
+
+                                <div class="system-switch-line">
+
+                                    <label class="system-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="automaticBackup"
+                                            checked
+                                        >
+                                        <span class="system-switch-slider"></span>
+                                    </label>
+
+                                    <span class="system-switch-state" data-for="automaticBackup">
+                                        ON
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="backupFrequency">
+                                    バックアップ頻度
+                                </label>
+
+                                <select id="backupFrequency" class="form-select">
+                                    <option value="daily" selected>毎日</option>
+                                    <option value="weekly">毎週</option>
+                                    <option value="monthly">毎月</option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="backupTime">
+                                    バックアップ時刻
+                                </label>
+
+                                <input
+                                    type="time"
+                                    id="backupTime"
+                                    class="form-control"
+                                    value="02:00"
+                                >
+
+                            </div>
+
+                            <div class="system-form-field">
+
+                                <label for="retentionPeriod">
+                                    保持期間
+                                </label>
+
+                                <select id="retentionPeriod" class="form-select">
+                                    <option value="7">7日</option>
+                                    <option value="14">14日</option>
+                                    <option value="30" selected>30日</option>
+                                    <option value="90">90日</option>
+                                </select>
+
+                            </div>
+
+                            <div class="system-card-actions">
+
+                                <button
+                                    type="button"
+                                    id="backupNowButton"
+                                    class="btn btn-outline-primary"
+                                >
+                                    <i class="bi bi-database-fill"></i>
+                                    今すぐバックアップを実行
+                                </button>
+
+                            </div>
+
+                            <div class="system-export-section">
+
+                                <h3>データのエクスポート</h3>
+
+                                <p>
+                                    各種データをCSV形式でエクスポートできます。
+                                </p>
+
+                                <div class="system-export-actions">
+
+                                    <select
+                                        id="exportDataType"
+                                        class="form-select"
+                                        aria-label="エクスポートするデータ"
+                                    >
+                                        <option value="users">ユーザー情報</option>
+                                        <option value="tasks">タスク情報</option>
+                                        <option value="shifts">シフト情報</option>
+                                        <option value="scores">負担スコア情報</option>
+                                    </select>
+
+                                    <button
+                                        type="button"
+                                        id="exportButton"
+                                        class="btn btn-outline-primary"
+                                    >
+                                        <i class="bi bi-download"></i>
+                                        エクスポート
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                    </div>
+
+                    <!-- =====================================
+                         右列
+                    ====================================== -->
+                    <div class="system-settings-column">
+
+                        <!-- システム情報 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>システム情報</h2>
+                            </div>
+
+                            <table class="system-info-table">
+                                <tbody>
+                                    <tr>
+                                        <th>バージョン</th>
+                                        <td>v1.2.0</td>
+                                    </tr>
+                                    <tr>
+                                        <th>最終更新日</th>
+                                        <td>2024/10/01 15:30</td>
+                                    </tr>
+                                    <tr>
+                                        <th>サーバー環境</th>
+                                        <td>Production</td>
+                                    </tr>
+                                    <tr>
+                                        <th>データベース</th>
+                                        <td>MySQL 8.0</td>
+                                    </tr>
+                                    <tr>
+                                        <th>PHPバージョン</th>
+                                        <td>8.2.0</td>
+                                    </tr>
+                                    <tr>
+                                        <th>サーバー時刻</th>
+                                        <td id="serverTime">--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="system-info-note">
+                                ※ システム情報は画面確認用のサンプルです。
+                            </p>
+
+                        </section>
+
+                        <!-- メンテナンス設定 -->
+                        <section class="system-settings-card">
+
+                            <div class="system-card-heading">
+                                <h2>メンテナンス設定</h2>
+                            </div>
+
+                            <div class="system-maintenance-switch">
+
+                                <span>メンテナンスモード</span>
+
+                                <label class="system-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="maintenanceMode"
+                                    >
+                                    <span class="system-switch-slider"></span>
+                                </label>
+
+                                <span class="system-switch-state" data-for="maintenanceMode">
+                                    OFF
+                                </span>
+
+                            </div>
+
+                            <p class="system-help">
+                                メンテナンス中は一般ユーザーがログインできません。
+                            </p>
+
+                            <div class="system-maintenance-field">
+
+                                <label for="maintenanceStartDate">
+                                    メンテナンス開始時刻
+                                </label>
+
+                                <div class="system-datetime-group">
+
+                                    <input
+                                        type="date"
+                                        id="maintenanceStartDate"
+                                        class="form-control"
+                                        value="2024-10-20"
+                                    >
+
+                                    <span>～</span>
+
+                                    <input
+                                        type="time"
+                                        id="maintenanceStartTime"
+                                        class="form-control"
+                                        value="01:00"
+                                    >
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-maintenance-field">
+
+                                <label for="maintenanceEndDate">
+                                    メンテナンス終了時刻
+                                </label>
+
+                                <div class="system-datetime-group">
+
+                                    <input
+                                        type="date"
+                                        id="maintenanceEndDate"
+                                        class="form-control"
+                                        value="2024-10-20"
+                                    >
+
+                                    <span>～</span>
+
+                                    <input
+                                        type="time"
+                                        id="maintenanceEndTime"
+                                        class="form-control"
+                                        value="05:00"
+                                    >
+
+                                </div>
+
+                            </div>
+
+                            <div class="system-maintenance-field">
+
+                                <label for="maintenanceMessage">
+                                    メンテナンスメッセージ
+                                </label>
+
+                                <textarea
+                                    id="maintenanceMessage"
+                                    class="form-control"
+                                    rows="3"
+                                    maxlength="200"
+                                >ただいまメンテナンスを実施しております。ご迷惑をおかけいたしますが、しばらくお待ちください。</textarea>
+
+                                <p class="system-character-count">
+                                    <span id="maintenanceMessageCount">0</span> / 200
+                                </p>
+
+                            </div>
+
+                        </section>
+
+                    </div>
+
+                </div>
+
+                <!-- 保存メッセージ -->
+                <p
+                    id="systemSettingsMessage"
+                    class="system-settings-message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <!-- 下部操作 -->
+                <div class="system-settings-footer">
+
+                    <button
+                        type="button"
+                        id="resetSettingsButton"
+                        class="btn btn-outline-primary"
+                    >
+                        リセット
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-floppy"></i>
+                        保存
+                    </button>
+
+                </div>
+
+            </form>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

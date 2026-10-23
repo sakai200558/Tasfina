@@ -1,0 +1,587 @@
+
+/* ========================================
+   アカウント管理画面
+======================================== */
+
+.accounts-page {
+    background: #ffffff;
+    color: #17213a;
+    --accounts-primary: #0065d8;
+    --accounts-border: #dce4ef;
+    --accounts-muted: #71809a;
+}
+
+/* 見出し */
+
+.accounts-heading {
+    margin-bottom: 16px;
+}
+
+.accounts-heading h1 {
+    margin: 0 0 5px;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+.accounts-heading p {
+    margin: 0;
+    color: var(--accounts-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   メインレイアウト
+======================================== */
+
+.accounts-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(340px, .8fr);
+    gap: 16px;
+    align-items: stretch;
+    margin-top: 16px;
+}
+
+.accounts-card {
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--accounts-border);
+    border-radius: 7px;
+    padding: 16px;
+}
+
+.accounts-card h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.accounts-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.accounts-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 9px 15px;
+}
+
+/* ========================================
+   検索
+======================================== */
+
+.accounts-search {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.accounts-search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #61708c;
+}
+
+.accounts-search input {
+    padding-left: 42px;
+    height: 40px;
+    border-color: var(--accounts-border);
+    font-size: 13px;
+}
+
+/* ========================================
+   フィルター
+======================================== */
+
+.accounts-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.accounts-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.accounts-filter label {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.accounts-filter select {
+    min-width: 0;
+    font-size: 12px;
+    height: 38px;
+    border-color: var(--accounts-border);
+}
+
+/* ========================================
+   ユーザー一覧テーブル
+======================================== */
+
+.accounts-table-wrapper {
+    border: 1px solid #e7edf5;
+    border-radius: 5px;
+}
+
+.accounts-table {
+    margin-bottom: 0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.accounts-table th {
+    background: #f7f9fc;
+    color: #34415a;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 9px;
+    border-bottom: 1px solid #dce4ef;
+}
+
+.accounts-table td {
+    padding: 9px;
+    font-size: 12px;
+    color: #43516d;
+    border-color: #e8edf4;
+}
+
+.accounts-table tbody tr {
+    cursor: pointer;
+}
+
+.accounts-table tbody tr:hover td {
+    background: #f4f9ff;
+}
+
+.accounts-table tbody tr.selected-row td {
+    background: #e9f4ff;
+}
+
+.accounts-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #0065d8;
+    cursor: pointer;
+}
+
+.accounts-user-name {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+}
+
+.accounts-avatar {
+    width: 29px;
+    height: 29px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e7ebf2;
+    color: #8591a7;
+    font-size: 19px;
+    overflow: hidden;
+}
+
+.accounts-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.accounts-role {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.role-admin {
+    background: #ffe0e3;
+    color: #d83342;
+}
+
+.role-manager {
+    background: #dcecff;
+    color: #0065c8;
+}
+
+.role-member {
+    background: #d9f7e7;
+    color: #198458;
+}
+
+.role-viewer {
+    background: #edf0f5;
+    color: #657187;
+}
+
+.accounts-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.accounts-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #55c99a;
+}
+
+.accounts-status.inactive .accounts-status-dot {
+    background: #aeb7c7;
+}
+
+.accounts-row-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.accounts-icon-button {
+    padding: 3px;
+    background: transparent;
+    border: none;
+    font-size: 15px;
+    color: #0065d8;
+}
+
+.accounts-icon-button.delete {
+    color: #f04452;
+}
+
+.accounts-icon-button:hover {
+    opacity: .7;
+}
+
+/* ========================================
+   ページネーション
+======================================== */
+
+.accounts-table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.accounts-table-footer p {
+    margin: 0;
+    color: #6e7b95;
+    font-size: 12px;
+}
+
+.accounts-pagination {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.accounts-pagination button,
+.accounts-pagination span {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #dce4ef;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: #64728c;
+}
+
+.accounts-pagination span {
+    background: #0065d8;
+    color: #fff;
+    border-color: #0065d8;
+}
+
+.accounts-pagination button:disabled {
+    opacity: .35;
+}
+
+.accounts-page-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.accounts-page-size label {
+    font-size: 12px;
+    white-space: nowrap;
+    color: #6e7b95;
+}
+
+.accounts-page-size select {
+    width: 85px;
+    font-size: 12px;
+}
+
+/* ========================================
+   ユーザー詳細
+======================================== */
+
+.accounts-close-button {
+    border: none;
+    background: transparent;
+    color: #465574;
+    font-size: 17px;
+}
+
+.accounts-profile {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.accounts-avatar-large {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #e6eaf1;
+    color: #8793aa;
+    font-size: 58px;
+}
+
+.accounts-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.accounts-profile p {
+    font-size: 10px;
+    color: #8290a7;
+    margin: 6px 0 0;
+}
+
+.accounts-form-field {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.accounts-form-field > label {
+    color: #34415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.accounts-form-field > label span {
+    color: #e94350;
+}
+
+.accounts-form-field .form-control,
+.accounts-form-field .form-select {
+    min-width: 0;
+    height: 40px;
+    border-color: #dce4ef;
+    font-size: 12px;
+}
+
+.accounts-password-group {
+    display: flex;
+    gap: 8px;
+}
+
+.accounts-password-group .btn {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.accounts-switch-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0065d8;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.accounts-switch {
+    position: relative;
+    width: 46px;
+    height: 25px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.accounts-switch input {
+    position: absolute;
+    opacity: 0;
+}
+
+.accounts-switch-slider {
+    display: block;
+    width: 46px;
+    height: 25px;
+    background: #b7c0d1;
+    border-radius: 20px;
+    transition: background .2s;
+}
+
+.accounts-switch-slider::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    background: white;
+    border-radius: 50%;
+    transition: transform .2s;
+}
+
+.accounts-switch input:checked + .accounts-switch-slider {
+    background: #0065d8;
+}
+
+.accounts-switch input:checked + .accounts-switch-slider::after {
+    transform: translateX(21px);
+}
+
+.accounts-switch input:focus-visible + .accounts-switch-slider {
+    outline: 3px solid #8cbcff;
+    outline-offset: 2px;
+}
+
+.accounts-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.accounts-form-actions .btn {
+    min-width: 110px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.accounts-message {
+    font-size: 12px;
+    margin: 10px 0;
+    color: #21845a;
+}
+
+.accounts-message.error {
+    color: #dc3545;
+}
+
+/* ========================================
+   下部カード
+======================================== */
+
+.accounts-bottom-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.accounts-subtitle {
+    margin: 6px 0 16px;
+    color: #7b879c;
+    font-size: 12px;
+}
+
+.accounts-bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.accounts-bulk-actions strong {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.accounts-bulk-actions .form-select {
+    min-width: 0;
+    font-size: 12px;
+}
+
+.accounts-bulk-actions .btn {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.accounts-role-description {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 9px;
+}
+
+.accounts-role-description .accounts-role {
+    min-width: 95px;
+    text-align: center;
+}
+
+.accounts-role-description p {
+    margin: 0;
+    color: #6e7b95;
+    font-size: 11px;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1350px) {
+    .accounts-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .accounts-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .accounts-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .accounts-table-footer {
+        flex-wrap: wrap;
+    }
+
+    .accounts-bulk-actions {
+        flex-wrap: wrap;
+    }
+
+    .accounts-form-field {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .accounts-profile {
+        flex-wrap: wrap;
+    }
+}

@@ -1,1 +1,421 @@
-アカウント設定
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>アカウント管理 | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/settings-accounts.css">
+
+    <!-- JavaScript -->
+    <script src="../js/common.js" defer></script>
+    <script src="../js/settings-accounts.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <main class="main-content accounts-page">
+
+            <!-- ページ見出し -->
+            <div class="accounts-heading">
+                <h1>アカウント管理</h1>
+                <p>
+                    ユーザーの登録・編集・権限管理を行います。
+                    検索や絞り込みで対象のユーザーを簡単に管理できます。
+                </p>
+            </div>
+
+            <!-- 共通設定ナビゲーション -->
+            <div id="settingsNav"></div>
+
+            <!-- メインエリア -->
+            <div class="accounts-layout">
+
+                <!-- 左側：ユーザー一覧 -->
+                <section class="accounts-card accounts-list-card">
+
+                    <div class="accounts-card-heading">
+                        <h2>ユーザー一覧</h2>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary accounts-add-button"
+                            id="addUserButton"
+                        >
+                            <i class="bi bi-plus-lg"></i>
+                            新規ユーザーを追加
+                        </button>
+                    </div>
+
+                    <!-- 検索 -->
+                    <div class="accounts-search">
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="search"
+                            id="userSearch"
+                            class="form-control"
+                            placeholder="ユーザー名・メールアドレスで検索"
+                            aria-label="ユーザー検索"
+                        >
+                    </div>
+
+                    <!-- 絞り込み -->
+                    <div class="accounts-filters">
+
+                        <div class="accounts-filter">
+                            <label for="departmentFilter">部門</label>
+                            <select id="departmentFilter" class="form-select">
+                                <option value="">すべて</option>
+                                <option value="営業部">営業部</option>
+                                <option value="開発部">開発部</option>
+                                <option value="サポート部">サポート部</option>
+                            </select>
+                        </div>
+
+                        <div class="accounts-filter">
+                            <label for="roleFilter">権限</label>
+                            <select id="roleFilter" class="form-select">
+                                <option value="">すべて</option>
+                                <option value="1000">全社管理者</option>
+                                <option value="2000">部門管理者</option>
+                                <option value="3000">一般メンバー</option>
+                                <option value="4000">閲覧専用</option>
+                            </select>
+                        </div>
+
+                        <div class="accounts-filter">
+                            <label for="statusFilter">ステータス</label>
+                            <select id="statusFilter" class="form-select">
+                                <option value="">すべて</option>
+                                <option value="active">有効</option>
+                                <option value="inactive">無効</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- ユーザー一覧 -->
+                    <div class="table-responsive accounts-table-wrapper">
+
+                        <table class="table accounts-table">
+
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            id="selectAllUsers"
+                                            aria-label="表示中のユーザーをすべて選択"
+                                        >
+                                    </th>
+                                    <th>ユーザー名</th>
+                                    <th>メールアドレス</th>
+                                    <th>部門</th>
+                                    <th>権限</th>
+                                    <th>ステータス</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="userTableBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                    <!-- ページネーション -->
+                    <div class="accounts-table-footer">
+
+                        <p id="userCountText"></p>
+
+                        <div class="accounts-pagination">
+                            <button
+                                type="button"
+                                id="previousPage"
+                                aria-label="前のページ"
+                            >
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+
+                            <span id="currentPageNumber">1</span>
+
+                            <button
+                                type="button"
+                                id="nextPage"
+                                aria-label="次のページ"
+                            >
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="accounts-page-size">
+                            <label for="pageSize">表示件数</label>
+                            <select id="pageSize" class="form-select">
+                                <option value="10">10件</option>
+                                <option value="20" selected>20件</option>
+                                <option value="50">50件</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- 右側：ユーザー詳細 -->
+                <section class="accounts-card accounts-detail-card" id="userDetailPanel">
+
+                    <div class="accounts-card-heading">
+                        <h2 id="detailHeading">ユーザー詳細・編集</h2>
+
+                        <button
+                            type="button"
+                            class="accounts-close-button"
+                            id="closeDetailButton"
+                            aria-label="詳細を閉じる"
+                        >
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- プロフィール画像 -->
+                    <div class="accounts-profile">
+
+                        <div class="accounts-avatar-large" id="profileAvatar">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+
+                        <div>
+                            <label for="profileImage" class="btn btn-outline-primary btn-sm">
+                                画像を変更
+                            </label>
+
+                            <input
+                                type="file"
+                                id="profileImage"
+                                accept="image/png,image/jpeg"
+                                hidden
+                            >
+
+                            <p>※ 推奨サイズ：200px × 200px（PNG、JPG）</p>
+                        </div>
+
+                    </div>
+
+                    <!-- 編集フォーム -->
+                    <form id="userForm" novalidate>
+
+                        <div class="accounts-form-field">
+                            <label for="userName">
+                                ユーザー名 <span>*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="userName"
+                                class="form-control"
+                                maxlength="100"
+                                required
+                            >
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userEmail">
+                                メールアドレス <span>*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="userEmail"
+                                class="form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userPassword">パスワード</label>
+
+                            <div class="accounts-password-group">
+                                <input
+                                    type="password"
+                                    id="userPassword"
+                                    class="form-control"
+                                    placeholder="変更時のみ入力"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    id="togglePasswordButton"
+                                >
+                                    表示
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userDepartment">
+                                部門 <span>*</span>
+                            </label>
+
+                            <select id="userDepartment" class="form-select" required>
+                                <option value="営業部">営業部</option>
+                                <option value="開発部">開発部</option>
+                                <option value="サポート部">サポート部</option>
+                            </select>
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userRole">
+                                権限 <span>*</span>
+                            </label>
+
+                            <select id="userRole" class="form-select" required>
+                                <option value="1000">全社管理者</option>
+                                <option value="2000">部門管理者</option>
+                                <option value="3000">一般メンバー</option>
+                                <option value="4000">閲覧専用</option>
+                            </select>
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userActive">ステータス</label>
+
+                            <div class="accounts-switch-line">
+                                <label class="accounts-switch">
+                                    <input type="checkbox" id="userActive" checked>
+                                    <span class="accounts-switch-slider"></span>
+                                </label>
+
+                                <span id="userActiveText">有効</span>
+                            </div>
+                        </div>
+
+                        <div class="accounts-form-field">
+                            <label for="userExpiry">アカウント有効期限</label>
+
+                            <input
+                                type="date"
+                                id="userExpiry"
+                                class="form-control"
+                            >
+                        </div>
+
+                        <p id="userFormMessage" class="accounts-message" role="status" aria-live="polite"></p>
+
+                        <div class="accounts-form-actions">
+                            <button
+                                type="button"
+                                id="cancelEditButton"
+                                class="btn btn-outline-secondary"
+                            >
+                                キャンセル
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-floppy"></i>
+                                保存
+                            </button>
+                        </div>
+
+                    </form>
+
+                </section>
+
+            </div>
+
+            <!-- 下部 -->
+            <div class="accounts-bottom-grid">
+
+                <!-- 一括操作 -->
+                <section class="accounts-card">
+
+                    <h2>一括操作</h2>
+                    <p class="accounts-subtitle">
+                        選択したユーザーに対して一括で操作を行います。
+                    </p>
+
+                    <div class="accounts-bulk-actions">
+
+                        <strong id="selectedUserCount">選択件数：0件</strong>
+
+                        <select id="bulkAction" class="form-select">
+                            <option value="">操作を選択</option>
+                            <option value="activate">有効化</option>
+                            <option value="deactivate">無効化</option>
+                            <option value="department">部門変更</option>
+                            <option value="delete">削除</option>
+                        </select>
+
+                        <select id="bulkDepartment" class="form-select" disabled>
+                            <option value="">対象の部門を選択</option>
+                            <option value="営業部">営業部</option>
+                            <option value="開発部">開発部</option>
+                            <option value="サポート部">サポート部</option>
+                        </select>
+
+                        <button
+                            type="button"
+                            id="executeBulkButton"
+                            class="btn btn-primary"
+                            disabled
+                        >
+                            <i class="bi bi-play-fill"></i>
+                            実行
+                        </button>
+
+                    </div>
+
+                </section>
+
+                <!-- 権限の説明 -->
+                <section class="accounts-card accounts-role-card">
+
+                    <h2>権限の説明</h2>
+
+                    <div class="accounts-role-description">
+                        <span class="accounts-role role-admin">全社管理者</span>
+                        <p>全社の機能・データにアクセス可能です。</p>
+                    </div>
+
+                    <div class="accounts-role-description">
+                        <span class="accounts-role role-manager">部門管理者</span>
+                        <p>所属する部門の管理・承認などが可能です。</p>
+                    </div>
+
+                    <div class="accounts-role-description">
+                        <span class="accounts-role role-member">一般メンバー</span>
+                        <p>基本的な機能のみ利用可能です。</p>
+                    </div>
+
+                    <div class="accounts-role-description">
+                        <span class="accounts-role role-viewer">閲覧専用</span>
+                        <p>許可された情報の閲覧のみ可能です。</p>
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
