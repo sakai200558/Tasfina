@@ -4,11 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>タスク管理 | Tasfina</title>
 
@@ -17,7 +13,6 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
-
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
         rel="stylesheet"
@@ -28,15 +23,19 @@
     <link rel="stylesheet" href="../css/tasks.css">
     <link rel="stylesheet" href="../css/task-create.css">
 
-    <!-- JavaScript -->
+    <!-- Bootstrap JS -->
     <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         defer
     ></script>
 
+    <!-- 共通・既存JS -->
     <script src="../js/common.js" defer></script>
     <script src="../js/tasks.js" defer></script>
     <script src="../js/task-create.js" defer></script>
+
+    <!-- 新規タスクモーダル読込専用JS -->
+    <script src="../js/tasks-modal-loader.js" defer></script>
 </head>
 
 <body class="app-page">
@@ -49,66 +48,45 @@
         <!-- 共通サイドバー -->
         <div id="sidebar"></div>
 
-        <main class="page-main tasks-page">
+        <main class="main-content tasks-page">
 
-            <!-- ========================================
-                 ページ見出し
-            ======================================== -->
-
-            <div class="page-heading">
+            <!-- ページ見出し -->
+            <div class="task-page-heading">
 
                 <h1>タスク管理</h1>
 
-               <button
-                 type="button"
-                 id="openTaskCreateModal"
-                 class="btn btn-primary"
+                <button
+                    type="button"
+                    id="openTaskCreateModal"
+                    class="btn task-create-button"
                 >
-                 <i class="bi bi-plus-lg"></i>
-                新規タスク作成
+                    <i class="bi bi-plus-lg"></i>
+                    新規タスク作成
                 </button>
 
             </div>
 
-            <!-- ========================================
-                 集計カード
-            ======================================== -->
-
-            <section
-                class="task-summary"
-                aria-label="タスク概要"
-            >
+            <!-- 集計カード -->
+            <section class="task-summary" aria-label="タスク概要">
 
                 <article class="task-summary-card">
-
                     <p>進行中</p>
-
                     <strong id="progressCount">0件</strong>
-
                 </article>
 
                 <article class="task-summary-card">
-
                     <p>承認待ち</p>
-
                     <strong id="pendingCount">0件</strong>
-
                 </article>
 
                 <article class="task-summary-card">
-
                     <p>完了</p>
-
                     <strong id="doneCount">0件</strong>
-
                 </article>
 
             </section>
 
-            <!-- ========================================
-                 タスク一覧
-            ======================================== -->
-
+            <!-- タスク一覧 -->
             <section class="task-panel">
 
                 <!-- タブ -->
@@ -160,11 +138,10 @@
 
                 </div>
 
-                <!-- 検索・担当者フィルター -->
+                <!-- 検索・絞り込み -->
                 <div class="task-filters">
 
                     <div class="task-search">
-
                         <i class="bi bi-search"></i>
 
                         <input
@@ -173,7 +150,6 @@
                             placeholder="タスク名で検索"
                             aria-label="タスク名で検索"
                         >
-
                     </div>
 
                     <select
@@ -186,7 +162,7 @@
 
                 </div>
 
-                <!-- 一覧テーブル -->
+                <!-- タスクテーブル -->
                 <div class="table-responsive">
 
                     <table class="table task-table">
@@ -200,12 +176,14 @@
                             </tr>
                         </thead>
 
+                        <!-- tasks.js がデータを表示 -->
                         <tbody id="taskTableBody"></tbody>
 
                     </table>
 
                 </div>
 
+                <!-- 一覧下部 -->
                 <div class="task-panel-footer">
 
                     <span id="taskResultCount"></span>
@@ -219,20 +197,16 @@
 
             </section>
 
-            <!-- ========================================
-                 選択中のタスク詳細
-            ======================================== -->
-
+            <!-- 選択中のタスク詳細 -->
             <section class="task-detail-panel">
 
                 <h2>選択中のタスク詳細</h2>
 
+                <!-- tasks.js が詳細を表示 -->
                 <div id="selectedTaskDetail">
-
                     <p class="task-empty">
                         タスクを選択してください。
                     </p>
-
                 </div>
 
                 <div class="task-detail-actions">
@@ -263,10 +237,7 @@
 
     </div>
 
-    <!-- ========================================
-         工数変更申請モーダル
-    ======================================== -->
-
+    <!-- 工数変更申請モーダル -->
     <div
         class="modal fade"
         id="workHoursModal"
@@ -274,7 +245,6 @@
         aria-labelledby="workHoursModalLabel"
         aria-hidden="true"
     >
-
         <div class="modal-dialog modal-dialog-centered">
 
             <div class="modal-content task-modal">
@@ -302,14 +272,13 @@
 
                     <div class="modal-body">
 
-                        <p class="modal-task-name" id="hoursTaskName"></p>
+                        <p
+                            class="modal-task-name"
+                            id="hoursTaskName"
+                        ></p>
 
                         <div class="mb-3">
-
-                            <label
-                                for="currentHours"
-                                class="form-label"
-                            >
+                            <label for="currentHours" class="form-label">
                                 現在の想定工数
                             </label>
 
@@ -319,15 +288,10 @@
                                 class="form-control"
                                 readonly
                             >
-
                         </div>
 
                         <div class="mb-3">
-
-                            <label
-                                for="requestedHours"
-                                class="form-label"
-                            >
+                            <label for="requestedHours" class="form-label">
                                 変更後の想定工数（時間）
                             </label>
 
@@ -339,15 +303,10 @@
                                 step="0.1"
                                 required
                             >
-
                         </div>
 
                         <div class="mb-3">
-
-                            <label
-                                for="hoursReason"
-                                class="form-label"
-                            >
+                            <label for="hoursReason" class="form-label">
                                 変更理由
                             </label>
 
@@ -358,7 +317,6 @@
                                 maxlength="500"
                                 required
                             ></textarea>
-
                         </div>
 
                         <p
@@ -379,10 +337,7 @@
                             キャンセル
                         </button>
 
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                        >
+                        <button type="submit" class="btn btn-primary">
                             申請する
                         </button>
 
@@ -393,13 +348,9 @@
             </div>
 
         </div>
-
     </div>
 
-    <!-- ========================================
-         完了申請モーダル
-    ======================================== -->
-
+    <!-- タスク完了申請モーダル -->
     <div
         class="modal fade"
         id="taskCompleteModal"
@@ -407,7 +358,6 @@
         aria-labelledby="taskCompleteModalLabel"
         aria-hidden="true"
     >
-
         <div class="modal-dialog modal-dialog-centered">
 
             <div class="modal-content task-modal">
@@ -441,11 +391,7 @@
                         ></p>
 
                         <div class="mb-3">
-
-                            <label
-                                for="actualHours"
-                                class="form-label"
-                            >
+                            <label for="actualHours" class="form-label">
                                 実績工数（時間）
                             </label>
 
@@ -457,15 +403,10 @@
                                 step="0.1"
                                 required
                             >
-
                         </div>
 
                         <div class="mb-3">
-
-                            <label
-                                for="completeReport"
-                                class="form-label"
-                            >
+                            <label for="completeReport" class="form-label">
                                 完了報告
                             </label>
 
@@ -476,15 +417,10 @@
                                 maxlength="1000"
                                 required
                             ></textarea>
-
                         </div>
 
                         <div class="mb-3">
-
-                            <label
-                                for="completeEvidence"
-                                class="form-label"
-                            >
+                            <label for="completeEvidence" class="form-label">
                                 エビデンス（任意）
                             </label>
 
@@ -498,7 +434,6 @@
                             <div class="form-text">
                                 PDF・画像・Word・Excel（最大10MB）
                             </div>
-
                         </div>
 
                         <p
@@ -519,10 +454,7 @@
                             キャンセル
                         </button>
 
-                        <button
-                            type="submit"
-                            class="btn btn-primary"
-                        >
+                        <button type="submit" class="btn btn-primary">
                             完了申請する
                         </button>
 
@@ -533,8 +465,10 @@
             </div>
 
         </div>
-
     </div>
+
+    <!-- 新規タスク作成モーダル -->
+    <div id="taskCreateModalContainer"></div>
 
     <!-- 通知表示 -->
     <div
@@ -542,10 +476,6 @@
         class="toast-area"
         aria-live="polite"
     ></div>
-<!-- ========================================
-     新規タスク作成モーダルの読み込み先
-======================================== -->
 
-<div id="taskCreateModalContainer"></div>
 </body>
 </html>
