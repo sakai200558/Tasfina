@@ -1,1 +1,361 @@
-ランキング
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>負担スコアランキング | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- ランキング専用CSS -->
+    <link rel="stylesheet" href="../css/ranking.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- ランキング専用JavaScript -->
+    <script src="../js/ranking.js" defer></script>
+</head>
+
+<body class="app-page ranking-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <main class="main-content ranking-main">
+
+            <!-- タイトル・期間選択 -->
+            <div class="ranking-page-heading">
+
+                <h1>負担スコアランキング</h1>
+
+                <div class="ranking-period">
+
+                    <button
+                        type="button"
+                        id="previousMonth"
+                        aria-label="前月"
+                    >
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <span id="currentMonth"></span>
+
+                    <button
+                        type="button"
+                        id="nextMonth"
+                        aria-label="翌月"
+                    >
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="currentMonthButton"
+                        aria-label="今月へ戻る"
+                        title="今月へ戻る"
+                    >
+                        <i class="bi bi-calendar3"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- タブ・フィルター -->
+            <div class="ranking-toolbar">
+
+                <div class="ranking-tabs" role="tablist">
+
+                    <button
+                        type="button"
+                        class="ranking-tab active"
+                        data-tab="members"
+                        role="tab"
+                        aria-selected="true"
+                    >
+                        メンバーランキング
+                    </button>
+
+                    <button
+                        type="button"
+                        class="ranking-tab"
+                        data-tab="departments"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        部門ランキング
+                    </button>
+
+                    <button
+                        type="button"
+                        class="ranking-tab"
+                        data-tab="trend"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        推移グラフ
+                    </button>
+
+                </div>
+
+                <div class="ranking-filters">
+
+                    <label>
+                        <span>シフト種別</span>
+                        <select id="shiftFilter">
+                            <option value="all">すべて</option>
+                            <option value="normal">通常勤務</option>
+                            <option value="remote">在宅勤務</option>
+                            <option value="morning">午前休</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>部門</span>
+                        <select id="departmentFilter">
+                            <option value="all">すべて</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>表示件数</span>
+                        <select id="pageSize">
+                            <option value="5">5件</option>
+                            <option value="10" selected>10件</option>
+                            <option value="20">20件</option>
+                        </select>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- サマリー -->
+            <div class="ranking-summary-row">
+
+                <section class="ranking-summary-grid">
+
+                    <article class="ranking-summary-card">
+                        <h2>全メンバー平均</h2>
+                        <div class="ranking-summary-value">
+                            <strong id="averageScore">-</strong>
+                            <span>pt</span>
+                            <small id="averageChange"></small>
+                        </div>
+                    </article>
+
+                    <article class="ranking-summary-card">
+                        <h2>最高スコア</h2>
+                        <div class="ranking-summary-value">
+                            <strong
+                                id="maximumScore"
+                                class="score-high"
+                            >-</strong>
+                            <span class="score-high">pt</span>
+                            <small id="maximumChange"></small>
+                        </div>
+                    </article>
+
+                    <article class="ranking-summary-card">
+                        <h2>最低スコア</h2>
+                        <div class="ranking-summary-value">
+                            <strong id="minimumScore">-</strong>
+                            <span>pt</span>
+                            <small id="minimumChange"></small>
+                        </div>
+                    </article>
+
+                </section>
+
+                <aside class="ranking-info">
+
+                    <div class="ranking-info-heading">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <strong>負担スコアについて</strong>
+                    </div>
+
+                    <p>
+                        シフトの種類・勤務時間・繁忙期などに応じて
+                        算出されたメンバーごとの負担度を表すスコアです。
+                        <br>
+                        スコアが高いほど、負担が大きいことを示します。
+                    </p>
+
+                </aside>
+
+            </div>
+
+            <!-- ランキング本体 -->
+            <div class="ranking-content-grid">
+
+                <div class="ranking-left">
+
+                    <!-- メンバーランキング -->
+                    <section
+                        id="membersPanel"
+                        class="ranking-panel"
+                    >
+
+                        <div class="table-responsive">
+                            <table class="ranking-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>順位</th>
+                                        <th>メンバー</th>
+                                        <th>部門</th>
+                                        <th>負担スコア ↓</th>
+                                        <th>前月比</th>
+                                        <th>主な内訳</th>
+                                        <th>シフト回数</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="memberRankingBody"></tbody>
+
+                            </table>
+                        </div>
+
+                    </section>
+
+                    <!-- 部門ランキング -->
+                    <section
+                        id="departmentsPanel"
+                        class="ranking-panel"
+                        hidden
+                    >
+
+                        <div class="table-responsive">
+                            <table class="ranking-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>順位</th>
+                                        <th>部門</th>
+                                        <th>メンバー数</th>
+                                        <th>平均負担スコア</th>
+                                        <th>合計スコア</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="departmentRankingBody"></tbody>
+
+                            </table>
+                        </div>
+
+                    </section>
+
+                    <!-- 推移グラフ -->
+                    <section
+                        id="trendPanel"
+                        class="ranking-panel ranking-trend-panel"
+                        hidden
+                    >
+                        <h2>負担スコアの推移</h2>
+                        <p>直近6か月の平均負担スコア</p>
+
+                        <div
+                            id="trendChart"
+                            class="ranking-trend-chart"
+                        ></div>
+                    </section>
+
+                    <!-- 凡例 -->
+                    <div
+                        id="rankingLegend"
+                        class="ranking-legend"
+                    >
+
+                        <span>
+                            <i class="legend-color normal"></i>
+                            通常勤務（1.0pt）
+                        </span>
+
+                        <span>
+                            <i class="legend-color remote"></i>
+                            在宅勤務（0.8pt）
+                        </span>
+
+                        <span>
+                            <i class="legend-color morning"></i>
+                            午前休（0.5pt）
+                        </span>
+
+                        <span>
+                            <i class="legend-color leave"></i>
+                            有給休暇（0pt）
+                        </span>
+
+                        <span>
+                            <i class="legend-color busy"></i>
+                            繁忙期補正（+1.0pt）
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- メンバー詳細 -->
+                <aside
+                    id="rankingDetailPanel"
+                    class="ranking-detail-panel"
+                >
+
+                    <div class="ranking-detail-heading">
+
+                        <h2>選択中のメンバー詳細</h2>
+
+                        <button
+                            type="button"
+                            id="editMemberButton"
+                            class="ranking-edit-button"
+                        >
+                            <i class="bi bi-pencil"></i>
+                            編集
+                        </button>
+
+                    </div>
+
+                    <div id="selectedMemberDetail"></div>
+
+                    <button
+                        type="button"
+                        id="viewMemberShifts"
+                        class="ranking-shift-button"
+                    >
+                        メンバーのシフト詳細を見る
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

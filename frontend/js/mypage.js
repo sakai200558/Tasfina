@@ -5,9 +5,15 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // =====================================
-    // 所属部門コードのコピー
-    // =====================================
+    /* ========================================
+       ログイン中のユーザー情報取得
+    ======================================== */
+
+    loadMyPageUser();
+
+    /* ========================================
+       所属部門コードのコピー
+    ======================================== */
 
     const copyButton = document.getElementById("copyDeptCode");
     const copyMessage = document.getElementById("copyMessage");
@@ -15,6 +21,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let messageTimer;
 
     function showCopyMessage(message) {
+
+        if (!copyMessage) {
+            return;
+        }
 
         copyMessage.textContent = message;
         copyMessage.classList.add("show");
@@ -57,10 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-
-    // =====================================
-    // プロフィール編集（仮処理）
-    // =====================================
+    /* ========================================
+       プロフィール編集（仮処理）
+    ======================================== */
 
     const editProfileButton =
         document.getElementById("editProfileButton");
@@ -71,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             event.preventDefault();
 
-            // 後からプロフィール編集モーダルを実装
             alert("プロフィール編集機能は準備中です。");
 
         });
@@ -79,3 +87,73 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+
+/* ========================================
+   ログイン中のユーザー情報取得
+======================================== */
+
+async function loadMyPageUser() {
+
+    const nameElement = document.getElementById(
+        "mypageUserName"
+    );
+
+    const emailElement = document.getElementById(
+        "mypageUserEmail"
+    );
+
+    if (!nameElement || !emailElement) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            "../../backend/get-user.php",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        // 未ログインの場合
+        if (response.status === 401) {
+
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                "ユーザー情報の取得に失敗しました。"
+            );
+        }
+
+        const result = await response.json();
+
+        if (result.success !== true || !result.user) {
+            throw new Error(
+                result.message || "取得に失敗しました。"
+            );
+        }
+
+        // ユーザー名を表示
+        nameElement.textContent = result.user.name;
+
+        // メールアドレスを表示
+        emailElement.textContent = result.user.email;
+
+    } catch (error) {
+
+        console.error("ユーザー情報取得エラー:", error);
+
+        nameElement.textContent = "取得できませんでした";
+        emailElement.textContent = "";
+
+    }
+
+}

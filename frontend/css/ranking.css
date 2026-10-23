@@ -1,0 +1,708 @@
+
+/* ========================================
+   Tasfina ランキング専用CSS
+======================================== */
+
+.ranking-main {
+    padding: 22px 24px 30px;
+    min-width: 0;
+    background: #ffffff;
+    color: #17213b;
+}
+
+/* ========================================
+   タイトル・月切り替え
+======================================== */
+
+.ranking-page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.ranking-page-heading h1 {
+    margin: 0;
+    font-size: 29px;
+    font-weight: 700;
+    color: #0c1738;
+}
+
+.ranking-period {
+    display: flex;
+    align-items: center;
+    height: 42px;
+}
+
+.ranking-period button,
+.ranking-period span {
+    height: 42px;
+    border: 1px solid #d8e0ec;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ranking-period button {
+    width: 43px;
+    color: #17213b;
+}
+
+.ranking-period button:first-child {
+    border-radius: 6px 0 0 6px;
+}
+
+.ranking-period button:nth-child(3) {
+    border-radius: 0 6px 6px 0;
+}
+
+.ranking-period button:hover {
+    background: #edf5ff;
+}
+
+.ranking-period span {
+    min-width: 145px;
+    font-size: 14px;
+    font-weight: 600;
+    border-left: none;
+    border-right: none;
+}
+
+#currentMonthButton {
+    margin-left: 8px;
+    border-radius: 6px;
+    font-size: 19px;
+}
+
+/* ========================================
+   タブ・フィルター
+======================================== */
+
+.ranking-toolbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.ranking-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.ranking-tab {
+    min-width: 155px;
+    min-height: 44px;
+    padding: 10px 17px;
+    background: #f7f9fc;
+    border: 1px solid #e0e6ef;
+    border-radius: 6px;
+    color: #46516b;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ranking-tab.active {
+    background: #0868d9;
+    color: #ffffff;
+    border-color: #0868d9;
+}
+
+.ranking-filters {
+    display: flex;
+    gap: 12px;
+}
+
+.ranking-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #4c5974;
+    font-size: 12px;
+}
+
+.ranking-filters select {
+    min-width: 105px;
+    min-height: 38px;
+    padding: 7px 30px 7px 12px;
+    border: 1px solid #d5deeb;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #23304a;
+    font-size: 13px;
+}
+
+.ranking-filters label:nth-child(2) select {
+    min-width: 125px;
+}
+
+/* ========================================
+   サマリー
+======================================== */
+
+.ranking-summary-row {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.ranking-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ranking-summary-card {
+    padding: 17px 18px;
+    min-height: 122px;
+    border: 1px solid #dce3ed;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.ranking-summary-card h2 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ranking-summary-value {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ranking-summary-value strong {
+    color: #0859b6;
+    font-size: 34px;
+    line-height: 1;
+}
+
+.ranking-summary-value > span {
+    color: #0859b6;
+    font-weight: 700;
+}
+
+.ranking-summary-value strong.score-high,
+.ranking-summary-value span.score-high {
+    color: #e63131;
+}
+
+.ranking-summary-value small {
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.ranking-info {
+    padding: 15px 16px;
+    border: 1px solid #d6e9fc;
+    border-radius: 7px;
+    background: #edf6ff;
+}
+
+.ranking-info-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #0758ad;
+    font-size: 14px;
+}
+
+.ranking-info-heading i {
+    font-size: 19px;
+}
+
+.ranking-info p {
+    margin: 8px 0 0 28px;
+    color: #526381;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* ========================================
+   ランキング本体
+======================================== */
+
+.ranking-content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(300px, .85fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.ranking-left {
+    min-width: 0;
+}
+
+.ranking-panel {
+    border: 1px solid #dfe5ee;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.ranking-panel[hidden] {
+    display: none;
+}
+
+/* ========================================
+   ランキングテーブル
+======================================== */
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ranking-table th {
+    padding: 14px 10px;
+    background: #f5f7fa;
+    border-bottom: 1px solid #e3e9f0;
+    color: #25304a;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ranking-table td {
+    padding: 11px 10px;
+    border-bottom: 1px solid #e9edf3;
+    vertical-align: middle;
+}
+
+.ranking-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ranking-table tbody tr {
+    cursor: pointer;
+}
+
+.ranking-table tbody tr:hover {
+    background: #f5f9ff;
+}
+
+.ranking-table tbody tr.selected {
+    background: #eaf4ff;
+}
+
+.ranking-table td:nth-child(4) {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rank-medal {
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rank-1 {
+    background: #ffd16b;
+    color: #9b5600;
+}
+
+.rank-2 {
+    background: #c8d0de;
+    color: #64728c;
+}
+
+.rank-3 {
+    background: #e7b48c;
+    color: #8c4e27;
+}
+
+.member-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.member-avatar {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e5eaf1;
+    color: #7789a7;
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+.member-avatar.large {
+    width: 50px;
+    height: 50px;
+    font-size: 42px;
+}
+
+.score-red {
+    color: #f03535;
+}
+
+.change-up {
+    color: #ff4141;
+}
+
+.change-down {
+    color: #17a873;
+}
+
+.change-neutral {
+    color: #8290aa;
+}
+
+/* スコア内訳バー */
+
+.score-breakdown {
+    display: flex;
+    width: 170px;
+    height: 19px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #edf0f4;
+}
+
+.score-breakdown span {
+    display: block;
+    height: 100%;
+}
+
+.breakdown-normal,
+.legend-color.normal {
+    background: #83baff;
+}
+
+.breakdown-remote,
+.legend-color.remote {
+    background: #76d2b5;
+}
+
+.breakdown-morning,
+.legend-color.morning {
+    background: #ffc45d;
+}
+
+.breakdown-leave,
+.legend-color.leave {
+    background: #ff9797;
+}
+
+.breakdown-busy,
+.legend-color.busy {
+    background: #ff7e7e;
+}
+
+/* ========================================
+   凡例
+======================================== */
+
+.ranking-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 17px;
+    margin-top: 16px;
+    font-size: 11px;
+    color: #687590;
+}
+
+.ranking-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+}
+
+/* ========================================
+   メンバー詳細
+======================================== */
+
+.ranking-detail-panel {
+    padding: 15px 16px;
+    border: 1px solid #dce4ed;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.ranking-detail-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.ranking-detail-heading h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.ranking-edit-button {
+    padding: 7px 11px;
+    background: #ffffff;
+    border: 1px solid #cdd9e9;
+    border-radius: 5px;
+    color: #0966cb;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ranking-detail-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #e5eaf1;
+}
+
+.ranking-detail-name {
+    flex: 1;
+}
+
+.ranking-detail-name strong {
+    display: block;
+    font-size: 15px;
+}
+
+.ranking-detail-name small {
+    color: #73809a;
+    font-size: 12px;
+}
+
+.ranking-detail-total {
+    text-align: right;
+}
+
+.ranking-detail-total span {
+    display: block;
+    color: #6c7892;
+    font-size: 12px;
+}
+
+.ranking-detail-total strong {
+    font-size: 28px;
+    color: #f03333;
+}
+
+.ranking-detail-total small {
+    font-size: 12px;
+}
+
+.ranking-detail-change {
+    padding: 9px 0;
+    font-size: 12px;
+    color: #67748e;
+}
+
+.ranking-detail-change strong {
+    margin-left: 8px;
+}
+
+.ranking-detail-section {
+    margin-top: 10px;
+}
+
+.ranking-detail-section h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ranking-detail-section h3 small {
+    font-weight: 400;
+    color: #68758c;
+}
+
+.ranking-detail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ranking-detail-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #e8edf3;
+    font-size: 12px;
+}
+
+.ranking-detail-list li span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.ranking-detail-list li strong {
+    white-space: nowrap;
+}
+
+.ranking-detail-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+}
+
+.ranking-shift-button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px 8px;
+    border: 1px solid #1474e8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #0969d1;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ranking-shift-button:hover {
+    background: #edf6ff;
+}
+
+/* ========================================
+   推移グラフ
+======================================== */
+
+.ranking-trend-panel {
+    padding: 20px;
+}
+
+.ranking-trend-panel h2 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.ranking-trend-panel p {
+    color: #71809a;
+    font-size: 13px;
+}
+
+.ranking-trend-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 12px;
+    min-height: 270px;
+    padding: 20px 10px 0;
+    border-bottom: 1px solid #dce4ed;
+}
+
+.trend-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 250px;
+    gap: 8px;
+}
+
+.trend-bar {
+    width: min(100%, 58px);
+    min-height: 3px;
+    background: linear-gradient(#6eb0ff, #0d68d3);
+    border-radius: 5px 5px 0 0;
+}
+
+.trend-value {
+    font-size: 12px;
+    color: #0b5cb9;
+    font-weight: 700;
+}
+
+.trend-label {
+    font-size: 12px;
+    color: #697892;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1250px) {
+    .ranking-content-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ranking-detail-panel {
+        max-width: none;
+    }
+}
+
+@media (max-width: 950px) {
+    .ranking-summary-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ranking-toolbar {
+        align-items: stretch;
+    }
+
+    .ranking-tabs {
+        overflow-x: auto;
+    }
+
+    .ranking-filters {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 650px) {
+    .ranking-main {
+        padding: 16px;
+    }
+
+    .ranking-page-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ranking-page-heading h1 {
+        font-size: 24px;
+    }
+
+    .ranking-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ranking-table {
+        min-width: 720px;
+    }
+
+    .ranking-tab {
+        min-width: 135px;
+        font-size: 12px;
+    }
+
+    .ranking-filters label {
+        flex: 1;
+    }
+
+    .ranking-filters select {
+        width: 100%;
+    }
+}
