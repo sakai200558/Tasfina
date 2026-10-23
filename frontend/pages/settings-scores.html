@@ -1,1 +1,569 @@
-負担スコア設定
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>負担スコア設定 | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- 負担スコア設定専用CSS -->
+    <link rel="stylesheet" href="../css/settings-scores.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- 負担スコア設定専用JavaScript -->
+    <script src="../js/settings-scores.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <main class="main-content settings-scores-page">
+
+            <!-- ページ見出し -->
+            <div class="score-page-heading">
+
+                <h1>負担スコア設定</h1>
+
+                <p>
+                    各シフトや条件に対する負担スコアの算出ルールを設定します。
+                    ルーレットの確率計算やランキングに使用されます。
+                </p>
+
+            </div>
+
+            <!-- 設定画面ナビゲーション -->
+            <nav class="score-settings-nav" aria-label="設定メニュー">
+
+                <a href="settings.html" class="score-nav-link">
+                    <i class="bi bi-gear-fill"></i>
+                    全般設定
+                </a>
+
+                <a href="settings-shifts.html" class="score-nav-link">
+                    <i class="bi bi-calendar-week"></i>
+                    シフト設定
+                </a>
+
+                <a
+                    href="settings-scores.html"
+                    class="score-nav-link active"
+                    aria-current="page"
+                >
+                    <i class="bi bi-shield-check"></i>
+                    負担スコア設定
+                </a>
+
+                <a href="settings.html" class="score-nav-link" data-future-tab="notification">
+                    <i class="bi bi-bell"></i>
+                    通知設定
+                </a>
+
+                <a href="settings.html" class="score-nav-link" data-future-tab="account">
+                    <i class="bi bi-people-fill"></i>
+                    アカウント管理
+                </a>
+
+                <a href="settings.html" class="score-nav-link" data-future-tab="system">
+                    <i class="bi bi-sliders"></i>
+                    システム設定
+                </a>
+
+            </nav>
+
+            <!-- 左右2カラム -->
+            <div class="score-layout">
+
+                <!-- 左側 -->
+                <div class="score-left-column">
+
+                    <!-- 基本設定 -->
+                    <section class="score-card">
+
+                        <div class="score-card-heading">
+                            <h2>スコア計算の基本設定</h2>
+                            <p>
+                                シフトごとの負担度や連続勤務などを考慮して、
+                                1人あたりの負担スコアを算出します。
+                            </p>
+                        </div>
+
+                        <div class="score-basic-grid">
+
+                            <div class="score-field">
+
+                                <label for="aggregationPeriod">
+                                    集計期間
+                                    <span class="score-required">*</span>
+                                </label>
+
+                                <select
+                                    id="aggregationPeriod"
+                                    class="form-select"
+                                >
+                                    <option value="1">直近1週間</option>
+                                    <option value="2">直近2週間</option>
+                                    <option value="4" selected>直近4週間</option>
+                                    <option value="8">直近8週間</option>
+                                </select>
+
+                                <p class="score-help">
+                                    ※ この期間のシフト実績から負担スコアを計算します。
+                                </p>
+
+                            </div>
+
+                            <div class="score-field">
+
+                                <label for="resetTiming">
+                                    スコアのリセットタイミング
+                                    <span class="score-required">*</span>
+                                </label>
+
+                                <select
+                                    id="resetTiming"
+                                    class="form-select"
+                                >
+                                    <option value="monthly" selected>毎月1日</option>
+                                    <option value="weekly">毎週月曜日</option>
+                                    <option value="quarterly">3か月ごと</option>
+                                    <option value="none">リセットしない</option>
+                                </select>
+
+                                <p class="score-help">
+                                    ※ 指定したタイミングで負担スコアをリセットします。
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- シフト種別ごとのスコア -->
+                    <section class="score-card">
+
+                        <div class="score-card-heading">
+                            <h2>シフト種別ごとのスコア設定</h2>
+                            <p>
+                                各シフト種別の基本負担スコアを設定します。
+                            </p>
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table score-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>シフト種別</th>
+                                        <th>表示色</th>
+                                        <th>
+                                            基本スコア
+                                            <span class="score-required">*</span>
+                                        </th>
+                                        <th>説明</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="shiftScoreTableBody"></tbody>
+
+                            </table>
+
+                        </div>
+
+                    </section>
+
+                    <!-- 追加条件のスコア -->
+                    <section class="score-card">
+
+                        <div class="score-card-heading">
+                            <h2>追加条件のスコア設定</h2>
+                            <p>
+                                シフトの連続勤務や時間帯などの条件による
+                                追加の負担スコアを設定します。
+                            </p>
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table score-table condition-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>条件</th>
+                                        <th>加算スコア</th>
+                                        <th>説明</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>
+                                            連続勤務（日数）
+
+                                            <button
+                                                type="button"
+                                                class="score-help-button"
+                                                data-bs-toggle="tooltip"
+                                                title="2日以上の連続勤務で、2日目以降の勤務日数に応じて加算します。"
+                                                aria-label="連続勤務の説明"
+                                            >
+                                                <i class="bi bi-question-circle"></i>
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <div class="score-input-unit">
+                                                <input
+                                                    type="number"
+                                                    id="consecutiveScore"
+                                                    class="form-control score-number-input"
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.1"
+                                                    value="0.2"
+                                                    required
+                                                >
+                                                <span>/ 1日ごと</span>
+                                            </div>
+                                        </td>
+
+                                        <td>連続勤務日数に応じて加算</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            夜間シフト（22:00以降を含む）
+
+                                            <button
+                                                type="button"
+                                                class="score-help-button"
+                                                data-bs-toggle="tooltip"
+                                                title="勤務時間が22時以降にかかるシフトに加算します。"
+                                                aria-label="夜間シフトの説明"
+                                            >
+                                                <i class="bi bi-question-circle"></i>
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                type="number"
+                                                id="nightScore"
+                                                class="form-control score-number-input"
+                                                min="0"
+                                                max="100"
+                                                step="0.1"
+                                                value="1.0"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>夜間勤務の負担を加算</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            早朝シフト（6:00以前に開始）
+
+                                            <button
+                                                type="button"
+                                                class="score-help-button"
+                                                data-bs-toggle="tooltip"
+                                                title="勤務開始時刻が6時以前のシフトに加算します。"
+                                                aria-label="早朝シフトの説明"
+                                            >
+                                                <i class="bi bi-question-circle"></i>
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                type="number"
+                                                id="earlyScore"
+                                                class="form-control score-number-input"
+                                                min="0"
+                                                max="100"
+                                                step="0.1"
+                                                value="0.5"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>早朝勤務の負担を加算</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            週の勤務日数が上限を超えた場合
+
+                                            <button
+                                                type="button"
+                                                class="score-help-button"
+                                                data-bs-toggle="tooltip"
+                                                title="シフト設定で指定した連続勤務の上限日数を、プレビュー上の週上限として利用します。"
+                                                aria-label="週の上限超過の説明"
+                                            >
+                                                <i class="bi bi-question-circle"></i>
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                type="number"
+                                                id="weeklyOverScore"
+                                                class="form-control score-number-input"
+                                                min="0"
+                                                max="100"
+                                                step="0.1"
+                                                value="1.0"
+                                                required
+                                            >
+                                        </td>
+
+                                        <td>設定した上限を超えた場合に加算</td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+                <!-- 右側 -->
+                <div class="score-right-column">
+
+                    <!-- 計算式の確認 -->
+                    <section class="score-card score-formula-card">
+
+                        <div class="score-card-heading">
+                            <h2>計算式の確認</h2>
+                            <p>
+                                下記の式で負担スコアを計算します。
+                            </p>
+                        </div>
+
+                        <div class="score-formula">
+                            負担スコア ＝ 基本スコア ＋ 追加スコア（条件）
+                        </div>
+
+                        <div class="score-formula-example">
+
+                            <h3>追加スコアの内訳（例）</h3>
+
+                            <ul>
+                                <li>
+                                    連続勤務：
+                                    <span id="formulaConsecutive">0.2</span>
+                                    ×（連続日数 − 1）
+                                </li>
+
+                                <li>
+                                    夜間シフト：勤務1回につき
+                                    +<span id="formulaNight">1.0</span>
+                                </li>
+
+                                <li>
+                                    早朝シフト：勤務1回につき
+                                    +<span id="formulaEarly">0.5</span>
+                                </li>
+
+                                <li>
+                                    週の上限超過：超過日数 ×
+                                    <span id="formulaWeekly">1.0</span>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <!-- 計算例 -->
+                        <div class="score-calculation">
+
+                            <h3>計算例</h3>
+
+                            <p>
+                                Aさんの1日の負担スコア例
+                            </p>
+
+                            <table class="table score-example-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>項目</th>
+                                        <th>内容</th>
+                                        <th>スコア</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr>
+                                        <td>基本スコア</td>
+                                        <td>通常出勤</td>
+                                        <td id="exampleBase">1.0</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>連続勤務</td>
+                                        <td>3日目</td>
+                                        <td id="exampleConsecutive">0.4</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>夜間シフト</td>
+                                        <td>あり</td>
+                                        <td id="exampleNight">1.0</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>早朝シフト</td>
+                                        <td>なし</td>
+                                        <td>0.0</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>週の上限超過</td>
+                                        <td>なし</td>
+                                        <td>0.0</td>
+                                    </tr>
+                                </tbody>
+
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2">合計</th>
+                                        <th id="exampleTotal">2.4</th>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+
+                    </section>
+
+                    <!-- プレビュー -->
+                    <section class="score-card score-preview-card">
+
+                        <div class="score-preview-heading">
+
+                            <div>
+                                <h2>スコアプレビュー（メンバー別）</h2>
+
+                                <p>
+                                    現在の設定での負担スコアを
+                                    プレビューできます。
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="previewScoreButton"
+                                class="btn btn-outline-primary"
+                            >
+                                <i class="bi bi-bar-chart-fill"></i>
+                                プレビュー実行
+                            </button>
+
+                        </div>
+
+                        <div id="scorePreviewResult" hidden>
+
+                            <p class="score-preview-note">
+                                ※ サンプル勤務データによる計算結果
+                            </p>
+
+                            <div class="table-responsive">
+
+                                <table class="table score-table score-preview-table">
+
+                                    <thead>
+                                        <tr>
+                                            <th>メンバー</th>
+                                            <th>負担スコア</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="scorePreviewTableBody"></tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+            <!-- 画面下部ボタン -->
+            <div class="score-footer">
+
+                <p
+                    id="scoreMessage"
+                    class="score-message"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+
+                <button
+                    type="button"
+                    id="resetScoresButton"
+                    class="btn btn-outline-primary"
+                >
+                    リセット
+                </button>
+
+                <button
+                    type="button"
+                    id="saveScoresButton"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-floppy"></i>
+                    保存
+                </button>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+</body>
+</html>

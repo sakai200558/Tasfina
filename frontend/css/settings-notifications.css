@@ -1,0 +1,537 @@
+
+/* ========================================
+   通知設定画面
+======================================== */
+
+.notifications-page {
+    background: #ffffff;
+    color: #17213a;
+}
+
+/* ページ見出し */
+
+.notifications-heading {
+    margin-bottom: 18px;
+}
+
+.notifications-heading h1 {
+    margin: 0 0 4px;
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.notifications-heading p {
+    margin: 0;
+    color: #77839c;
+    font-size: 13px;
+}
+
+/* ========================================
+   2カラムレイアウト
+======================================== */
+
+.notifications-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.notifications-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+/* ========================================
+   カード
+======================================== */
+
+.notification-card {
+    background: #ffffff;
+    border: 1px solid #dce4ef;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 0;
+}
+
+.card-heading {
+    margin-bottom: 14px;
+}
+
+.card-heading h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.card-heading p {
+    font-size: 12px;
+    color: #77839c;
+    margin: 0;
+}
+
+/* ========================================
+   通知チャネル
+======================================== */
+
+.channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.channel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 13px;
+    border: 1px solid #dce4ef;
+    border-radius: 7px;
+}
+
+.channel-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.channel-info h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.channel-info p {
+    font-size: 11px;
+    color: #78849b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ========================================
+   通知アイコン
+======================================== */
+
+.notification-icon {
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.notification-icon.small {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+}
+
+.notification-icon.blue {
+    background: #e6f1ff;
+    color: #0065d8;
+}
+
+.notification-icon.red {
+    background: #ffe9ec;
+    color: #f33b49;
+}
+
+.notification-icon.orange {
+    background: #fff1df;
+    color: #e88a19;
+}
+
+.notification-icon.purple {
+    background: #f1e8ff;
+    color: #9653d8;
+}
+
+.notification-icon.green {
+    background: #e3f8ed;
+    color: #19b978;
+}
+
+.notification-icon.gray {
+    background: #e9edf4;
+    color: #596782;
+}
+
+/* ========================================
+   ON/OFFスイッチ
+======================================== */
+
+.notification-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.notification-switch input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.switch-track {
+    width: 46px;
+    height: 25px;
+    border-radius: 99px;
+    background: #aeb8ca;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.switch-track::after {
+    content: "";
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.notification-switch input:checked + .switch-track {
+    background: #0065d8;
+}
+
+.notification-switch input:checked + .switch-track::after {
+    transform: translateX(21px);
+}
+
+.notification-switch input:focus-visible + .switch-track {
+    outline: 3px solid #9bc7ff;
+    outline-offset: 3px;
+}
+
+.switch-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64718a;
+    min-width: 28px;
+}
+
+.notification-switch input:checked ~ .switch-text {
+    color: #0065d8;
+}
+
+/* ========================================
+   通知対象テーブル
+======================================== */
+
+.notification-table-wrap {
+    overflow-x: auto;
+}
+
+.notification-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.notification-table th,
+.notification-table td {
+    border: 1px solid #e3e8f1;
+    padding: 8px 9px;
+}
+
+.notification-table th {
+    background: #f6f8fb;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.notification-table th:first-child {
+    text-align: left;
+    min-width: 240px;
+}
+
+.notification-table td:not(:first-child) {
+    text-align: center;
+    width: 90px;
+}
+
+.notification-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-type strong {
+    display: block;
+    font-size: 12px;
+    color: #17213a;
+}
+
+.notification-type small {
+    display: block;
+    font-size: 10px;
+    color: #78849b;
+    margin-top: 3px;
+}
+
+.notification-table input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: #0065d8;
+    cursor: pointer;
+}
+
+/* ========================================
+   プレビュータブ
+======================================== */
+
+.preview-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid #e3e8f1;
+    margin-bottom: 12px;
+}
+
+.preview-tab {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    padding: 10px 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #748099;
+    cursor: pointer;
+}
+
+.preview-tab.active {
+    border-bottom-color: #0065d8;
+    color: #0065d8;
+}
+
+.preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.preview-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px;
+    background: #f8fafd;
+    border-radius: 7px;
+}
+
+.preview-item.green-preview {
+    background: #eafaf1;
+}
+
+.preview-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.preview-content strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.preview-content p {
+    font-size: 11px;
+    color: #6e7b93;
+    margin: 0;
+}
+
+.preview-item time {
+    font-size: 10px;
+    color: #8793a8;
+    white-space: nowrap;
+}
+
+/* ========================================
+   サイレントタイム
+======================================== */
+
+.silent-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.silent-toggle-row strong {
+    font-size: 12px;
+}
+
+.silent-time-fields {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.silent-time-fields label {
+    font-size: 11px;
+    color: #65728a;
+    white-space: nowrap;
+}
+
+.silent-time-fields .form-control {
+    min-width: 0;
+    font-size: 12px;
+    padding: 8px;
+}
+
+.time-separator {
+    color: #6c7890;
+}
+
+.silent-time-fields.is-disabled {
+    opacity: 0.5;
+}
+
+.silent-info {
+    display: flex;
+    gap: 9px;
+    padding: 12px;
+    background: #eaf5ff;
+    color: #4876b5;
+    border-radius: 6px;
+}
+
+.silent-info i {
+    font-size: 16px;
+}
+
+.silent-info p {
+    font-size: 11px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ========================================
+   メールアドレス
+======================================== */
+
+.notification-email-row {
+    display: flex;
+    gap: 10px;
+}
+
+.notification-email-row .form-control {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+}
+
+.notification-email-row .btn {
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.email-error {
+    color: #dc3545;
+    font-size: 11px;
+    margin: 6px 0 0;
+}
+
+.email-error:empty {
+    display: none;
+}
+
+/* ========================================
+   保存
+======================================== */
+
+.notification-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.notification-actions .btn {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 24px;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 12px;
+    color: #25875d;
+}
+
+.notification-message.error {
+    color: #dc3545;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1200px) {
+    .notifications-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .notifications-heading h1 {
+        font-size: 25px;
+    }
+
+    .notification-card {
+        padding: 13px;
+    }
+
+    .channel-row {
+        padding: 10px;
+    }
+
+    .silent-time-fields {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .time-separator {
+        display: none;
+    }
+
+    .notification-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .notification-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-email-row {
+        flex-direction: column;
+    }
+
+    .channel-info {
+        gap: 8px;
+    }
+
+    .channel-info p {
+        font-size: 10px;
+    }
+}

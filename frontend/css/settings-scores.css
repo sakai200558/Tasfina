@@ -1,0 +1,521 @@
+
+/* ========================================
+   Tasfina 負担スコア設定
+======================================== */
+
+.settings-scores-page {
+    padding: 18px 20px 24px;
+    background: #ffffff;
+    color: #17213a;
+    font-size: 13px;
+}
+
+/* ========================================
+   ページ見出し
+======================================== */
+
+.score-page-heading {
+    margin-bottom: 16px;
+}
+
+.score-page-heading h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.score-page-heading p {
+    margin: 0;
+    color: #74819a;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   設定ナビゲーション
+======================================== */
+
+.score-settings-nav {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 16px;
+}
+
+.score-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 43px;
+    padding: 9px 7px;
+
+    background: #f8fafc;
+    border: 1px solid #e1e7f0;
+    border-radius: 6px;
+
+    color: #46536c;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.score-nav-link:hover {
+    background: #eaf2fd;
+    color: #0065c8;
+    text-decoration: none;
+}
+
+.score-nav-link.active {
+    background: #0065c8;
+    border-color: #0065c8;
+    color: #ffffff;
+}
+
+.score-nav-link.active:hover {
+    color: #ffffff;
+}
+
+.score-nav-link i {
+    font-size: 15px;
+}
+
+/* ========================================
+   2カラムレイアウト
+======================================== */
+
+.score-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.score-left-column,
+.score-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ========================================
+   カード共通
+======================================== */
+
+.score-card {
+    min-width: 0;
+    padding: 16px;
+
+    background: #ffffff;
+    border: 1px solid #e0e6ef;
+    border-radius: 7px;
+}
+
+.score-card-heading {
+    margin-bottom: 14px;
+}
+
+.score-card h2 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.score-card-heading p {
+    margin: 0;
+    color: #74819a;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   基本設定
+======================================== */
+
+.score-basic-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+}
+
+.score-field {
+    min-width: 0;
+}
+
+.score-field label {
+    display: block;
+    margin-bottom: 7px;
+
+    color: #35415a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.score-required {
+    color: #e94d56;
+}
+
+.score-field .form-select {
+    min-height: 40px;
+    border: 1px solid #d7dfeb;
+    border-radius: 5px;
+
+    color: #34415a;
+    font-size: 12px;
+}
+
+.score-field .form-select:focus,
+.score-number-input:focus {
+    border-color: #0065c8;
+    box-shadow: 0 0 0 3px rgba(0, 101, 200, 0.1);
+}
+
+.score-help {
+    margin: 6px 0 0;
+    color: #8190a5;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* ========================================
+   スコア設定テーブル
+======================================== */
+
+.score-table {
+    width: 100%;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.score-table thead th {
+    padding: 9px 12px;
+
+    background: #f7f9fc;
+    border: 1px solid #e3e9f2;
+
+    color: #3f4c66;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.score-table tbody td {
+    padding: 6px 12px;
+
+    border: 1px solid #e3e9f2;
+    color: #44516b;
+    font-size: 11px;
+}
+
+.score-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.score-table tbody td:first-child {
+    font-weight: 600;
+}
+
+.score-number-input {
+    width: 110px;
+    min-height: 30px;
+    padding: 4px 9px;
+
+    border: 1px solid #d7dfeb;
+    border-radius: 5px;
+
+    color: #34415a;
+    font-size: 12px;
+}
+
+.score-color-dot {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+
+    border: 1px solid #dce3ed;
+    border-radius: 50%;
+
+    background: var(--score-dot-color, #cccccc);
+    vertical-align: middle;
+}
+
+/* ========================================
+   追加条件テーブル
+======================================== */
+
+.condition-table td:first-child {
+    min-width: 220px;
+}
+
+.score-help-button {
+    margin-left: 7px;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+
+    color: #0065c8;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.score-help-button:hover {
+    color: #004a96;
+}
+
+.score-input-unit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.score-input-unit span {
+    color: #66748b;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* ========================================
+   計算式の確認
+======================================== */
+
+.score-formula {
+    padding: 14px 12px;
+    margin-bottom: 9px;
+
+    background: #eaf4ff;
+    border-radius: 6px;
+
+    color: #0058b4;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.score-formula-example {
+    padding: 13px 14px;
+    margin-bottom: 16px;
+
+    background: #f1f8ff;
+    border-radius: 6px;
+}
+
+.score-formula-example h3,
+.score-calculation h3 {
+    margin: 0 0 9px;
+    color: #0058b4;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.score-formula-example ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.score-formula-example li {
+    margin-bottom: 5px;
+    color: #34415a;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.score-formula-example li:last-child {
+    margin-bottom: 0;
+}
+
+/* ========================================
+   計算例
+======================================== */
+
+.score-calculation h3 {
+    color: #17213a;
+}
+
+.score-calculation > p {
+    margin: 0 0 9px;
+    color: #74819a;
+    font-size: 11px;
+}
+
+.score-example-table {
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.score-example-table thead th,
+.score-example-table tbody td {
+    padding: 8px;
+}
+
+.score-example-table tfoot th {
+    padding: 10px 12px;
+
+    background: #eaf4ff;
+    border: 1px solid #e0e9f5;
+
+    color: #123b77;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.score-example-table tfoot th:first-child {
+    text-align: left;
+}
+
+.score-example-table tfoot th:last-child {
+    text-align: right;
+    font-size: 23px;
+}
+
+/* ========================================
+   プレビュー
+======================================== */
+
+.score-preview-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.score-preview-heading > div {
+    min-width: 0;
+}
+
+.score-preview-heading p {
+    margin: 5px 0 0;
+    color: #74819a;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.score-preview-heading .btn {
+    flex-shrink: 0;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.score-preview-note {
+    margin: 14px 0 8px;
+    color: #78859d;
+    font-size: 11px;
+}
+
+.score-preview-table {
+    margin-top: 8px;
+}
+
+.score-preview-table td:last-child {
+    font-weight: 700;
+    text-align: right;
+}
+
+.score-preview-table th:last-child {
+    text-align: right;
+}
+
+#scorePreviewResult[hidden] {
+    display: none;
+}
+
+/* ========================================
+   下部ボタン
+======================================== */
+
+.score-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 18px;
+    padding-bottom: 12px;
+}
+
+.score-footer .btn {
+    min-width: 110px;
+    padding: 9px 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.score-message {
+    flex: 1;
+    margin: 0;
+    color: #25875d;
+    font-size: 12px;
+}
+
+.score-message.error {
+    color: #dc3545;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 1250px) {
+
+    .score-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .score-settings-nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 750px) {
+
+    .score-basic-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .score-preview-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .settings-scores-page {
+        padding: 15px;
+    }
+
+    .score-page-heading h1 {
+        font-size: 24px;
+    }
+
+    .score-settings-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .score-nav-link {
+        font-size: 11px;
+    }
+
+    .score-card {
+        padding: 12px;
+    }
+
+    .score-footer {
+        flex-wrap: wrap;
+    }
+
+    .score-message {
+        flex-basis: 100%;
+    }
+
+    .score-footer .btn {
+        flex: 1;
+    }
+}

@@ -1,1 +1,525 @@
-通知設定
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>通知設定 | Tasfina</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- 通知設定専用CSS -->
+    <link
+        rel="stylesheet"
+        href="../css/settings-notifications.css"
+    >
+
+    <!-- Bootstrap JavaScript -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        defer
+    ></script>
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- 通知設定専用JavaScript -->
+    <script src="../js/settings-notifications.js" defer></script>
+</head>
+
+<body class="app-page">
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content notifications-page">
+
+            <!-- ページ見出し -->
+            <div class="notifications-heading">
+                <h1>通知設定</h1>
+                <p>システムからの通知方法や通知対象を設定します。</p>
+            </div>
+
+            <!-- 共通設定メニュー -->
+            <div id="settingsNav"></div>
+
+            <!-- 設定フォーム -->
+            <form id="notificationSettingsForm">
+
+                <div class="notifications-grid">
+
+                    <!-- ========================
+                         左カラム
+                    ======================== -->
+                    <div class="notifications-column">
+
+                        <!-- 通知チャネル設定 -->
+                        <section class="notification-card">
+
+                            <div class="card-heading">
+                                <h2>通知チャネル設定</h2>
+                                <p>各チャネルで受け取る通知を設定します。</p>
+                            </div>
+
+                            <div class="channel-list">
+
+                                <!-- メール通知 -->
+                                <div class="channel-row">
+
+                                    <div class="channel-info">
+
+                                        <span class="notification-icon blue">
+                                            <i class="bi bi-envelope-fill"></i>
+                                        </span>
+
+                                        <div>
+                                            <h3>メール通知</h3>
+                                            <p>
+                                                重要な通知をメールで受け取ります。
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    <label class="notification-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="emailNotification"
+                                            checked
+                                        >
+                                        <span class="switch-track"></span>
+                                        <span class="switch-text">ON</span>
+                                    </label>
+
+                                </div>
+
+                                <!-- システム通知 -->
+                                <div class="channel-row">
+
+                                    <div class="channel-info">
+
+                                        <span class="notification-icon red">
+                                            <i class="bi bi-bell-fill"></i>
+                                        </span>
+
+                                        <div>
+                                            <h3>システム通知</h3>
+                                            <p>
+                                                画面右上のベルアイコンに通知が表示されます。
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    <label class="notification-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="systemNotification"
+                                            checked
+                                        >
+                                        <span class="switch-track"></span>
+                                        <span class="switch-text">ON</span>
+                                    </label>
+
+                                </div>
+
+                                <!-- プッシュ通知 -->
+                                <div class="channel-row">
+
+                                    <div class="channel-info">
+
+                                        <span class="notification-icon blue">
+                                            <i class="bi bi-phone-fill"></i>
+                                        </span>
+
+                                        <div>
+                                            <h3>プッシュ通知</h3>
+                                            <p>
+                                                ブラウザやモバイルアプリでプッシュ通知を受け取ります。
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    <label class="notification-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="pushNotification"
+                                        >
+                                        <span class="switch-track"></span>
+                                        <span class="switch-text">OFF</span>
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <!-- 通知対象設定 -->
+                        <section class="notification-card">
+
+                            <div class="card-heading">
+                                <h2>通知対象の設定</h2>
+                                <p>受け取りたい通知の種類を選択してください。</p>
+                            </div>
+
+                            <div class="notification-table-wrap">
+
+                                <table class="notification-table">
+
+                                    <thead>
+                                        <tr>
+                                            <th>通知の種類</th>
+                                            <th>メール</th>
+                                            <th>システム通知</th>
+                                            <th>プッシュ通知</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small blue">
+                                                        <i class="bi bi-calendar-event"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>シフト関連の通知</strong>
+                                                        <small>シフト確定・変更・希望申請の結果など</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="shift" data-channel="email" checked aria-label="シフト関連 メール"></td>
+                                            <td><input type="checkbox" data-type="shift" data-channel="system" checked aria-label="シフト関連 システム通知"></td>
+                                            <td><input type="checkbox" data-type="shift" data-channel="push" checked aria-label="シフト関連 プッシュ通知"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small red">
+                                                        <i class="bi bi-clock"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>有給申請の通知</strong>
+                                                        <small>申請の承認・却下・コメントなど</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="leave" data-channel="email" checked aria-label="有給申請 メール"></td>
+                                            <td><input type="checkbox" data-type="leave" data-channel="system" checked aria-label="有給申請 システム通知"></td>
+                                            <td><input type="checkbox" data-type="leave" data-channel="push" checked aria-label="有給申請 プッシュ通知"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small orange">
+                                                        <i class="bi bi-bar-chart-fill"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>負担スコアの通知</strong>
+                                                        <small>スコアの変動・ランキング更新など</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="score" data-channel="email" aria-label="負担スコア メール"></td>
+                                            <td><input type="checkbox" data-type="score" data-channel="system" checked aria-label="負担スコア システム通知"></td>
+                                            <td><input type="checkbox" data-type="score" data-channel="push" aria-label="負担スコア プッシュ通知"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small purple">
+                                                        <i class="bi bi-chat-dots-fill"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>チャットの通知</strong>
+                                                        <small>メンション・新しいメッセージなど</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="chat" data-channel="email" aria-label="チャット メール"></td>
+                                            <td><input type="checkbox" data-type="chat" data-channel="system" checked aria-label="チャット システム通知"></td>
+                                            <td><input type="checkbox" data-type="chat" data-channel="push" checked aria-label="チャット プッシュ通知"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small green">
+                                                        <i class="bi bi-megaphone-fill"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>お知らせの通知</strong>
+                                                        <small>システムメンテナンス・重要なお知らせなど</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="announcement" data-channel="email" checked aria-label="お知らせ メール"></td>
+                                            <td><input type="checkbox" data-type="announcement" data-channel="system" checked aria-label="お知らせ システム通知"></td>
+                                            <td><input type="checkbox" data-type="announcement" data-channel="push" checked aria-label="お知らせ プッシュ通知"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <div class="notification-type">
+                                                    <span class="notification-icon small gray">
+                                                        <i class="bi bi-gear-fill"></i>
+                                                    </span>
+                                                    <div>
+                                                        <strong>システム通知</strong>
+                                                        <small>不具合・新機能の案内など</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td><input type="checkbox" data-type="system" data-channel="email" checked aria-label="システム情報 メール"></td>
+                                            <td><input type="checkbox" data-type="system" data-channel="system" checked aria-label="システム情報 システム通知"></td>
+                                            <td><input type="checkbox" data-type="system" data-channel="push" aria-label="システム情報 プッシュ通知"></td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </section>
+
+                    </div>
+
+                    <!-- ========================
+                         右カラム
+                    ======================== -->
+                    <div class="notifications-column">
+
+                        <!-- 通知プレビュー -->
+                        <section class="notification-card">
+
+                            <div class="card-heading">
+                                <h2>通知プレビュー</h2>
+                                <p>
+                                    設定中の通知がどのように表示されるか確認できます。
+                                </p>
+                            </div>
+
+                            <div class="preview-tabs" role="tablist" aria-label="通知プレビュー">
+
+                                <button
+                                    type="button"
+                                    class="preview-tab active"
+                                    data-preview="system"
+                                    role="tab"
+                                    aria-selected="true"
+                                >
+                                    システム通知
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="preview-tab"
+                                    data-preview="email"
+                                    role="tab"
+                                    aria-selected="false"
+                                >
+                                    メール通知
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="preview-tab"
+                                    data-preview="push"
+                                    role="tab"
+                                    aria-selected="false"
+                                >
+                                    プッシュ通知
+                                </button>
+
+                            </div>
+
+                            <div id="notificationPreview" class="preview-list" role="tabpanel">
+
+                                <div class="preview-item green-preview">
+                                    <span class="notification-icon small green">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </span>
+                                    <div class="preview-content">
+                                        <strong>シフトが確定しました</strong>
+                                        <p>2024年10月のシフトが確定しました。</p>
+                                    </div>
+                                    <time>10/17 10:00</time>
+                                </div>
+
+                                <div class="preview-item">
+                                    <span class="notification-icon small red">
+                                        <i class="bi bi-clock"></i>
+                                    </span>
+                                    <div class="preview-content">
+                                        <strong>有給申請が承認されました</strong>
+                                        <p>10月5日の有給申請が承認されました。</p>
+                                    </div>
+                                    <time>10/17 09:30</time>
+                                </div>
+
+                                <div class="preview-item">
+                                    <span class="notification-icon small orange">
+                                        <i class="bi bi-bar-chart-fill"></i>
+                                    </span>
+                                    <div class="preview-content">
+                                        <strong>負担スコアが更新されました</strong>
+                                        <p>あなたの今月の負担スコアは2.4です。</p>
+                                    </div>
+                                    <time>10/16 18:20</time>
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <!-- サイレントタイム -->
+                        <section class="notification-card">
+
+                            <div class="card-heading">
+                                <h2>通知の時間設定（サイレントタイム）</h2>
+                                <p>指定した時間帯は通知を受け取りません。</p>
+                            </div>
+
+                            <div class="silent-toggle-row">
+
+                                <strong>サイレントタイム</strong>
+
+                                <label class="notification-switch">
+                                    <input
+                                        type="checkbox"
+                                        id="silentTimeEnabled"
+                                        checked
+                                    >
+                                    <span class="switch-track"></span>
+                                    <span class="switch-text">ON</span>
+                                </label>
+
+                            </div>
+
+                            <div class="silent-time-fields" id="silentTimeFields">
+
+                                <label for="silentStart">開始時刻</label>
+
+                                <input
+                                    type="time"
+                                    id="silentStart"
+                                    class="form-control"
+                                    value="22:00"
+                                >
+
+                                <span class="time-separator">～</span>
+
+                                <label for="silentEnd">終了時刻</label>
+
+                                <input
+                                    type="time"
+                                    id="silentEnd"
+                                    class="form-control"
+                                    value="07:00"
+                                >
+
+                            </div>
+
+                            <div class="silent-info">
+                                <i class="bi bi-info-circle-fill"></i>
+                                <p>
+                                    サイレントタイム中でも、重要なお知らせ
+                                    （システム障害など）は通知される場合があります。
+                                </p>
+                            </div>
+
+                        </section>
+
+                        <!-- 通知先メールアドレス -->
+                        <section class="notification-card">
+
+                            <div class="card-heading">
+                                <h2>通知先メールアドレス</h2>
+                                <p>
+                                    通知を受け取るメールアドレスを設定します。
+                                </p>
+                            </div>
+
+                            <div class="notification-email-row">
+
+                                <input
+                                    type="email"
+                                    id="notificationEmail"
+                                    class="form-control"
+                                    value="taro.yamada@tasfina.co.jp"
+                                    readonly
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    id="editEmailButton"
+                                    class="btn btn-outline-primary"
+                                >
+                                    <i class="bi bi-pencil"></i>
+                                    変更
+                                </button>
+
+                            </div>
+
+                            <p id="emailError" class="email-error" role="alert"></p>
+
+                        </section>
+
+                    </div>
+
+                </div>
+
+                <!-- 保存ボタン -->
+                <div class="notification-actions">
+
+                    <p
+                        id="notificationMessage"
+                        class="notification-message"
+                        role="status"
+                        aria-live="polite"
+                    ></p>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-floppy"></i>
+                        設定を保存
+                    </button>
+
+                </div>
+
+            </form>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

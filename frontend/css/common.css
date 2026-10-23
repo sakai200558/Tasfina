@@ -212,3 +212,110 @@ body {
         margin-top: 12px;
     }
 }
+
+/* ========================================
+   設定画面 共通ナビゲーション
+======================================== */
+
+/* 設定メニュー全体 */
+
+.settings-nav {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+    margin-bottom: 16px;
+}
+
+/* 各設定メニュー */
+
+.settings-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 44px;
+    padding: 10px 8px;
+
+    background-color: #f7f9fc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    color: #44516a;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition:
+        background-color 0.2s,
+        color 0.2s;
+}
+
+/* アイコン */
+
+.settings-nav-link i {
+    font-size: 15px;
+}
+
+/* ホバー時 */
+
+.settings-nav-link:hover {
+    background-color: #eaf2fd;
+    color: #0065c8;
+    text-decoration: none;
+}
+
+/* 現在開いている設定画面 */
+
+.settings-nav-link.active,
+.settings-nav-link[aria-current="page"] {
+    background-color: #0065c8;
+    border-color: #0065c8;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* 選択中メニューのホバー */
+
+.settings-nav-link.active:hover {
+    background-color: #0056ac;
+    color: #ffffff;
+}
+
+/* キーボード操作 */
+
+.settings-nav-link:focus-visible {
+    outline: 3px solid #80baff;
+    outline-offset: 2px;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+@media screen and (max-width: 1200px) {
+
+    .settings-nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media screen and (max-width: 600px) {
+
+    .settings-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .settings-nav-link {
+        min-height: 42px;
+        padding: 9px 6px;
+        gap: 5px;
+        font-size: 11px;
+    }
+
+    .settings-nav-link i {
+        font-size: 13px;
+    }
+}
