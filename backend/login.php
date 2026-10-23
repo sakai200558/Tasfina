@@ -13,21 +13,41 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
+$query = json_decode(file_get_contents("php://input"), true);
+
+$useremail = $query["email"];
+$userpassword = $query["password"];
+
+
 try {
     $pdo = new PDO($dsn, $username, $password, $options);
 
     // 例:名前付きプレースホルダ
-    $sql  = "SELECT * FROM users WHERE status = :status AND age >= :age";
+    $sql  = "select user_id,password_hash from users where email = :email";
     $stmt = $pdo->prepare($sql);
 
-    $status = 'active';
-    $age    = 20;
-
-    $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-    $stmt->bindParam(':age',    $age,    PDO::PARAM_INT);
+    $stmt->bindParam(':email', $useremail, PDO::PARAM_STR);
 
     $stmt->execute();
-    $rows = $stmt->fetchAll();
+    $rows = $stmt->fetch();
+
+    $userpassword = hash("sha256", $userpassword);
+    
+
+    if($userpassword !== $rows["password_hash"])
+    {
+        $return = json_encode(["comment" => "ユーザー名かパスワードが間違っています", "login" => false]);
+        exit();
+    }else
+    {
+        $return = json_encode(["comment" => "ログイン成功", "login" => true]);
+    }
+
+    session_start();
+
+    $_SESSION["user_id"] = $rows["user_id"];
+
+    echo $return;
 
 } catch (PDOException $e) {
     error_log($e->getMessage());
