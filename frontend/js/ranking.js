@@ -1,13 +1,14 @@
 
 /* ========================================
    Tasfina 負担スコアランキング
+   サンプルデータ版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* ========================================
-       サンプルデータ
-    ======================================== */
+    // =====================================
+    // サンプルデータ（10人）
+    // =====================================
 
     const members = [
         {
@@ -18,7 +19,29 @@ document.addEventListener("DOMContentLoaded", () => {
             change: 0.6,
             shifts: 18,
             breakdown: [1.8, 0.8, 0.5, 0, 1.7],
-            counts: [8, 4, 2, 0, 4]
+            counts: [8, 4, 2, 0, 4],
+            workHours: 142.5,
+            busyDays: 4,
+            tasks: [
+                {
+                    name: "月次報告書の作成",
+                    hours: 4,
+                    formula: "4時間 × 0.1pt/時間",
+                    points: 0.4
+                },
+                {
+                    name: "顧客資料の作成",
+                    hours: 6,
+                    formula: "6時間 × 0.1pt/時間",
+                    points: 0.6
+                },
+                {
+                    name: "定例会議の準備",
+                    hours: 2,
+                    formula: "2時間 × 0.1pt/時間",
+                    points: 0.2
+                }
+            ]
         },
         {
             id: 2,
@@ -28,7 +51,23 @@ document.addEventListener("DOMContentLoaded", () => {
             change: 0.4,
             shifts: 16,
             breakdown: [1.6, 0.8, 0.5, 0, 1.3],
-            counts: [7, 4, 2, 0, 3]
+            counts: [7, 4, 2, 0, 3],
+            workHours: 136,
+            busyDays: 3,
+            tasks: [
+                {
+                    name: "API実装",
+                    hours: 8,
+                    formula: "8時間 × 0.1pt/時間",
+                    points: 0.8
+                },
+                {
+                    name: "コードレビュー",
+                    hours: 3,
+                    formula: "3時間 × 0.1pt/時間",
+                    points: 0.3
+                }
+            ]
         },
         {
             id: 3,
@@ -38,7 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: 0.3,
             shifts: 15,
             breakdown: [1.5, 0.7, 0.5, 0, 1.2],
-            counts: [7, 3, 2, 0, 3]
+            counts: [7, 3, 2, 0, 3],
+            workHours: 128,
+            busyDays: 3,
+            tasks: [
+                {
+                    name: "顧客訪問準備",
+                    hours: 5,
+                    formula: "5時間 × 0.1pt/時間",
+                    points: 0.5
+                }
+            ]
         },
         {
             id: 4,
@@ -48,7 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: 0.2,
             shifts: 12,
             breakdown: [1.2, 0.6, 0.5, 0, 0.8],
-            counts: [5, 3, 2, 0, 2]
+            counts: [5, 3, 2, 0, 2],
+            workHours: 101.5,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "問い合わせ対応",
+                    hours: 7,
+                    formula: "7時間 × 0.1pt/時間",
+                    points: 0.7
+                }
+            ]
         },
         {
             id: 5,
@@ -58,7 +117,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: 0,
             shifts: 13,
             breakdown: [1.2, 0.6, 0.4, 0, 0.6],
-            counts: [6, 3, 2, 0, 2]
+            counts: [6, 3, 2, 0, 2],
+            workHours: 108,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "提案書作成",
+                    hours: 6,
+                    formula: "6時間 × 0.1pt/時間",
+                    points: 0.6
+                }
+            ]
         },
         {
             id: 6,
@@ -68,7 +137,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: -0.3,
             shifts: 11,
             breakdown: [1.1, 0.5, 0.4, 0, 0.5],
-            counts: [5, 3, 1, 0, 2]
+            counts: [5, 3, 1, 0, 2],
+            workHours: 92,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "画面デザイン調整",
+                    hours: 4,
+                    formula: "4時間 × 0.1pt/時間",
+                    points: 0.4
+                }
+            ]
         },
         {
             id: 7,
@@ -78,7 +157,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: -0.4,
             shifts: 10,
             breakdown: [0.9, 0.5, 0.3, 0, 0.4],
-            counts: [4, 3, 1, 0, 2]
+            counts: [4, 3, 1, 0, 2],
+            workHours: 80,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "FAQ更新",
+                    hours: 3,
+                    formula: "3時間 × 0.1pt/時間",
+                    points: 0.3
+                }
+            ]
         },
         {
             id: 8,
@@ -88,7 +177,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: -0.5,
             shifts: 9,
             breakdown: [0.8, 0.4, 0.3, 0, 0.3],
-            counts: [4, 2, 1, 0, 2]
+            counts: [4, 2, 1, 0, 2],
+            workHours: 72,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "営業日報",
+                    hours: 2,
+                    formula: "2時間 × 0.1pt/時間",
+                    points: 0.2
+                }
+            ]
         },
         {
             id: 9,
@@ -98,7 +197,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: -0.2,
             shifts: 8,
             breakdown: [0.5, 0.3, 0.2, 0, 0.2],
-            counts: [3, 2, 1, 0, 2]
+            counts: [3, 2, 1, 0, 2],
+            workHours: 64,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "企画案整理",
+                    hours: 3,
+                    formula: "3時間 × 0.1pt/時間",
+                    points: 0.3
+                }
+            ]
         },
         {
             id: 10,
@@ -108,7 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
             change: -0.1,
             shifts: 6,
             breakdown: [0.3, 0.2, 0.1, 0, 0.2],
-            counts: [2, 1, 1, 0, 2]
+            counts: [2, 1, 1, 0, 2],
+            workHours: 48,
+            busyDays: 2,
+            tasks: [
+                {
+                    name: "テストケース作成",
+                    hours: 2,
+                    formula: "2時間 × 0.1pt/時間",
+                    points: 0.2
+                }
+            ]
         }
     ];
 
@@ -128,9 +247,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "busy"
     ];
 
-    /* ========================================
-       状態
-    ======================================== */
+    // =====================================
+    // 状態管理
+    // =====================================
 
     const now = new Date();
 
@@ -140,29 +259,30 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeTab = "members";
     let selectedMemberId = 1;
 
-    const monthLabel = document.getElementById("currentMonth");
+    const getElement = id => document.getElementById(id);
 
-    /* ========================================
-       補助関数
-    ======================================== */
+    // =====================================
+    // 共通関数
+    // =====================================
 
     function formatScore(value) {
         return Number(value).toFixed(1);
     }
 
     function formatChange(value) {
+
         const number = Number(value);
 
         if (number > 0) {
             return {
-                text: `↑ +${number.toFixed(1)}`,
+                text: `↑ +${formatScore(number)}`,
                 className: "change-up"
             };
         }
 
         if (number < 0) {
             return {
-                text: `↓ ${number.toFixed(1)}`,
+                text: `↓ ${formatScore(number)}`,
                 className: "change-down"
             };
         }
@@ -173,12 +293,32 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    function escapeHtml(value) {
+
+        return String(value).replace(
+            /[&<>"']/g,
+            character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[character]
+        );
+    }
+
+    // =====================================
+    // 月切り替え
+    // =====================================
+
     function updateMonthLabel() {
-        monthLabel.textContent =
+
+        getElement("currentMonth").textContent =
             `${displayedYear}年${displayedMonth + 1}月`;
     }
 
     function changeMonth(offset) {
+
         const date = new Date(
             displayedYear,
             displayedMonth + offset,
@@ -192,14 +332,23 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAll();
     }
 
-    function getFilteredMembers() {
-        const department = document.getElementById(
-            "departmentFilter"
-        ).value;
+    // =====================================
+    // フィルター
+    // =====================================
 
-        const shiftType = document.getElementById(
-            "shiftFilter"
-        ).value;
+    function getFilteredMembers() {
+
+        const department =
+            getElement("departmentFilter").value;
+
+        const shiftType =
+            getElement("shiftFilter").value;
+
+        const shiftIndex = {
+            normal: 0,
+            remote: 1,
+            morning: 2
+        }[shiftType];
 
         return members
             .filter(member => {
@@ -207,31 +356,49 @@ document.addEventListener("DOMContentLoaded", () => {
                     member.department === department;
             })
             .filter(member => {
-                if (shiftType === "all") {
-                    return true;
-                }
-
-                const index = {
-                    normal: 0,
-                    remote: 1,
-                    morning: 2
-                }[shiftType];
-
-                return member.counts[index] > 0;
+                return shiftType === "all" ||
+                    member.counts[shiftIndex] > 0;
             })
             .sort((a, b) => b.score - a.score);
     }
 
+    function initializeDepartments() {
+
+        const select = getElement("departmentFilter");
+
+        const departments = [
+            ...new Set(members.map(member => member.department))
+        ];
+
+        departments.forEach(department => {
+
+            const option = document.createElement("option");
+
+            option.value = department;
+            option.textContent = department;
+
+            select.appendChild(option);
+        });
+    }
+
+    // =====================================
+    // スコア内訳バー
+    // =====================================
+
     function buildBreakdownBar(member) {
-        const total = 6;
+
+        const total = member.breakdown.reduce(
+            (sum, value) => sum + value,
+            0
+        );
 
         return `
             <div class="score-breakdown">
                 ${member.breakdown.map((value, index) => {
-                    const width = Math.max(
-                        0,
-                        Math.min(100, value / total * 100)
-                    );
+
+                    const width = total > 0
+                        ? value / total * 100
+                        : 0;
 
                     return `
                         <span
@@ -240,75 +407,70 @@ document.addEventListener("DOMContentLoaded", () => {
                             title="${breakdownLabels[index]}: ${formatScore(value)}pt"
                         ></span>
                     `;
+
                 }).join("")}
             </div>
         `;
     }
 
-    /* ========================================
-       フィルター
-    ======================================== */
-
-    function initializeDepartments() {
-        const select = document.getElementById(
-            "departmentFilter"
-        );
-
-        const departments = [
-            ...new Set(members.map(member => member.department))
-        ];
-
-        departments.forEach(department => {
-            const option = document.createElement("option");
-            option.value = department;
-            option.textContent = department;
-            select.appendChild(option);
-        });
-    }
-
-    /* ========================================
-       サマリー表示
-    ======================================== */
+    // =====================================
+    // サマリー表示
+    // =====================================
 
     function renderSummary() {
+
         const filtered = getFilteredMembers();
 
-        if (filtered.length === 0) {
-            ["averageScore", "maximumScore", "minimumScore"]
-                .forEach(id => {
-                    document.getElementById(id).textContent = "-";
-                });
+        const scoreIds = [
+            "averageScore",
+            "maximumScore",
+            "minimumScore"
+        ];
 
-            ["averageChange", "maximumChange", "minimumChange"]
-                .forEach(id => {
-                    document.getElementById(id).textContent = "";
-                });
+        const changeIds = [
+            "averageChange",
+            "maximumChange",
+            "minimumChange"
+        ];
+
+        if (filtered.length === 0) {
+
+            scoreIds.forEach(id => {
+                getElement(id).textContent = "-";
+            });
+
+            changeIds.forEach(id => {
+                getElement(id).textContent = "";
+            });
 
             return;
         }
 
         const average = filtered.reduce(
-            (sum, member) => sum + member.score, 0
+            (sum, member) => sum + member.score,
+            0
+        ) / filtered.length;
+
+        const averageChange = filtered.reduce(
+            (sum, member) => sum + member.change,
+            0
         ) / filtered.length;
 
         const highest = filtered[0];
         const lowest = filtered[filtered.length - 1];
 
-        const averageChange = filtered.reduce(
-            (sum, member) => sum + member.change, 0
-        ) / filtered.length;
-
-        const values = [
-            ["averageScore", "averageChange", average, averageChange],
-            ["maximumScore", "maximumChange", highest.score, highest.change],
-            ["minimumScore", "minimumChange", lowest.score, lowest.change]
+        const summary = [
+            [average, averageChange],
+            [highest.score, highest.change],
+            [lowest.score, lowest.change]
         ];
 
-        values.forEach(([scoreId, changeId, score, change]) => {
-            document.getElementById(scoreId).textContent =
+        summary.forEach(([score, change], index) => {
+
+            getElement(scoreIds[index]).textContent =
                 formatScore(score);
 
-            const changeElement = document.getElementById(changeId);
+            const changeElement = getElement(changeIds[index]);
             const formatted = formatChange(change);
 
             changeElement.textContent = formatted.text;
@@ -316,36 +478,74 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ========================================
-       メンバーランキング
-    ======================================== */
+    // =====================================
+    // 詳細モーダル起動
+    // =====================================
+
+    function openMemberDetail(member) {
+
+        selectedMemberId = member.id;
+
+        // 既存の右側パネルも更新
+        renderMemberRanking();
+        renderMemberDetail();
+
+        // モーダルを表示
+        if (
+            window.TasfinaRankingDetail &&
+            typeof window.TasfinaRankingDetail.open === "function"
+        ) {
+
+            window.TasfinaRankingDetail.open(
+                member,
+                {
+                    year: displayedYear,
+                    month: displayedMonth + 1
+                }
+            );
+
+        } else {
+
+            console.error(
+                "ranking-detail.js が読み込まれていません。"
+            );
+
+            alert(
+                "詳細モーダルを読み込めませんでした。"
+            );
+        }
+    }
+
+    // =====================================
+    // メンバーランキング
+    // =====================================
 
     function renderMemberRanking() {
-        const tbody = document.getElementById(
-            "memberRankingBody"
-        );
+
+        const tbody = getElement("memberRankingBody");
 
         const pageSize = Number(
-            document.getElementById("pageSize").value
+            getElement("pageSize").value
         );
 
-        const filtered = getFilteredMembers();
-        const visible = filtered.slice(0, pageSize);
+        const visible = getFilteredMembers().slice(0, pageSize);
 
-        tbody.innerHTML = "";
+        tbody.replaceChildren();
 
         if (visible.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center py-4">
-                        該当するメンバーはいません。
-                    </td>
-                </tr>
-            `;
+
+            const row = tbody.insertRow();
+            const cell = row.insertCell();
+
+            cell.colSpan = 7;
+            cell.className = "text-center py-4";
+            cell.textContent = "該当するメンバーはいません。";
+
             return;
         }
 
         visible.forEach((member, index) => {
+
             const rank = index + 1;
             const change = formatChange(member.change);
 
@@ -357,11 +557,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             row.innerHTML = `
                 <td>
-                    ${
-                        rank <= 3
-                            ? `<span class="rank-medal rank-${rank}">${rank}</span>`
-                            : rank
-                    }
+                    ${rank <= 3
+                        ? `<span class="rank-medal rank-${rank}">${rank}</span>`
+                        : rank}
                 </td>
 
                 <td>
@@ -369,11 +567,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="member-avatar">
                             <i class="bi bi-person-circle"></i>
                         </span>
-                        ${member.name}
+                        ${escapeHtml(member.name)}
                     </div>
                 </td>
 
-                <td>${member.department}</td>
+                <td>${escapeHtml(member.department)}</td>
 
                 <td class="${member.score >= 3.5 ? "score-red" : ""}">
                     ${formatScore(member.score)} pt
@@ -388,41 +586,62 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${member.shifts}回</td>
             `;
 
+            // クリックでモーダルを開く
             row.addEventListener("click", () => {
-                selectedMemberId = member.id;
-                renderMemberRanking();
-                renderMemberDetail();
+                openMemberDetail(member);
+            });
+
+            // キーボードでも開けるようにする
+            row.tabIndex = 0;
+
+            row.setAttribute(
+                "aria-label",
+                `${member.name}の負担スコア詳細を表示`
+            );
+
+            row.addEventListener("keydown", event => {
+
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+                    event.preventDefault();
+                    openMemberDetail(member);
+                }
             });
 
             tbody.appendChild(row);
-        });
-    }
 
-    /* ========================================
-       部門ランキング
-    ======================================== */
+        }); // ← 前回抜けていた重要な閉じ括弧
+
+    } // ← renderMemberRanking の終了
+
+    // =====================================
+    // 部門ランキング
+    // =====================================
 
     function renderDepartmentRanking() {
-        const tbody = document.getElementById(
-            "departmentRankingBody"
-        );
 
+        const tbody = getElement("departmentRankingBody");
         const filtered = getFilteredMembers();
 
-        const grouped = {};
+        const grouped = new Map();
 
         filtered.forEach(member => {
-            if (!grouped[member.department]) {
-                grouped[member.department] = [];
+
+            if (!grouped.has(member.department)) {
+                grouped.set(member.department, []);
             }
 
-            grouped[member.department].push(member);
+            grouped.get(member.department).push(member);
         });
 
-        const departments = Object.entries(grouped)
+        const departments = [...grouped.entries()]
             .map(([name, people]) => {
+
                 const total = people.reduce(
-                    (sum, member) => sum + member.score, 0
+                    (sum, member) => sum + member.score,
+                    0
                 );
 
                 return {
@@ -434,42 +653,63 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .sort((a, b) => b.average - a.average);
 
-        tbody.innerHTML = "";
+        tbody.replaceChildren();
+
+        if (departments.length === 0) {
+
+            const row = tbody.insertRow();
+            const cell = row.insertCell();
+
+            cell.colSpan = 5;
+            cell.className = "text-center py-4";
+            cell.textContent = "該当する部門はありません。";
+
+            return;
+        }
 
         departments.forEach((department, index) => {
-            const row = document.createElement("tr");
 
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${department.name}</td>
-                <td>${department.count}人</td>
-                <td>${formatScore(department.average)} pt</td>
-                <td>${formatScore(department.total)} pt</td>
-            `;
+            const row = tbody.insertRow();
 
-            tbody.appendChild(row);
+            const values = [
+                index + 1,
+                department.name,
+                `${department.count}人`,
+                `${formatScore(department.average)} pt`,
+                `${formatScore(department.total)} pt`
+            ];
+
+            values.forEach(value => {
+
+                const cell = row.insertCell();
+                cell.textContent = value;
+            });
         });
     }
 
-    /* ========================================
-       推移グラフ（サンプル）
-    ======================================== */
+    // =====================================
+    // 推移グラフ
+    // =====================================
 
     function renderTrendChart() {
-        const chart = document.getElementById("trendChart");
 
-        const average = getFilteredMembers().length
-            ? getFilteredMembers().reduce(
-                (sum, member) => sum + member.score, 0
-            ) / getFilteredMembers().length
+        const chart = getElement("trendChart");
+        const filtered = getFilteredMembers();
+
+        const average = filtered.length
+            ? filtered.reduce(
+                (sum, member) => sum + member.score,
+                0
+            ) / filtered.length
             : 0;
 
-        // 仮の推移データ
+        // 仮の月別変動値
         const offsets = [-0.4, -0.2, 0.1, -0.1, 0.2, 0];
 
-        chart.innerHTML = "";
+        chart.replaceChildren();
 
         offsets.forEach((offset, index) => {
+
             const monthDate = new Date(
                 displayedYear,
                 displayedMonth - 5 + index,
@@ -477,53 +717,57 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             const value = Math.max(0, average + offset);
-            const height = Math.min(180, value / 5 * 180);
+
+            const height = Math.min(
+                180,
+                value / 5 * 180
+            );
 
             const column = document.createElement("div");
             column.className = "trend-column";
 
-            const label = document.createElement("span");
-            label.className = "trend-value";
-            label.textContent = `${formatScore(value)}pt`;
+            const valueLabel = document.createElement("span");
+            valueLabel.className = "trend-value";
+            valueLabel.textContent = `${formatScore(value)}pt`;
 
             const bar = document.createElement("div");
             bar.className = "trend-bar";
             bar.style.height = `${height}px`;
 
-            const month = document.createElement("span");
-            month.className = "trend-label";
-            month.textContent = `${monthDate.getMonth() + 1}月`;
+            const monthLabel = document.createElement("span");
+            monthLabel.className = "trend-label";
+            monthLabel.textContent =
+                `${monthDate.getMonth() + 1}月`;
 
-            column.append(label, bar, month);
+            column.append(
+                valueLabel,
+                bar,
+                monthLabel
+            );
+
             chart.appendChild(column);
         });
     }
 
-    /* ========================================
-       選択メンバー詳細
-    ======================================== */
+    // =====================================
+    // 右側の選択メンバー詳細
+    // =====================================
 
     function renderMemberDetail() {
-        const container = document.getElementById(
-            "selectedMemberDetail"
-        );
+
+        const container = getElement("selectedMemberDetail");
 
         const filtered = getFilteredMembers();
 
-        let member = filtered.find(
+        const member = filtered.find(
             item => item.id === selectedMemberId
-        );
+        ) || filtered[0];
 
         if (!member) {
-            member = filtered[0];
-        }
 
-        if (!member) {
-            container.innerHTML = `
-                <p class="text-muted">
-                    表示できるメンバーがいません。
-                </p>
-            `;
+            container.textContent =
+                "表示できるメンバーがいません。";
+
             return;
         }
 
@@ -539,8 +783,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </span>
 
                 <div class="ranking-detail-name">
-                    <strong>${member.name}</strong>
-                    <small>${member.department}</small>
+                    <strong>${escapeHtml(member.name)}</strong>
+                    <small>${escapeHtml(member.department)}</small>
                 </div>
 
                 <div class="ranking-detail-total">
@@ -559,6 +803,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
             <div class="ranking-detail-section">
+
                 <h3>
                     スコアの内訳
                     <small>
@@ -567,21 +812,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 </h3>
 
                 <ul class="ranking-detail-list">
+
                     ${member.breakdown.map((value, index) => `
                         <li>
                             <span>
-                                <i
-                                    class="ranking-detail-dot legend-color ${breakdownClasses[index]}"
-                                ></i>
+                                <i class="ranking-detail-dot legend-color ${breakdownClasses[index]}"></i>
                                 ${breakdownLabels[index]}
                             </span>
                             <strong>${formatScore(value)} pt</strong>
                         </li>
                     `).join("")}
+
                 </ul>
+
             </div>
 
             <div class="ranking-detail-section">
+
                 <h3>
                     シフト実績
                     (${displayedMonth + 1}月)
@@ -589,75 +836,91 @@ document.addEventListener("DOMContentLoaded", () => {
                 </h3>
 
                 <ul class="ranking-detail-list">
+
                     ${member.counts.map((count, index) => `
                         <li>
                             <span>
-                                <i
-                                    class="ranking-detail-dot legend-color ${breakdownClasses[index]}"
-                                ></i>
-                                ${
-                                    index === 4
-                                        ? "休日"
-                                        : breakdownLabels[index]
-                                }
+                                <i class="ranking-detail-dot legend-color ${breakdownClasses[index]}"></i>
+                                ${index === 4
+                                    ? "繁忙日"
+                                    : breakdownLabels[index]}
                             </span>
                             <strong>${count}回</strong>
                         </li>
                     `).join("")}
+
                 </ul>
+
             </div>
         `;
     }
 
-    /* ========================================
-       タブ切り替え
-    ======================================== */
+    // =====================================
+    // タブ切り替え
+    // =====================================
 
     function initializeTabs() {
+
         const tabs = document.querySelectorAll(".ranking-tab");
 
         const panels = {
-            members: document.getElementById("membersPanel"),
-            departments: document.getElementById("departmentsPanel"),
-            trend: document.getElementById("trendPanel")
+            members: getElement("membersPanel"),
+            departments: getElement("departmentsPanel"),
+            trend: getElement("trendPanel")
         };
 
+        function activateTab(tabName) {
+
+            activeTab = tabName;
+
+            // タブボタンの表示を変更
+            tabs.forEach(tab => {
+
+                const isActive = tab.dataset.tab === tabName;
+
+                tab.classList.toggle("active", isActive);
+
+                tab.setAttribute(
+                    "aria-selected",
+                    String(isActive)
+                );
+
+                tab.tabIndex = isActive ? 0 : -1;
+            });
+
+            // 対象パネルだけ表示
+            Object.entries(panels).forEach(([key, panel]) => {
+
+                panel.hidden = key !== tabName;
+            });
+
+            // 凡例と右側詳細はメンバータブのみ
+            getElement("rankingLegend").hidden =
+                tabName !== "members";
+
+            getElement("rankingDetailPanel").hidden =
+                tabName !== "members";
+
+            renderAll();
+        }
+
         tabs.forEach(tab => {
+
             tab.addEventListener("click", () => {
-                activeTab = tab.dataset.tab;
-
-                tabs.forEach(item => {
-                    const isActive = item === tab;
-
-                    item.classList.toggle("active", isActive);
-                    item.setAttribute(
-                        "aria-selected",
-                        String(isActive)
-                    );
-                });
-
-                Object.entries(panels).forEach(([key, panel]) => {
-                    panel.hidden = key !== activeTab;
-                });
-
-                document.getElementById(
-                    "rankingLegend"
-                ).hidden = activeTab !== "members";
-
-                document.getElementById(
-                    "rankingDetailPanel"
-                ).hidden = activeTab !== "members";
-
-                renderAll();
+                activateTab(tab.dataset.tab);
             });
         });
+
+        // 初期タブ
+        activateTab("members");
     }
 
-    /* ========================================
-       全体再描画
-    ======================================== */
+    // =====================================
+    // 全体再描画
+    // =====================================
 
     function renderAll() {
+
         renderSummary();
         renderMemberRanking();
         renderDepartmentRanking();
@@ -665,18 +928,23 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMemberDetail();
     }
 
-    /* ========================================
-       イベント登録
-    ======================================== */
+    // =====================================
+    // イベント登録
+    // =====================================
 
-    document.getElementById("previousMonth")
-        .addEventListener("click", () => changeMonth(-1));
-
-    document.getElementById("nextMonth")
-        .addEventListener("click", () => changeMonth(1));
-
-    document.getElementById("currentMonthButton")
+    getElement("previousMonth")
         .addEventListener("click", () => {
+            changeMonth(-1);
+        });
+
+    getElement("nextMonth")
+        .addEventListener("click", () => {
+            changeMonth(1);
+        });
+
+    getElement("currentMonthButton")
+        .addEventListener("click", () => {
+
             displayedYear = now.getFullYear();
             displayedMonth = now.getMonth();
 
@@ -689,29 +957,33 @@ document.addEventListener("DOMContentLoaded", () => {
         "departmentFilter",
         "pageSize"
     ].forEach(id => {
-        document.getElementById(id)
-            .addEventListener("change", renderAll);
+
+        getElement(id).addEventListener(
+            "change",
+            renderAll
+        );
     });
 
-    document.getElementById("editMemberButton")
+    getElement("editMemberButton")
         .addEventListener("click", () => {
+
             alert(
                 "メンバー編集画面との連携は今後実装します。"
             );
         });
 
-    document.getElementById("viewMemberShifts")
+    getElement("viewMemberShifts")
         .addEventListener("click", () => {
-            window.location.href = "shifts.html";
+
+            window.location.href = "shift.html";
         });
 
-    /* ========================================
-       初期化
-    ======================================== */
+    // =====================================
+    // 初期化
+    // =====================================
 
     initializeDepartments();
-    initializeTabs();
     updateMonthLabel();
-    renderAll();
+    initializeTabs();
 
 });

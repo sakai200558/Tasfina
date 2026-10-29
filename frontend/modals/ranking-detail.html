@@ -1,1 +1,266 @@
-負担ランキングの詳細モーダル
+
+<!-- ========================================
+     Tasfina 負担スコア詳細モーダル
+======================================== -->
+
+<div
+    class="modal fade"
+    id="rankingDetailModal"
+    tabindex="-1"
+    aria-labelledby="rankingDetailModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+
+        <div class="modal-content ranking-detail-modal-content">
+
+            <!-- ヘッダー -->
+            <div class="modal-header ranking-modal-header">
+
+                <div>
+                    <p class="ranking-modal-eyebrow">
+                        負担スコア分析
+                    </p>
+
+                    <h2
+                        class="modal-title"
+                        id="rankingDetailModalTitle"
+                    >
+                        負担スコア詳細
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="閉じる"
+                ></button>
+
+            </div>
+
+            <!-- 本文 -->
+            <div class="modal-body ranking-modal-body">
+
+                <!-- 読み込み・エラー表示 -->
+                <div
+                    id="rankingModalStatus"
+                    class="ranking-modal-status"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></div>
+
+                <div id="rankingModalContent">
+
+                    <!-- メンバー情報 -->
+                    <section class="ranking-modal-profile">
+
+                        <div class="ranking-modal-person">
+
+                            <div class="ranking-modal-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+
+                            <div>
+                                <h3 id="rankingModalMemberName">-</h3>
+
+                                <p id="rankingModalDepartment">-</p>
+
+                                <span
+                                    id="rankingModalPeriod"
+                                    class="ranking-modal-period"
+                                >-</span>
+                            </div>
+
+                        </div>
+
+                        <div class="ranking-modal-total">
+
+                            <span>総負担スコア</span>
+
+                            <div>
+                                <strong id="rankingModalTotalScore">-</strong>
+                                <small>pt</small>
+                            </div>
+
+                            <p>
+                                前月比
+                                <strong id="rankingModalChange">-</strong>
+                            </p>
+
+                        </div>
+
+                    </section>
+
+                    <!-- サマリーカード -->
+                    <section class="ranking-modal-stats">
+
+                        <article class="ranking-modal-stat">
+                            <div class="ranking-modal-stat-icon blue">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <span>実労働時間</span>
+                            <strong id="rankingModalWorkHours">-</strong>
+                        </article>
+
+                        <article class="ranking-modal-stat">
+                            <div class="ranking-modal-stat-icon purple">
+                                <i class="bi bi-list-task"></i>
+                            </div>
+                            <span>担当タスク件数</span>
+                            <strong id="rankingModalTaskCount">-</strong>
+                        </article>
+
+                        <article class="ranking-modal-stat">
+                            <div class="ranking-modal-stat-icon green">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <span>シフト回数</span>
+                            <strong id="rankingModalShiftCount">-</strong>
+                        </article>
+
+                        <article class="ranking-modal-stat">
+                            <div class="ranking-modal-stat-icon orange">
+                                <i class="bi bi-lightning-charge"></i>
+                            </div>
+                            <span>繁忙日勤務回数</span>
+                            <strong id="rankingModalBusyDays">-</strong>
+                        </article>
+
+                    </section>
+
+                    <!-- スコア内訳 -->
+                    <section class="ranking-modal-section">
+
+                        <div class="ranking-modal-section-heading">
+                            <h3>
+                                <i class="bi bi-pie-chart"></i>
+                                負担スコアの内訳
+                            </h3>
+                            <span>勤務区分・繁忙期補正</span>
+                        </div>
+
+                        <div class="ranking-modal-breakdown-layout">
+
+                            <div
+                                id="rankingModalBreakdownBar"
+                                class="ranking-modal-breakdown-bar"
+                                aria-label="スコア内訳"
+                            ></div>
+
+                            <div
+                                id="rankingModalBreakdownList"
+                                class="ranking-modal-breakdown-list"
+                            ></div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- タスクごとのポイント -->
+                    <section class="ranking-modal-section">
+
+                        <div class="ranking-modal-section-heading">
+                            <h3>
+                                <i class="bi bi-calculator"></i>
+                                タスク別ポイント計算
+                            </h3>
+                            <span>作業時間と計算式を表示</span>
+                        </div>
+
+                        <div class="ranking-modal-table-wrap">
+
+                            <table class="ranking-modal-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>タスク名</th>
+                                        <th>実作業時間</th>
+                                        <th>計算式</th>
+                                        <th>ポイント</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="rankingModalTaskBody"></tbody>
+
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3">タスクポイント合計</th>
+                                        <td id="rankingModalTaskTotal">-</td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+
+                    </section>
+
+                    <!-- 計算根拠 -->
+                    <section class="ranking-modal-section">
+
+                        <div class="ranking-modal-section-heading">
+                            <h3>
+                                <i class="bi bi-journal-text"></i>
+                                スコア計算根拠
+                            </h3>
+                        </div>
+
+                        <div class="ranking-modal-calculation">
+
+                            <div class="ranking-modal-calc-row">
+                                <span>勤務区分によるスコア</span>
+                                <strong id="rankingModalBaseScore">-</strong>
+                            </div>
+
+                            <div class="ranking-modal-calc-row">
+                                <span>繁忙期ボーナス</span>
+                                <strong id="rankingModalBusyBonus">-</strong>
+                            </div>
+
+                            <div class="ranking-modal-calc-row">
+                                <span>タスクポイント</span>
+                                <strong id="rankingModalTaskPoints">-</strong>
+                            </div>
+
+                            <div class="ranking-modal-calc-row ranking-modal-calc-total">
+                                <span>計算上の合計</span>
+                                <strong id="rankingModalCalculatedTotal">-</strong>
+                            </div>
+
+                            <p
+                                id="rankingModalCalculationNote"
+                                class="ranking-modal-calc-note"
+                            ></p>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+            <!-- フッター -->
+            <div class="modal-footer ranking-modal-footer">
+
+                <span>
+                    <i class="bi bi-info-circle"></i>
+                    スコアの算出ルールは設定内容に準じます。
+                </span>
+
+                <button
+                    type="button"
+                    class="ranking-modal-close-button"
+                    data-bs-dismiss="modal"
+                >
+                    閉じる
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

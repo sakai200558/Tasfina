@@ -1,1 +1,171 @@
-部門詳細モーダル
+
+<!-- 部門詳細モーダル -->
+<div
+    class="modal fade"
+    id="departmentDetailModal"
+    tabindex="-1"
+    aria-labelledby="departmentDetailTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content dept-detail-modal">
+
+            <!-- ヘッダー -->
+            <div class="modal-header dept-detail-header">
+                <div>
+                    <p class="dept-detail-eyebrow">
+                        <i class="bi bi-diagram-3"></i>
+                        部門詳細
+                    </p>
+                    <h2 class="modal-title" id="departmentDetailTitle">
+                        部門名
+                    </h2>
+                    <p id="deptDetailManager" class="dept-detail-manager"></p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="閉じる"
+                ></button>
+            </div>
+
+            <div class="modal-body dept-detail-body">
+
+                <!-- 基本情報 -->
+                <div class="dept-detail-overview">
+                    <div>
+                        <span class="dept-detail-caption">運用モード</span>
+                        <div id="deptDetailMode"></div>
+                    </div>
+                    <div>
+                        <span class="dept-detail-caption">業務負荷ステータス</span>
+                        <div id="deptDetailLoadStatus"></div>
+                    </div>
+                </div>
+
+                <!-- サマリー -->
+                <div class="dept-detail-summary">
+                    <article class="dept-detail-stat">
+                        <span>所属人数</span>
+                        <strong id="deptDetailCount">-</strong>
+                    </article>
+                    <article class="dept-detail-stat">
+                        <span>本日の出勤人数</span>
+                        <strong id="deptDetailPresent">-</strong>
+                    </article>
+                    <article class="dept-detail-stat">
+                        <span>担当中タスク</span>
+                        <strong id="deptDetailTaskCount">-</strong>
+                    </article>
+                    <article class="dept-detail-stat dept-detail-stat-score">
+                        <span>部門全体の負担スコア</span>
+                        <strong id="deptDetailTotalScore">-</strong>
+                    </article>
+                </div>
+
+                <div class="dept-detail-grid">
+
+                    <!-- 左カラム -->
+                    <div class="dept-detail-column">
+
+                        <section class="dept-detail-section">
+                            <div class="dept-detail-section-heading">
+                                <h3>
+                                    <i class="bi bi-people"></i>
+                                    所属メンバー
+                                </h3>
+                                <span id="deptDetailMemberLabel"></span>
+                            </div>
+
+                            <div
+                                id="deptDetailMembers"
+                                class="dept-detail-member-list"
+                            ></div>
+                        </section>
+
+                        <section class="dept-detail-section">
+                            <h3>
+                                <i class="bi bi-calendar-check"></i>
+                                本日の出勤状況
+                            </h3>
+
+                            <div
+                                id="deptDetailAttendance"
+                                class="dept-detail-attendance"
+                            ></div>
+                        </section>
+
+                    </div>
+
+                    <!-- 右カラム -->
+                    <div class="dept-detail-column">
+
+                        <section class="dept-detail-section">
+                            <h3>
+                                <i class="bi bi-clipboard-check"></i>
+                                担当中タスク
+                            </h3>
+
+                            <div
+                                id="deptDetailTasks"
+                                class="dept-detail-task-list"
+                            ></div>
+                        </section>
+
+                        <section class="dept-detail-section">
+                            <h3>
+                                <i class="bi bi-bar-chart"></i>
+                                部門の業務負荷
+                            </h3>
+
+                            <div class="dept-detail-load">
+                                <div class="dept-detail-load-top">
+                                    <span>平均負担スコア</span>
+                                    <strong id="deptDetailAverageScore">-</strong>
+                                </div>
+
+                                <div
+                                    class="dept-detail-progress"
+                                    role="progressbar"
+                                    aria-label="平均負担スコア"
+                                    aria-valuemin="0"
+                                    aria-valuemax="5"
+                                    aria-valuenow="0"
+                                    id="deptDetailProgress"
+                                >
+                                    <div
+                                        id="deptDetailProgressBar"
+                                        class="dept-detail-progress-bar"
+                                    ></div>
+                                </div>
+
+                                <p id="deptDetailLoadMessage"></p>
+                            </div>
+
+                            <div class="dept-detail-score-note">
+                                <i class="bi bi-info-circle"></i>
+                                負担スコアは高いほど業務負荷が大きいことを示します。
+                            </div>
+                        </section>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer dept-detail-footer">
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    閉じる
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
