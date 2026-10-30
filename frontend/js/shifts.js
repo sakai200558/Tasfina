@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- APIデータ取得・描画関数 ---
     async function loadShiftData() {
         try {
-            const res = await fetch(`shift_api.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
+            const res = await fetch(`shifts.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
             const data = await res.json();
             if (data.success) {
                 renderCalendar(data.shifts, data.busy_days);
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDashboardInfo() {
         try {
-            const res = await fetch(`shift_api.php?action=get_dashboard_info&user_id=${userId}`);
+            const res = await fetch(`shifts.php?action=get_dashboard_info&user_id=${userId}`);
             const data = await res.json();
             if (data.success && data.todays_shift) {
                 const s = data.todays_shift;
