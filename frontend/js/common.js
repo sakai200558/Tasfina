@@ -118,3 +118,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
 });
+
+/* ========================================
+   共通モーダル読み込み
+======================================== */
+
+async function loadModal(containerId, path) {
+
+    const container = document.getElementById(containerId);
+
+    if (!container) {
+        throw new Error(
+            `モーダル配置先がありません: ${containerId}`
+        );
+    }
+
+    const response = await fetch(path, {
+        credentials: "same-origin"
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `モーダル読み込み失敗: ${response.status}`
+        );
+    }
+
+    container.innerHTML = await response.text();
+
+    return container;
+}
