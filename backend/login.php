@@ -29,7 +29,9 @@ try {
     $stmt->bindParam(':email', $useremail, PDO::PARAM_STR);
 
     $stmt->execute();
-    $rows = $stmt->fetch();
+    $rows = $stmt->fetchAll();
+
+    $user_id = $rows["user_id"];
 
     $userpassword = hash("sha256", $userpassword);
     
@@ -43,9 +45,20 @@ try {
         $return = json_encode(["comment" => "ログイン成功", "login" => true]);
     }
 
+
+    $sql  = "SELECT group_id FROM user_groups WHERE user_id = :user_id";
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_STR);
+
+    $stmt->execute();
+    $rows = $stmt->fetch();
+
+
     session_start();
 
     $_SESSION["user_id"] = $rows["user_id"];
+    $_SESSION["group_id"] = $rows["group_id"];
 
     echo $return;
 
