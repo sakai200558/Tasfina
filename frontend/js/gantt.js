@@ -129,6 +129,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const departmentFilter = document.getElementById("departmentFilter");
     const statusFilter = document.getElementById("statusFilter");
 
+    if (
+        !chart ||
+        !detail ||
+        !periodLabel ||
+        !assigneeFilter ||
+        !departmentFilter ||
+        !statusFilter
+    ) {
+        console.error(
+            "ガントチャートに必要なHTML要素が見つかりません。"
+        );
+        return;
+    }
+
     /* =====================================
        日付処理
     ===================================== */
@@ -180,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (currentView === "week") {
             const day = currentDate.getDay();
             const mondayOffset = (day + 6) % 7;
+
             start = addDays(currentDate, -mondayOffset);
             count = 8;
             width = 110;
@@ -221,31 +236,38 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================== */
 
     function initializeFilters() {
-        const assignees = [...new Set(tasks.map(t => t.assignee))];
-        const departments = [...new Set(tasks.map(t => t.department))];
+        const assignees = [
+            ...new Set(tasks.map(task => task.assignee))
+        ];
+
+        const departments = [
+            ...new Set(tasks.map(task => task.department))
+        ];
 
         assignees.forEach(name => {
-            const option = new Option(name, name);
-            assigneeFilter.add(option);
+            assigneeFilter.add(new Option(name, name));
         });
 
         departments.forEach(name => {
-            const option = new Option(name, name);
-            departmentFilter.add(option);
+            departmentFilter.add(new Option(name, name));
         });
     }
 
     function filteredTasks() {
-        return tasks.filter(task => {
-            return (
-                (assigneeFilter.value === "all" ||
-                    task.assignee === assigneeFilter.value) &&
-                (departmentFilter.value === "all" ||
-                    task.department === departmentFilter.value) &&
-                (statusFilter.value === "all" ||
-                    task.status === statusFilter.value)
-            );
-        });
+        return tasks.filter(task => (
+            (
+                assigneeFilter.value === "all" ||
+                task.assignee === assigneeFilter.value
+            ) &&
+            (
+                departmentFilter.value === "all" ||
+                task.department === departmentFilter.value
+            ) &&
+            (
+                statusFilter.value === "all" ||
+                task.status === statusFilter.value
+            )
+        ));
     }
 
     /* =====================================
@@ -256,13 +278,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const range = getRange();
         const totalWidth = range.count * range.width;
 
-        chart.style.setProperty("--timeline-width", `${totalWidth}px`);
-        chart.style.setProperty("--column-width", `${range.width}px`);
+        chart.style.setProperty(
+            "--timeline-width",
+            `${totalWidth}px`
+        );
+
+        chart.style.setProperty(
+            "--column-width",
+            `${range.width}px`
+        );
 
         periodLabel.textContent =
             `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月`;
 
-        const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+        const weekdays = [
+            "日", "月", "火", "水", "木", "金", "土"
+        ];
 
         let html = `
             <div class="gantt-row gantt-header">
@@ -290,18 +321,26 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `</div></div>`;
 
         const visibleTasks = filteredTasks();
-        const departments = [...new Set(visibleTasks.map(t => t.department))];
+
+        const departments = [
+            ...new Set(
+                visibleTasks.map(task => task.department)
+            )
+        ];
 
         departments.forEach(department => {
-            const collapsed = collapsedDepartments.has(department);
+            const collapsed =
+                collapsedDepartments.has(department);
 
             html += `
                 <div class="gantt-row gantt-department">
                     <div class="gantt-cell">
-                        <button type="button"
+                        <button
+                            type="button"
                             class="department-toggle ${collapsed ? "collapsed" : ""}"
                             data-department="${escapeHTML(department)}"
-                            aria-expanded="${!collapsed}">
+                            aria-expanded="${!collapsed}"
+                        >
                             <i class="bi bi-chevron-down"></i>
                             ${escapeHTML(department)}
                         </button>
@@ -311,12 +350,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
-            if (collapsed) return;
+            if (collapsed) {
+                return;
+            }
 
             visibleTasks
                 .filter(task => task.department === department)
                 .forEach(task => {
-
                     const start = parseDate(task.start);
                     const end = parseDate(task.end);
 
@@ -324,18 +364,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     const duration = dayDiff(start, end) + 1;
 
                     const visibleStart = Math.max(0, offset);
-                    const visibleEnd = Math.min(range.count, offset + duration);
+                    const visibleEnd = Math.min(
+                        range.count,
+                        offset + duration
+                    );
 
                     let barHTML = "";
 
                     if (visibleEnd > visibleStart) {
-                        const left = visibleStart * range.width + 6;
-                        const width = (visibleEnd - visibleStart) * range.width - 12;
+                        const left =
+                            visibleStart * range.width + 6;
+
+                        const width =
+                            (visibleEnd - visibleStart) *
+                            range.width - 12;
 
                         barHTML = `
-                            <div class="gantt-task-bar ${task.status}"
-                                style="left:${left}px;width:${width}px">
-                            </div>
+                            <div
+                                class="gantt-task-bar ${task.status}"
+                                style="left:${left}px;width:${width}px"
+                            ></div>
                         `;
 
                         const labelLeft = Math.min(
@@ -344,32 +392,43 @@ document.addEventListener("DOMContentLoaded", () => {
                         );
 
                         barHTML += `
-                            <span class="gantt-task-hours"
-                                style="left:${labelLeft}px">
+                            <span
+                                class="gantt-task-hours"
+                                style="left:${labelLeft}px"
+                            >
                                 ${task.hours.toFixed(1)}h
                             </span>
                         `;
                     }
 
                     if (task.milestone) {
-                        const milestoneDate = parseDate(task.milestone);
-                        const milestoneOffset = dayDiff(range.start, milestoneDate);
+                        const milestoneDate =
+                            parseDate(task.milestone);
 
-                        if (milestoneOffset >= 0 && milestoneOffset < range.count) {
+                        const milestoneOffset =
+                            dayDiff(range.start, milestoneDate);
+
+                        if (
+                            milestoneOffset >= 0 &&
+                            milestoneOffset < range.count
+                        ) {
                             barHTML += `
-                                <span class="gantt-milestone"
-                                    style="left:${(milestoneOffset + 0.5) * range.width - 8}px">
-                                </span>
+                                <span
+                                    class="gantt-milestone"
+                                    style="left:${(milestoneOffset + 0.5) * range.width - 8}px"
+                                ></span>
                             `;
                         }
                     }
 
                     html += `
-                        <div class="gantt-row gantt-task-row ${selectedTaskId === task.id ? "selected" : ""}"
+                        <div
+                            class="gantt-row gantt-task-row ${selectedTaskId === task.id ? "selected" : ""}"
                             data-task-id="${task.id}"
                             tabindex="0"
                             role="button"
-                            aria-label="${escapeHTML(task.name)}の詳細を表示">
+                            aria-label="${escapeHTML(task.name)}の詳細を表示"
+                        >
                             <div class="gantt-cell gantt-name">
                                 ${escapeHTML(task.name)}
                             </div>
@@ -394,47 +453,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chart.innerHTML = html;
 
-        chart.querySelectorAll(".department-toggle").forEach(button => {
-            button.addEventListener("click", () => {
-                const name = button.dataset.department;
+        chart.querySelectorAll(".department-toggle")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    const name = button.dataset.department;
 
-                if (collapsedDepartments.has(name)) {
-                    collapsedDepartments.delete(name);
-                } else {
-                    collapsedDepartments.add(name);
-                }
+                    if (collapsedDepartments.has(name)) {
+                        collapsedDepartments.delete(name);
+                    } else {
+                        collapsedDepartments.add(name);
+                    }
 
-                renderChart();
+                    renderChart();
+                });
             });
-        });
 
-        chart.querySelectorAll(".gantt-task-row").forEach(row => {
-            const select = () => {
-                selectedTaskId = Number(row.dataset.taskId);
-                renderChart();
-                renderDetail();
-            };
+        chart.querySelectorAll(".gantt-task-row")
+            .forEach(row => {
+                const select = () => {
+                    selectedTaskId =
+                        Number(row.dataset.taskId);
 
-            row.addEventListener("click", select);
+                    renderChart();
+                    renderDetail();
+                };
 
-            row.addEventListener("keydown", event => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    select();
-                }
+                row.addEventListener("click", select);
+
+                row.addEventListener("keydown", event => {
+                    if (
+                        event.key === "Enter" ||
+                        event.key === " "
+                    ) {
+                        event.preventDefault();
+                        select();
+                    }
+                });
             });
-        });
     }
 
     /* =====================================
-       タスク詳細
+       選択中のタスク詳細
     ===================================== */
 
     function renderDetail() {
-        const task = tasks.find(t => t.id === selectedTaskId);
+        const task = tasks.find(
+            item => item.id === selectedTaskId
+        );
 
         if (!task) {
-            detail.innerHTML = '<p class="gantt-empty">タスクを選択してください。</p>';
+            detail.innerHTML = `
+                <p class="gantt-empty">
+                    タスクを選択してください。
+                </p>
+            `;
             return;
         }
 
@@ -482,15 +554,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 </dl>
 
                 <div class="gantt-detail-note">
-                    <label for="ganttMemo" class="form-label">メモ</label>
-                    <textarea id="ganttMemo" readonly>${escapeHTML(task.memo)}</textarea>
+                    <label
+                        for="ganttMemo"
+                        class="form-label"
+                    >
+                        メモ
+                    </label>
+
+                    <textarea
+                        id="ganttMemo"
+                        readonly
+                    >${escapeHTML(task.memo)}</textarea>
 
                     <div class="gantt-detail-actions">
-                        <button type="button" class="btn btn-outline-primary" id="requestHours">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            id="requestHours"
+                        >
                             工数変更申請
                         </button>
 
-                        <button type="button" class="btn btn-primary" id="requestComplete">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="requestComplete"
+                        >
                             完了申請
                         </button>
                     </div>
@@ -498,74 +587,131 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        document.getElementById("requestHours").addEventListener("click", () => {
-            alert("工数変更申請モーダルは今後接続予定です。");
-        });
-
-        document.getElementById("requestComplete").addEventListener("click", () => {
-            alert("タスク完了申請モーダルは今後接続予定です。");
-        });
+        // ボタンは再描画で作り直されるため、
+        // クリック処理は gantt-modals.js で管理する。
     }
 
     /* =====================================
        期間切り替え
     ===================================== */
 
-    document.querySelectorAll(".gantt-view-switch button")
-        .forEach(button => {
-            button.addEventListener("click", () => {
-                currentView = button.dataset.view;
+    document.querySelectorAll(
+        ".gantt-view-switch button"
+    ).forEach(button => {
+        button.addEventListener("click", () => {
+            currentView = button.dataset.view;
 
-                document.querySelectorAll(".gantt-view-switch button")
-                    .forEach(item => item.classList.remove("active"));
-
-                button.classList.add("active");
-                renderChart();
+            document.querySelectorAll(
+                ".gantt-view-switch button"
+            ).forEach(item => {
+                item.classList.remove("active");
             });
+
+            button.classList.add("active");
+            renderChart();
+        });
+    });
+
+    document.getElementById("prevPeriod")
+        ?.addEventListener("click", () => {
+            if (currentView === "day") {
+                currentDate = addDays(currentDate, -1);
+            } else if (currentView === "week") {
+                currentDate = addDays(currentDate, -7);
+            } else {
+                currentDate = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 1,
+                    1
+                );
+            }
+
+            renderChart();
         });
 
-    document.getElementById("prevPeriod").addEventListener("click", () => {
-        if (currentView === "day") {
-            currentDate = addDays(currentDate, -1);
-        } else if (currentView === "week") {
-            currentDate = addDays(currentDate, -7);
-        } else {
-            currentDate = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth() - 1,
-                1
-            );
-        }
+    document.getElementById("nextPeriod")
+        ?.addEventListener("click", () => {
+            if (currentView === "day") {
+                currentDate = addDays(currentDate, 1);
+            } else if (currentView === "week") {
+                currentDate = addDays(currentDate, 7);
+            } else {
+                currentDate = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1,
+                    1
+                );
+            }
 
-        renderChart();
-    });
+            renderChart();
+        });
 
-    document.getElementById("nextPeriod").addEventListener("click", () => {
-        if (currentView === "day") {
-            currentDate = addDays(currentDate, 1);
-        } else if (currentView === "week") {
-            currentDate = addDays(currentDate, 7);
-        } else {
-            currentDate = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth() + 1,
-                1
-            );
-        }
+    document.getElementById("todayButton")
+        ?.addEventListener("click", () => {
+            currentDate = new Date();
+            renderChart();
+        });
 
-        renderChart();
-    });
-
-    document.getElementById("todayButton").addEventListener("click", () => {
-        currentDate = new Date();
-        renderChart();
-    });
-
-    [assigneeFilter, departmentFilter, statusFilter].forEach(filter => {
+    [
+        assigneeFilter,
+        departmentFilter,
+        statusFilter
+    ].forEach(filter => {
         filter.addEventListener("change", () => {
             renderChart();
         });
     });
+
+    /* =====================================
+       モーダル側から選択タスクを取得
+    ===================================== */
+
+    window.getGanttSelectedTask = () => {
+        return tasks.find(
+            task => task.id === selectedTaskId
+        ) ?? null;
+    };
+
+    /* =====================================
+       モーダルHTMLの読み込み
+    ===================================== */
+
+    async function initializeModalHTML() {
+        try {
+            if (typeof loadModal !== "function") {
+                throw new Error(
+                    "common.js の loadModal 関数が見つかりません。"
+                );
+            }
+
+            await loadModal(
+                "ganttModals",
+                "../modals/gantt-modals.html"
+            );
+
+            const hoursModal =
+                document.getElementById("workHoursModal");
+
+            const completeModal =
+                document.getElementById("taskCompleteModal");
+
+            if (!hoursModal || !completeModal) {
+                throw new Error(
+                    "モーダルHTML内に必要なIDが見つかりません。"
+                );
+            }
+
+            console.log(
+                "ガントチャート申請モーダルの読み込みに成功しました。"
+            );
+
+        } catch (error) {
+            console.error(
+                "ガントチャート申請モーダルの読み込みエラー:",
+                error
+            );
+        }
+    }
 
     /* =====================================
        初期表示
@@ -574,5 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeFilters();
     renderChart();
     renderDetail();
+
+    initializeModalHTML();
 
 });

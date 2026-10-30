@@ -1,4 +1,3 @@
-
 /* ========================================
    Tasfina ガントチャート申請モーダル
 ======================================== */
@@ -10,11 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!modalContainer) return;
 
-    // モーダルのHTMLが読み込まれた後に初期化
+    // モーダルHTMLの読み込み完了を監視
     const observer = new MutationObserver(() => {
 
-        if (!document.getElementById("workHoursForm") ||
-            !document.getElementById("taskCompleteForm")) {
+        if (
+            !document.getElementById("workHoursForm") ||
+            !document.getElementById("taskCompleteForm")
+        ) {
             return;
         }
 
@@ -26,10 +27,14 @@ document.addEventListener("DOMContentLoaded", () => {
         childList: true
     });
 
-    if (document.getElementById("workHoursForm")) {
+    if (
+        document.getElementById("workHoursForm") &&
+        document.getElementById("taskCompleteForm")
+    ) {
         observer.disconnect();
         initializeGanttModals();
     }
+
 });
 
 
@@ -40,6 +45,13 @@ function initializeGanttModals() {
 
     const completeModalElement =
         document.getElementById("taskCompleteModal");
+
+    if (!window.bootstrap?.Modal) {
+        console.error(
+            "Bootstrap JavaScriptが読み込まれていません。"
+        );
+        return;
+    }
 
     const hoursModal =
         bootstrap.Modal.getOrCreateInstance(hoursModalElement);
@@ -62,13 +74,14 @@ function initializeGanttModals() {
     let currentTask = null;
 
     /* =====================================
-       タスク情報の取得
+       選択中のタスク取得
     ===================================== */
 
     function getSelectedTask() {
 
-        // gantt.js 側から選択タスクを取得
-        if (typeof window.getGanttSelectedTask === "function") {
+        if (
+            typeof window.getGanttSelectedTask === "function"
+        ) {
             return window.getGanttSelectedTask();
         }
 
@@ -81,7 +94,10 @@ function initializeGanttModals() {
 
         const hours = Number(task.hours);
 
-        if (!Number.isFinite(hours) || hours <= 0) {
+        if (
+            !Number.isFinite(hours) ||
+            hours <= 0
+        ) {
             return null;
         }
 
@@ -95,7 +111,31 @@ function initializeGanttModals() {
     }
 
     /* =====================================
-       工数変更申請を開く
+       エラー表示
+    ===================================== */
+
+    function showError(id, message) {
+
+        const element = document.getElementById(id);
+
+        if (!element) return;
+
+        element.textContent = message;
+        element.hidden = false;
+    }
+
+    function clearError(id) {
+
+        const element = document.getElementById(id);
+
+        if (!element) return;
+
+        element.textContent = "";
+        element.hidden = true;
+    }
+
+    /* =====================================
+       工数変更申請モーダルを開く
     ===================================== */
 
     function openHoursModal() {
@@ -130,7 +170,7 @@ function initializeGanttModals() {
     }
 
     /* =====================================
-       完了申請を開く
+       完了申請モーダルを開く
     ===================================== */
 
     function openCompleteModal() {
@@ -165,26 +205,31 @@ function initializeGanttModals() {
     }
 
     /* =====================================
-       ボタンのイベント
+       ボタンクリック処理
     ===================================== */
 
     document.addEventListener("click", (event) => {
 
         const hoursButton =
-            event.target.closest("#requestHoursButton");
+            event.target.closest("#requestHours");
 
         const completeButton =
-            event.target.closest("#requestCompleteButton");
+            event.target.closest("#requestComplete");
 
         if (hoursButton) {
+
             event.preventDefault();
+
             openHoursModal();
         }
 
         if (completeButton) {
+
             event.preventDefault();
+
             openCompleteModal();
         }
+
     });
 
     /* =====================================
@@ -192,39 +237,36 @@ function initializeGanttModals() {
     ===================================== */
 
     hoursReason.addEventListener("input", () => {
+
         document.getElementById("hoursReasonCount")
             .textContent = hoursReason.value.length;
+
     });
 
     completeReport.addEventListener("input", () => {
+
         document.getElementById("completeReportCount")
             .textContent = completeReport.value.length;
+
     });
 
     /* =====================================
-       エラー処理
-    ===================================== */
-
-    function showError(id, message) {
-        const element = document.getElementById(id);
-        element.textContent = message;
-        element.hidden = false;
-    }
-
-    function clearError(id) {
-        const element = document.getElementById(id);
-        element.textContent = "";
-        element.hidden = true;
-    }
-
-    /* =====================================
-       工数変更申請
+       工数変更申請フォーム
     ===================================== */
 
     hoursForm.addEventListener("submit", (event) => {
 
         event.preventDefault();
+
         clearError("hoursError");
+
+        if (!currentTask) {
+            showError(
+                "hoursError",
+                "対象タスクが選択されていません。"
+            );
+            return;
+        }
 
         const requestedHours = Number(
             document.getElementById("requestedHours").value
@@ -232,38 +274,47 @@ function initializeGanttModals() {
 
         const reason = hoursReason.value.trim();
 
-        if (!Number.isFinite(requestedHours) ||
+        if (
+            !Number.isFinite(requestedHours) ||
             requestedHours <= 0 ||
-            requestedHours > 9999) {
+            requestedHours > 9999
+        ) {
 
             showError(
                 "hoursError",
                 "変更後の予定工数を正しく入力してください。"
             );
+
             return;
         }
 
         if (requestedHours === currentTask.hours) {
+
             showError(
                 "hoursError",
                 "現在の予定工数と異なる値を入力してください。"
             );
+
             return;
         }
 
         if (!reason) {
+
             showError(
                 "hoursError",
                 "変更理由を入力してください。"
             );
+
             return;
         }
 
         if (!hoursForm.checkValidity()) {
+
             showError(
                 "hoursError",
                 "入力内容を確認してください。"
             );
+
             return;
         }
 
@@ -274,17 +325,21 @@ function initializeGanttModals() {
             reason: reason
         };
 
-        if (!confirm(
+        const confirmed = window.confirm(
             "以下の内容で工数変更を申請しますか？\n\n" +
             `タスク：${currentTask.name}\n` +
             `変更前：${currentTask.hours}時間\n` +
             `変更後：${requestedHours}時間\n` +
             `理由：${reason}`
-        )) {
-            return;
-        }
+        );
 
-        console.log("工数変更申請（仮）", requestData);
+        if (!confirmed) return;
+
+        // 現在はフロントエンドの仮処理
+        console.log(
+            "工数変更申請（仮）:",
+            requestData
+        );
 
         hoursModal.hide();
 
@@ -292,16 +347,26 @@ function initializeGanttModals() {
             "工数変更申請の入力を確認しました。\n" +
             "現在は開発用の仮処理のため、申請は保存されていません。"
         );
+
     });
 
     /* =====================================
-       完了申請
+       完了申請フォーム
     ===================================== */
 
     completeForm.addEventListener("submit", (event) => {
 
         event.preventDefault();
+
         clearError("completeError");
+
+        if (!currentTask) {
+            showError(
+                "completeError",
+                "対象タスクが選択されていません。"
+            );
+            return;
+        }
 
         const actualHours = Number(
             document.getElementById("actualHours").value
@@ -312,51 +377,76 @@ function initializeGanttModals() {
         const evidence =
             document.getElementById("completeEvidence").files[0];
 
-        if (!Number.isFinite(actualHours) ||
+        /* 実績工数の確認 */
+
+        if (
+            !Number.isFinite(actualHours) ||
             actualHours <= 0 ||
-            actualHours > 9999) {
+            actualHours > 9999
+        ) {
 
             showError(
                 "completeError",
                 "実績工数を正しく入力してください。"
             );
+
             return;
         }
 
+        /* 完了報告の確認 */
+
         if (!report) {
+
             showError(
                 "completeError",
                 "完了報告を入力してください。"
             );
+
             return;
         }
 
-        if (evidence && evidence.size > 10 * 1024 * 1024) {
+        /* 添付ファイルのサイズ確認 */
+
+        if (
+            evidence &&
+            evidence.size > 10 * 1024 * 1024
+        ) {
+
             showError(
                 "completeError",
                 "添付ファイルは10MB以下にしてください。"
             );
+
             return;
         }
 
+        /* 添付ファイルの形式確認 */
+
         if (evidence) {
+
             const allowedExtensions =
                 /\.(pdf|png|jpe?g|docx|xlsx)$/i;
 
             if (!allowedExtensions.test(evidence.name)) {
+
                 showError(
                     "completeError",
                     "対応していないファイル形式です。"
                 );
+
                 return;
             }
         }
 
+        /* フォームの入力確認 */
+
         if (!completeForm.checkValidity()) {
+
             showError(
                 "completeError",
                 "入力内容を確認してください。"
             );
+
             return;
         }
 
@@ -368,16 +458,20 @@ function initializeGanttModals() {
             evidence_name: evidence ? evidence.name : null
         };
 
-        if (!confirm(
+        const confirmed = window.confirm(
             "以下の内容で完了申請しますか？\n\n" +
             `タスク：${currentTask.name}\n` +
             `実績工数：${actualHours}時間\n` +
             `完了報告：${report}`
-        )) {
-            return;
-        }
+        );
 
-        console.log("完了申請（仮）", requestData);
+        if (!confirmed) return;
+
+        // 現在はフロントエンドの仮処理
+        console.log(
+            "完了申請（仮）:",
+            requestData
+        );
 
         completeModal.hide();
 
@@ -385,9 +479,15 @@ function initializeGanttModals() {
             "完了申請の入力を確認しました。\n" +
             "現在は開発用の仮処理のため、申請は保存されていません。"
         );
+
     });
 
-    // 必要に応じて他のJSから呼び出せるようにする
+    /* =====================================
+       他のJavaScriptから呼び出す場合
+    ===================================== */
+
     window.openGanttHoursModal = openHoursModal;
+
     window.openGanttCompleteModal = openCompleteModal;
+
 }
