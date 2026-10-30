@@ -1,70 +1,193 @@
+
 <?php
 
-$host = 'localhost';
-$dbname = 'Tasfina_db'; // 実際のデータベース名に変更してください
-$username = 'root';     // 実際のユーザー名に変更してください
-$password = 'password';     // 実際のパスワードに変更してください
-$charset = 'utf8mb4';
+session_start();
 
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
+header("Content-Type: application/json; charset=utf-8");
 
-$query = json_decode(file_get_contents("php://input"), true);
+$host = "localhost";
+$dbname = "Tasfina_db";
+$dbUsername = "root";
+$dbPassword = "password";
+$charset = "utf8mb4";
 
-$useremail = $query["email"];
-$userpassword = $query["password"];
+function sendJson($status, $data)
+{
+    http_response_code($status);
 
+    echo json_encode(
+        $data,
+        JSON_UNESCAPED_UNICODE
+    );
 
-try {
-    $pdo = new PDO($dsn, $username, $password, $options);
-
-    // 例:名前付きプレースホルダ
-    $sql  = "select user_id,password_hash from users where email = :email";
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->bindParam(':email', $useremail, PDO::PARAM_STR);
-
-    $stmt->execute();
-    $rows = $stmt->fetchAll();
-
-    $user_id = $rows["user_id"];
-
-    $userpassword = hash("sha256", $userpassword);
-    
-
-    if($userpassword !== $rows["password_hash"])
-    {
-        $return = json_encode(["comment" => "ユーザー名かパスワードが間違っています", "login" => false]);
-        exit();
-    }else
-    {
-        $return = json_encode(["comment" => "ログイン成功", "login" => true]);
-    }
-
-
-    $sql  = "SELECT group_id FROM user_groups WHERE user_id = :user_id";
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_STR);
-
-    $stmt->execute();
-    $rows = $stmt->fetch();
-
-
-    session_start();
-
-    $_SESSION["user_id"] = $rows["user_id"];
-    $_SESSION["group_id"] = $rows["group_id"];
-
-    echo $return;
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    exit('DB error');
+    exit;
 }
 
-?>
+// POST以外は拒否
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    sendJson(405, [
+        "login" => false,
+        "comment" => "POSTで送信してください。"
+    ]);
+}
+
+// JSON取得
+$query = json_decode(
+    file_get_contents("php://input"),
+    true
+);
+
+if (!is_array($query)) {
+    sendJson(400, [
+        "login" => false,
+        "comment" => "送信データが不正です。"
+    ]);
+}
+
+// 入力値取得
+$email = trim($query["email"] ?? "");
+$userPassword = $query["password"] ?? "";
+
+// 入力チェック
+if (
+    !filter_var($email, FILTER_VALIDATE_EMAIL) ||
+    !is_string($userPassword) ||
+    $userPassword === ""
+) {
+    sendJson(400, [
+        "login" => false,
+        "comment" => "メールアドレスとパスワードを確認してください。"
+    ]);
+}
+
+try {
+
+    // DB接続
+    $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+
+    $pdo = new PDO(
+        $dsn,
+        $dbUsername,
+        $dbPassword,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
+        ]
+    );
+
+    // ユーザー取得
+    $sql = "
+        SELECT
+            user_id,
+            display_name,
+            email,
+            password_hash,
+            role_code
+        FROM users
+        WHERE email = :email
+        LIMIT 1
+    ";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        ":email" => $email
+    ]);
+
+    $user = $stmt->fetch();
+
+    // ユーザーが存在しない場合
+    if (!$user) {
+        sendJson(401, [
+            "login" => false,
+            "comment" => "メールアドレスまたはパスワードが違います。"
+        ]);
+    }
+
+    // 保存済みハッシュ
+    $storedHash = $user["password_hash"];
+
+    // 新方式の検証
+    $validPassword = password_verify(
+        $userPassword,
+        $storedHash
+    );
+
+    // 旧SHA-256方式にも対応
+    $legacyPassword = false;
+
+    if (!$validPassword) {
+
+        $legacyPassword = hash_equals(
+            $storedHash,
+            hash("sha256", $userPassword)
+        );
+
+        $validPassword = $legacyPassword;
+    }
+
+    // パスワード不一致
+    if (!$validPassword) {
+        sendJson(401, [
+            "login" => false,
+            "comment" => "メールアドレスまたはパスワードが違います。"
+        ]);
+    }
+
+    // 旧SHA-256なら新方式に更新
+    if ($legacyPassword) {
+
+        $newHash = password_hash(
+            $userPassword,
+            PASSWORD_DEFAULT
+        );
+
+        $update = $pdo->prepare("
+            UPDATE users
+            SET password_hash = :password_hash
+            WHERE user_id = :user_id
+        ");
+
+        $update->execute([
+            ":password_hash" => $newHash,
+            ":user_id" => $user["user_id"]
+        ]);
+    }
+
+    // セッション固定攻撃対策
+    session_regenerate_id(true);
+
+    // ログイン情報を保存
+    $_SESSION["user_id"] = (int)$user["user_id"];
+
+    $_SESSION["role_code"] = $user["role_code"];
+
+    // ログイン成功
+    sendJson(200, [
+        "login" => true,
+        "comment" => "ログイン成功"
+    ]);
+
+} catch (PDOException $e) {
+
+    error_log(
+        "ログインDBエラー: " . $e->getMessage()
+    );
+
+    sendJson(500, [
+        "login" => false,
+        "comment" => "サーバーでエラーが発生しました。"
+    ]);
+
+} catch (Throwable $e) {
+
+    error_log(
+        "ログインエラー: " . $e->getMessage()
+    );
+
+    sendJson(500, [
+        "login" => false,
+        "comment" => "ログイン処理に失敗しました。"
+    ]);
+}

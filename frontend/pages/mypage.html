@@ -51,58 +51,70 @@
             <h1 class="mypage-title">マイページ</h1>
 
             <!-- =========================
-                 プロフィール
-            ========================== -->
-            <section class="mypage-profile">
+     プロフィール
+========================== -->
+<section class="mypage-profile">
 
-                <div class="profile-avatar">
-                    <i class="bi bi-person-fill"></i>
-                </div>
+    <div class="profile-avatar">
+        <i class="bi bi-person-fill"></i>
+    </div>
 
-                <div class="profile-info">
+    <div class="profile-info">
 
-                    <h2>山田太郎</h2>
+        <!-- ユーザー名 -->
+        <h2 id="mypageUserName">
+            読み込み中...
+        </h2>
 
-                    <p class="profile-role">
-                        営業部／一般メンバー
-                    </p>
+        <!-- 役職 -->
+        <p
+            id="mypageUserRole"
+            class="profile-role"
+        >
+            読み込み中...
+        </p>
 
-                    <p class="profile-email">
-                        yamada@example.com
-                    </p>
+        <!-- メールアドレス -->
+        <p
+            id="mypageUserEmail"
+            class="profile-email"
+        >
+            読み込み中...
+        </p>
 
-                    <div class="profile-department">
+        <!-- 所属部門コード -->
+        <div class="profile-department">
 
-                        <span>
-                            所属部門コード：ABCD123
-                        </span>
+            <span>
+                所属部門コード：ABCD123
+            </span>
 
-                        <button
-                            type="button"
-                            id="copyDeptCode"
-                            class="profile-copy-button"
-                            data-code="ABCD123"
-                            aria-label="所属部門コードをコピー"
-                            title="所属部門コードをコピー"
-                        >
-                            <i class="bi bi-copy"></i>
-                        </button>
+            <button
+                type="button"
+                id="copyDeptCode"
+                class="profile-copy-button"
+                data-code="ABCD123"
+                aria-label="所属部門コードをコピー"
+                title="所属部門コードをコピー"
+            >
+                <i class="bi bi-copy"></i>
+            </button>
 
-                    </div>
+        </div>
 
-                </div>
+    </div>
 
-                <!-- プロフィール編集 -->
-                <a
-                    href="#"
-                    id="editProfileButton"
-                    class="profile-edit-button"
-                    aria-label="プロフィール編集"
-                >
-                    <i class="bi bi-pencil"></i>
-                </a>
+    <!-- プロフィール編集 -->
+    <a
+        href="#"
+        id="editProfileButton"
+        class="profile-edit-button"
+        aria-label="プロフィール編集"
+    >
+        <i class="bi bi-pencil"></i>
+    </a>
 
-            </section>
+</section>
 
 
             <!-- =========================

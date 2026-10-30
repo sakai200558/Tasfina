@@ -191,12 +191,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.json();
 
-            if (!response.ok) {
-                showError(
-                    result.message || "登録処理に失敗しました。"
-                );
-                return;
-            }
+           if (!response.ok) {
+    showError(
+        result.comment ||
+        result.message ||
+        "登録処理に失敗しました。"
+    );
+    return;
+}
 
             /* ========================================
                登録成功
