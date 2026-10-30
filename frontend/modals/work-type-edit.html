@@ -1,1 +1,121 @@
-業務タイプ　倍率編集モーダル
+
+<!-- ========================================
+     業務タイプ・倍率編集モーダル
+======================================== -->
+
+<div
+    class="modal fade"
+    id="workTypeEditModal"
+    tabindex="-1"
+    aria-labelledby="workTypeEditModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+        <div class="modal-content work-type-modal">
+
+            <!-- ヘッダー -->
+            <div class="modal-header">
+
+                <div>
+                    <h2
+                        class="modal-title fs-5"
+                        id="workTypeEditModalLabel"
+                    >
+                        <i class="bi bi-sliders me-2"></i>
+                        業務タイプ・倍率編集
+                    </h2>
+
+                    <p class="work-type-modal-description">
+                        業務内容ごとの負荷倍率を設定します。
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="閉じる"
+                ></button>
+
+            </div>
+
+            <!-- 本体 -->
+            <div class="modal-body">
+
+                <div
+                    id="workTypeMessage"
+                    class="alert d-none"
+                    role="alert"
+                ></div>
+
+                <div class="work-type-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>
+                        業務倍率は基本スコアに掛け合わせて使用します。
+                        無効にした業務タイプは新規選択の対象から除外する想定です。
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table work-type-table align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>業務タイプ名</th>
+                                <th>倍率</th>
+                                <th>状態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="workTypeTableBody">
+                            <!-- JavaScriptで生成 -->
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="addWorkTypeButton"
+                    class="btn btn-outline-primary"
+                >
+                    <i class="bi bi-plus-lg"></i>
+                    業務タイプを追加
+                </button>
+
+                <p class="work-type-note">
+                    ※ 倍率は0.1～10.0の範囲で設定してください。
+                </p>
+
+            </div>
+
+            <!-- フッター -->
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    キャンセル
+                </button>
+
+                <button
+                    type="button"
+                    id="saveWorkTypeButton"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-floppy me-1"></i>
+                    変更を保存
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
