@@ -4,13 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const generalActionButtons = document.getElementById('generalActionButtons');
     const adminActionButtons = document.getElementById('adminActionButtons');
     
-    // モーダル要素
+    // 月切り替え要素
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const currentYMEl = document.getElementById('currentYM');
+
+    // モーダル：希望シフト
     const preferredModal = document.getElementById('preferredModal');
     const openPreferredModalBtn = document.getElementById('openPreferredModalBtn');
     const closePreferredModalBtn = document.getElementById('closePreferredModalBtn');
     const cancelPreferredModalBtn = document.getElementById('cancelPreferredModalBtn');
     const submitPreferredModalBtn = document.getElementById('submitPreferredModalBtn');
 
+    // モーダル：有休申請
+    const paidLeaveModal = document.getElementById('paidLeaveModal');
+    const openPaidLeaveBtn = document.getElementById('openPaidLeaveBtn');
+    const closePaidLeaveModalBtn = document.getElementById('closePaidLeaveModalBtn');
+    const cancelPaidLeaveModalBtn = document.getElementById('cancelPaidLeaveModalBtn');
+    const submitPaidLeaveModalBtn = document.getElementById('submitPaidLeaveModalBtn');
+
+    // モーダル：繁忙期設定
     const busyModal = document.getElementById('busyModal');
     const openBusyModalBtn = document.getElementById('openBusyModalBtn');
     const closeBusyModalBtn = document.getElementById('closeBusyModalBtn');
@@ -20,10 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentYM = '2026-10'; // 基準年月
     const userId = 1; // サンプル用ユーザーID
 
+    // --- 月変更ユーティリティ ---
+    function changeMonth(offset) {
+        let [year, month] = currentYM.split('-').map(Number);
+        month += offset;
+        if (month > 12) {
+            month = 1;
+            year++;
+        } else if (month < 1) {
+            month = 12;
+            year--;
+        }
+        currentYM = `${year}-${String(month).padStart(2, '0')}`;
+        currentYMEl.textContent = currentYM;
+        loadShiftData();
+    }
+
+    if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+    if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
     // --- APIデータ取得・描画関数 ---
     async function loadShiftData() {
         try {
-            const res = await fetch(`shifts.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
+            const res = await fetch(`shift_api.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
             const data = await res.json();
             if (data.success) {
                 renderCalendar(data.shifts, data.busy_days);
@@ -36,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadDashboardInfo() {
         try {
-            const res = await fetch(`shifts.php?action=get_dashboard_info&user_id=${userId}`);
+            const res = await fetch(`shift_api.php?action=get_dashboard_info&user_id=${userId}`);
             const data = await res.json();
             if (data.success && data.todays_shift) {
                 const s = data.todays_shift;
@@ -54,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
         
-        // 簡易カレンダー生成（当月の日付表示の例）
         for (let i = 1; i <= 31; i++) {
             const dayStr = String(i).padStart(2, '0');
             const fullDate = `${currentYM}-${dayStr}`;
@@ -85,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- イベントリスナー設定 ---
+    // --- 権限切り替え ---
     roleSelector.addEventListener('change', (e) => {
         if (e.target.value === 'admin') {
             pageTitle.textContent = 'シフト管理（管理者）';
@@ -98,14 +129,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // モーダル制御
+    // --- モーダル開閉制御 ---
     if (openPreferredModalBtn) openPreferredModalBtn.addEventListener('click', () => preferredModal.classList.remove('hidden'));
     [closePreferredModalBtn, cancelPreferredModalBtn].forEach(btn => btn?.addEventListener('click', () => preferredModal.classList.add('hidden')));
+
+    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
+    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => btn?.addEventListener('click', () => paidLeaveModal.classList.add('hidden')));
 
     if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
     [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => btn?.addEventListener('click', () => busyModal.classList.add('hidden')));
 
-    // 希望シフト提出処理 (POST)
+    // --- 希望シフト提出処理 (POST) ---
     if (submitPreferredModalBtn) {
         submitPreferredModalBtn.addEventListener('click', async () => {
             const body = {
@@ -115,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 start_time: document.getElementById('prefStartTime').value,
                 end_time: document.getElementById('prefEndTime').value
             };
-            const res = await fetch('shifts.php', {
+            const res = await fetch('shift_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -127,7 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 繁忙期設定保存処理 (POST)
+    // --- 有休申請処理 ---
+    if (submitPaidLeaveModalBtn) {
+        submitPaidLeaveModalBtn.addEventListener('click', () => {
+            alert('有休申請を送信しました。');
+            paidLeaveModal.classList.add('hidden');
+        });
+    }
+
+    // --- 繁忙期設定保存処理 (POST) ---
     if (submitBusyModalBtn) {
         submitBusyModalBtn.addEventListener('click', async () => {
             const body = {
@@ -136,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 required_people: document.getElementById('busyRequiredPeople').value,
                 bonus_pt: document.getElementById('busyBonusPt').value
             };
-            const res = await fetch('shifts.php', {
+            const res = await fetch('shift_api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
