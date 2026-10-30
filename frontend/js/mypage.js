@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadMyPageUser();
 
+
     /* ========================================
        所属部門コードのコピー
     ======================================== */
@@ -22,6 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("copyMessage");
 
     let messageTimer;
+
+
+    /* ========================================
+       コピー結果メッセージ
+    ======================================== */
 
     function showCopyMessage(message) {
 
@@ -43,11 +49,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    /* ========================================
+       所属部門コードのコピー処理
+    ======================================== */
+
     if (copyButton) {
 
         copyButton.addEventListener("click", async () => {
 
-            const deptCode = copyButton.dataset.code;
+            const deptCode =
+                copyButton.dataset.code || "";
+
+            if (!deptCode) {
+
+                showCopyMessage(
+                    "コピーできる所属部門コードがありません"
+                );
+
+                return;
+            }
 
             try {
 
@@ -76,31 +97,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    /*
+       プロフィール編集モーダルの処理は
+       profile-edit.js に任せます。
+
+       ここではクリックイベントを
+       重複登録しません。
+    */
+
+});
+
+
+/* ========================================
+   所属部門表示の更新
+======================================== */
+
+function updateMyPageDepartment(user) {
+
+    const departmentElement =
+        document.getElementById("mypageDepartment");
+
+    const copyButton =
+        document.getElementById("copyDeptCode");
+
+    if (!departmentElement) {
+        return;
+    }
+
+    const departmentName =
+        String(user.department_name ?? "").trim();
+
+    const departmentCode =
+        String(user.department_code ?? "").trim();
+
+
     /* ========================================
-       プロフィール編集（仮処理）
+       所属部門がある場合
     ======================================== */
 
-    const editProfileButton =
-        document.getElementById("editProfileButton");
+    if (departmentName || departmentCode) {
 
-    if (editProfileButton) {
+        departmentElement.textContent =
+            departmentName
+                ? `所属部門：${departmentName}`
+                : `所属部門コード：${departmentCode}`;
 
-        editProfileButton.addEventListener(
-            "click",
-            (event) => {
+        if (copyButton) {
 
-                event.preventDefault();
+            copyButton.dataset.code =
+                departmentCode;
 
-                alert(
-                    "プロフィール編集機能は準備中です。"
-                );
+            copyButton.hidden =
+                !departmentCode;
 
-            }
-        );
+        }
+
+        return;
+    }
+
+
+    /* ========================================
+       所属部門がない場合
+    ======================================== */
+
+    departmentElement.textContent =
+        "所属部門：未所属";
+
+    if (copyButton) {
+
+        copyButton.dataset.code = "";
+
+        copyButton.hidden = true;
 
     }
 
-});
+}
 
 
 /* ========================================
@@ -117,6 +188,12 @@ async function loadMyPageUser() {
 
     const roleElement =
         document.getElementById("mypageUserRole");
+
+    const departmentElement =
+        document.getElementById("mypageDepartment");
+
+    const copyButton =
+        document.getElementById("copyDeptCode");
 
     if (!nameElement || !emailElement) {
         return;
@@ -141,6 +218,7 @@ async function loadMyPageUser() {
             }
         );
 
+
         /* =====================================
            未ログインの場合
         ===================================== */
@@ -152,6 +230,7 @@ async function loadMyPageUser() {
             return;
         }
 
+
         /* =====================================
            HTTPエラー確認
         ===================================== */
@@ -159,10 +238,11 @@ async function loadMyPageUser() {
         if (!response.ok) {
 
             throw new Error(
-                "ユーザー情報の取得に失敗しました。"
+                `ユーザー情報の取得に失敗しました。HTTP ${response.status}`
             );
 
         }
+
 
         /* =====================================
            JSON取得
@@ -182,19 +262,24 @@ async function loadMyPageUser() {
 
         }
 
+        const user = result.user;
+
+
         /* =====================================
            ユーザー名表示
         ===================================== */
 
         nameElement.textContent =
-            result.user.name || "名前未設定";
+            user.name || "名前未設定";
+
 
         /* =====================================
            メールアドレス表示
         ===================================== */
 
         emailElement.textContent =
-            result.user.email || "メールアドレス未設定";
+            user.email || "メールアドレス未設定";
+
 
         /* =====================================
            役職表示
@@ -209,15 +294,14 @@ async function loadMyPageUser() {
                 "4000": "閲覧専用"
             };
 
-            const roleCode = String(
-                result.user.role_code ?? ""
-            );
+            const roleCode =
+                String(user.role_code ?? "");
 
             const roleName =
                 roleNames[roleCode] || "権限未設定";
 
             const jobTitle =
-                result.user.job_title;
+                user.job_title;
 
             roleElement.textContent =
                 jobTitle
@@ -226,9 +310,17 @@ async function loadMyPageUser() {
 
         }
 
+
+        /* =====================================
+           所属部門表示
+        ===================================== */
+
+        updateMyPageDepartment(user);
+
+
         console.log(
             "ユーザー情報取得成功:",
-            result.user
+            user
         );
 
     } catch (error) {
@@ -244,7 +336,24 @@ async function loadMyPageUser() {
         emailElement.textContent = "";
 
         if (roleElement) {
+
             roleElement.textContent = "";
+
+        }
+
+        if (departmentElement) {
+
+            departmentElement.textContent =
+                "所属部門：取得できませんでした";
+
+        }
+
+        if (copyButton) {
+
+            copyButton.dataset.code = "";
+
+            copyButton.hidden = true;
+
         }
 
     }

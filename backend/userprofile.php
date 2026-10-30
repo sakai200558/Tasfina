@@ -5,14 +5,21 @@ session_start();
 
 header("Content-Type: application/json; charset=utf-8");
 
+// ========================================
 // データベース接続情報
-$host = 'localhost';
-$dbname = 'Tasfina_db';
-$username = 'root';
-$password = 'password';
-$charset = 'utf8mb4';
+// ========================================
 
-// JSONレスポンスを返す関数
+$host = "localhost";
+$dbname = "Tasfina_db";
+$username = "root";
+$password = "password";
+$charset = "utf8mb4";
+
+
+// ========================================
+// JSONレスポンス
+// ========================================
+
 function sendResponse($statusCode, $data)
 {
     http_response_code($statusCode);
@@ -25,7 +32,25 @@ function sendResponse($statusCode, $data)
     exit;
 }
 
+
+// ========================================
+// GETリクエスト確認
+// ========================================
+
+if ($_SERVER["REQUEST_METHOD"] !== "GET") {
+
+    sendResponse(405, [
+        "success" => false,
+        "message" => "GETでアクセスしてください。"
+    ]);
+
+}
+
+
+// ========================================
 // ログイン確認
+// ========================================
+
 if (!isset($_SESSION["user_id"])) {
 
     sendResponse(401, [
@@ -35,7 +60,12 @@ if (!isset($_SESSION["user_id"])) {
 
 }
 
-$userid = $_SESSION["user_id"];
+$userid = (int)$_SESSION["user_id"];
+
+
+// ========================================
+// データベース接続設定
+// ========================================
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
 
@@ -45,9 +75,13 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES => false
 ];
 
+
 try {
 
+    // ========================================
     // データベース接続
+    // ========================================
+
     $pdo = new PDO(
         $dsn,
         $username,
@@ -55,9 +89,14 @@ try {
         $options
     );
 
+
+    // ========================================
     // ログイン中のユーザー情報取得
+    // ========================================
+
     $sql = "
         SELECT
+            user_id,
             display_name,
             email,
             role_code,
@@ -71,15 +110,19 @@ try {
     $stmt = $pdo->prepare($sql);
 
     $stmt->bindValue(
-        ':user_id',
+        ":user_id",
         $userid,
         PDO::PARAM_INT
     );
 
     $stmt->execute();
 
-    // 1件だけ取得
     $user = $stmt->fetch();
+
+
+    // ========================================
+    // ユーザーが存在しない場合
+    // ========================================
 
     if (!$user) {
 
@@ -90,7 +133,29 @@ try {
 
     }
 
+
+    // ========================================
+    // 所属部門情報
+    // ========================================
+
+    /*
+       現時点では所属部門テーブルの
+       正確な構造が未確認のため、
+       存在しないテーブルへのSQLを
+       実行しないようにしています。
+
+       部門テーブルとの関連が確認できたら
+       ここに取得処理を追加します。
+    */
+
+    $departmentName = null;
+    $departmentCode = null;
+
+
+    // ========================================
     // 成功レスポンス
+    // ========================================
+
     sendResponse(200, [
         "success" => true,
         "user" => [
@@ -98,18 +163,36 @@ try {
             "email" => $user["email"],
             "role_code" => $user["role_code"],
             "job_title" => $user["job_title"],
-            "level_factor" => $user["level_factor"]
+            "level_factor" => $user["level_factor"],
+
+            // 所属部門
+            "department_name" => $departmentName,
+            "department_code" => $departmentCode
         ]
     ]);
 
 } catch (PDOException $e) {
 
-    // 詳細なDBエラーはサーバーログに記録
-    error_log($e->getMessage());
+    error_log(
+        "ユーザープロフィールDBエラー: " .
+        $e->getMessage()
+    );
 
     sendResponse(500, [
         "success" => false,
         "message" => "ユーザー情報の取得に失敗しました。"
+    ]);
+
+} catch (Throwable $e) {
+
+    error_log(
+        "ユーザープロフィールエラー: " .
+        $e->getMessage()
+    );
+
+    sendResponse(500, [
+        "success" => false,
+        "message" => "サーバーでエラーが発生しました。"
     ]);
 
 }
