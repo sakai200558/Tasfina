@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 start_time: document.getElementById('prefStartTime').value,
                 end_time: document.getElementById('prefEndTime').value
             };
-            const res = await fetch('shift_api.php', {
+            const res = await fetch('shifts.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 required_people: document.getElementById('busyRequiredPeople').value,
                 bonus_pt: document.getElementById('busyBonusPt').value
             };
-            const res = await fetch('shift_api.php', {
+            const res = await fetch('shifts.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
