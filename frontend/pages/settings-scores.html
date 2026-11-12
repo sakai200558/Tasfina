@@ -26,11 +26,23 @@
     <!-- 負担スコア設定専用CSS -->
     <link rel="stylesheet" href="../css/settings-scores.css">
 
+    <!-- 業務タイプ編集モーダル専用CSS -->
+<link rel="stylesheet" href="../css/work-type-edit.css">
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    defer
+></script>
+
     <!-- 共通JavaScript -->
     <script src="../js/common.js" defer></script>
 
     <!-- 負担スコア設定専用JavaScript -->
     <script src="../js/settings-scores.js" defer></script>
+
+    <!-- 業務タイプ編集モーダル専用JS -->
+<script src="../js/work-type-edit.js" defer></script>
+
 </head>
 
 <body class="app-page">
@@ -163,6 +175,33 @@
                         </div>
 
                     </section>
+
+                    <!-- =========================
+     業務タイプ・倍率設定
+========================= -->
+<section class="score-card">
+
+    <div class="score-card-heading">
+
+        <h2>業務タイプ・倍率設定</h2>
+
+        <p>
+            業務内容の負荷に応じた倍率を設定します。
+            基本スコアに倍率を適用します。
+        </p>
+
+    </div>
+
+    <button
+        type="button"
+        id="openWorkTypeEditButton"
+        class="btn btn-outline-primary"
+    >
+        <i class="bi bi-sliders"></i>
+        業務タイプを編集
+    </button>
+
+</section>
 
                     <!-- 追加条件のスコア -->
                     <section class="score-card">
@@ -521,14 +560,12 @@
 
             </div>
 
-        </main>
+                </main>
 
     </div>
 
-    <!-- Bootstrap JS -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    ></script>
+    <!-- 業務タイプ編集モーダル配置先 -->
+    <div id="workTypeEditModalContainer"></div>
 
 </body>
 </html>

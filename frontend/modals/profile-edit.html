@@ -1,1 +1,148 @@
-プロフィール編集モーダル
+
+<!-- プロフィール編集モーダル -->
+<div
+    class="modal fade"
+    id="profileEditModal"
+    tabindex="-1"
+    aria-labelledby="profileEditModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content profile-edit-modal">
+
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="profileEditModalLabel">
+                    <i class="bi bi-person-gear me-2"></i>
+                    プロフィール編集
+                </h2>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="閉じる"
+                ></button>
+            </div>
+
+            <form id="profileEditForm">
+
+                <div class="modal-body">
+
+                    <p class="profile-edit-description">
+                        プロフィール情報を変更できます。
+                    </p>
+
+                    <div
+                        id="profileEditMessage"
+                        class="alert"
+                        role="alert"
+                        aria-live="polite"
+                        hidden
+                    ></div>
+
+                    <!-- ユーザー名 -->
+                    <div class="mb-3">
+                        <label for="profileEditName" class="form-label">
+                            ユーザー名
+                            <span class="profile-edit-required">※</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="profileEditName"
+                            name="display_name"
+                            maxlength="30"
+                            required
+                        >
+
+                        <div class="form-text">
+                            30文字以内で入力してください。
+                        </div>
+                    </div>
+
+                    <!-- メールアドレス -->
+                    <div class="mb-3">
+                        <label for="profileEditEmail" class="form-label">
+                            メールアドレス
+                            <span class="profile-edit-required">※</span>
+                        </label>
+
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="profileEditEmail"
+                            name="email"
+                            maxlength="30"
+                            required
+                        >
+                    </div>
+
+                    <hr class="profile-edit-divider">
+
+                    <p class="profile-edit-section-title">
+                        所属・権限情報
+                    </p>
+
+                    <!-- 所属部門 -->
+                    <div class="mb-3">
+                        <label for="profileEditDepartment" class="form-label">
+                            所属部門
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control profile-edit-readonly"
+                            id="profileEditDepartment"
+                            value="読み込み中..."
+                            readonly
+                        >
+                    </div>
+
+                    <!-- 権限 -->
+                    <div class="mb-2">
+                        <label for="profileEditRole" class="form-label">
+                            権限
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control profile-edit-readonly"
+                            id="profileEditRole"
+                            value="読み込み中..."
+                            readonly
+                        >
+                    </div>
+
+                    <p class="profile-edit-note">
+                        <i class="bi bi-info-circle me-1"></i>
+                        所属部門・権限の変更は管理者に依頼してください。
+                    </p>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        キャンセル
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary profile-edit-save"
+                        id="profileEditSaveButton"
+                    >
+                        <i class="bi bi-check-lg me-1"></i>
+                        変更を保存
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
