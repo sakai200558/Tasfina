@@ -21,6 +21,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePaidLeaveModalBtn = document.getElementById('closePaidLeaveModalBtn');
     const cancelPaidLeaveModalBtn = document.getElementById('cancelPaidLeaveModalBtn');
     const submitPaidLeaveModalBtn = document.getElementById('submitPaidLeaveModalBtn');
+    
+    const leaveReasonTextarea = document.getElementById('leaveReason');
+    const charCountEl = document.getElementById('charCount');
+
+    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
+    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => paidLeaveModal.classList.add('hidden'));
+    });
+
+    if (leaveReasonTextarea && charCountEl) {
+        leaveReasonTextarea.addEventListener('input', (e) => {
+            const currentLen = e.target.value.length;
+            charCountEl.textContent = `${currentLen} / 300`;
+        });
+    }
 
     const busyModal = document.getElementById('busyModal');
     const openBusyModalBtn = document.getElementById('openBusyModalBtn');
@@ -241,6 +256,53 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(result.message || '繁忙期設定完了');
             busyModal.classList.add('hidden');
             loadShiftData();
+        });
+    }
+    // 有休申請の送信処理
+    if (submitPaidLeaveModalBtn) {
+        submitPaidLeaveModalBtn.addEventListener('click', async () => {
+            const startDate = document.getElementById('leaveStartDate').value;
+            const endDate = document.getElementById('leaveEndDate').value;
+            const reason = leaveReasonTextarea.value;
+            const leaveType = document.querySelector('input[name="leaveType"]:checked').value;
+
+            if (!startDate || !endDate) {
+                alert('開始日と終了日を選択してください。');
+                return;
+            }
+            if (!reason.trim()) {
+                alert('取得理由を入力してください。');
+                return;
+            }
+
+            const body = {
+                action: 'submit_paid_leave',
+                user_id: userId,
+                leave_type: leaveType,
+                start_date: startDate,
+                end_date: endDate,
+                reason: reason
+            };
+
+            try {
+                const res = await fetch('shifts.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert(result.message || '有休申請を送信しました。');
+                    paidLeaveModal.classList.add('hidden');
+                    loadShiftData();
+                } else {
+                    alert('エラー: ' + (result.error || '申請に失敗しました。'));
+                }
+            } catch (err) {
+                console.error('有休申請通信エラー:', err);
+                alert('通信に失敗しました。');
+            }
         });
     }
 

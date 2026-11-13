@@ -148,5 +148,35 @@ if ($method === 'POST') {
     }
 }
 
+// --- 有休申請の登録 ---
+    if ($action === 'submit_paid_leave') {
+        $start_date = $input['start_date'] ?? '';
+        $end_date = $input['end_date'] ?? '';
+        $reason = $input['reason'] ?? '';
+        $leave_type = $input['leave_type'] ?? 'full';
+
+        if (empty($start_date) || empty($end_date)) {
+            echo json_encode(['success' => false, 'error' => '日付が正しく選択されていません。']);
+            exit;
+        }
+
+        try {
+            // 例として shifts テーブルに有休ステータスとして登録する処理
+            $stmt = $pdo->prepare("
+                INSERT INTO shifts (user_id, work_date, status, created_at) 
+                VALUES (?, ?, '有給休暇', NOW())
+                ON DUPLICATE KEY UPDATE 
+                status = '有給休暇',
+                upated_at = NOW()
+            ");
+            $stmt->execute([$user_id, $start_date]);
+
+            echo json_encode(['success' => true, 'message' => '有休申請を受け付けました。']);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
 echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
 ?>
