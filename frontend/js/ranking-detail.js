@@ -44,27 +44,39 @@
     }
 
     function formatChange(value) {
-        const number = Number(value);
 
-        if (number > 0) {
-            return {
-                text: `↑ +${formatScore(number)} pt`,
-                className: "ranking-modal-change-up"
-            };
-        }
-
-        if (number < 0) {
-            return {
-                text: `↓ ${formatScore(number)} pt`,
-                className: "ranking-modal-change-down"
-            };
-        }
-
+    if (
+        value === null ||
+        value === undefined ||
+        !Number.isFinite(Number(value))
+    ) {
         return {
-            text: "→ ±0.0 pt",
+            text: "未取得",
             className: "ranking-modal-change-neutral"
         };
     }
+
+    const number = Number(value);
+
+    if (number > 0) {
+        return {
+            text: `↑ +${number.toFixed(1)} pt`,
+            className: "ranking-modal-change-up"
+        };
+    }
+
+    if (number < 0) {
+        return {
+            text: `↓ ${number.toFixed(1)} pt`,
+            className: "ranking-modal-change-down"
+        };
+    }
+
+    return {
+        text: "→ ±0.0 pt",
+        className: "ranking-modal-change-neutral"
+    };
+}
 
     function formatHours(value) {
         if (value === null || value === undefined) {
@@ -396,7 +408,7 @@
             formatScore(member.score)
         );
 
-        const change = formatChange(member.change ?? 0);
+        const change = formatChange(member.change);
 
         const changeElement = document.getElementById(
             "rankingModalChange"
