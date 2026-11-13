@@ -130,7 +130,7 @@
         </main>
     </div>
 
-    <!-- モーダル：希望シフト提出 -->
+<!-- モーダル：希望シフト提出 -->
     <div id="preferredModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -139,7 +139,7 @@
             </div>
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">対象日</label>
+                    <label class="block font-bold text-gray-700 mb-1">対象日 *</label>
                     <input type="date" id="prefDate" class="w-full p-2 border border-gray-300 rounded">
                 </div>
                 <div>
@@ -165,6 +165,7 @@
             </div>
             <div class="flex justify-end gap-2 border-t pt-3">
                 <button id="cancelPreferredModalBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded">キャンセル</button>
+                <!-- id="submitPreferredModalBtn" を付与 -->
                 <button id="submitPreferredModalBtn" class="px-4 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700">提出する</button>
             </div>
         </div>

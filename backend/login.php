@@ -83,7 +83,8 @@ try {
             display_name,
             email,
             password_hash,
-            role_code
+            role_code,
+            group_id
         FROM users
         WHERE email = :email
         LIMIT 1
@@ -162,6 +163,8 @@ try {
     $_SESSION["user_id"] = (int)$user["user_id"];
 
     $_SESSION["role_code"] = $user["role_code"];
+
+    $_SESSION["group_id"] = $user["group_id"];
 
     // ログイン成功
     sendJson(200, [

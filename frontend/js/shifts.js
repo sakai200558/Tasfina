@@ -170,26 +170,49 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
     [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => btn?.addEventListener('click', () => busyModal.classList.add('hidden')));
 
-    // --- 希望シフト提出処理 (参照先を shifts.php に変更) ---
+    // --- 希望シフト提出処理 ---
     if (submitPreferredModalBtn) {
         submitPreferredModalBtn.addEventListener('click', async () => {
+            const workDateInput = document.getElementById('prefDate').value;
+            const statusInput = document.getElementById('prefStatus').value;
+            const startTimeInput = document.getElementById('prefStartTime').value;
+            const endTimeInput = document.getElementById('prefEndTime').value;
+
+            // 対象日が未入力の場合は処理を中断
+            if (!workDateInput) {
+                alert('対象日を選択してください。');
+                return;
+            }
+
             const body = {
                 action: 'submit_shift_request',
                 user_id: userId,
-                work_date: document.getElementById('prefDate').value,
-                status: document.getElementById('prefStatus').value,
-                start_time: document.getElementById('prefStartTime').value,
-                end_time: document.getElementById('prefEndTime').value
+                work_date: workDateInput,
+                status: statusInput,
+                start_time: startTimeInput,
+                end_time: endTimeInput
             };
-            const res = await fetch('shifts.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const result = await res.json();
-            alert(result.message || '登録完了');
-            preferredModal.classList.add('hidden');
-            loadShiftData();
+
+            try {
+                const res = await fetch('shifts.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert(result.message || '希望シフトを登録しました。');
+                    preferredModal.classList.add('hidden');
+                    loadShiftData();        // カレンダーを再読み込み
+                    loadDashboardInfo();    // ダッシュボードを再読み込み
+                } else {
+                    alert('エラー: ' + (result.error || '登録に失敗しました。'));
+                }
+            } catch (err) {
+                console.error('通信エラー:', err);
+                alert('通信に失敗しました。');
+            }
         });
     }
 
