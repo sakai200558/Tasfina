@@ -25,11 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const leaveReasonTextarea = document.getElementById('leaveReason');
     const charCountEl = document.getElementById('charCount');
 
-    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
-    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => {
-        if (btn) btn.addEventListener('click', () => paidLeaveModal.classList.add('hidden'));
-    });
-
     if (leaveReasonTextarea && charCountEl) {
         leaveReasonTextarea.addEventListener('input', (e) => {
             const currentLen = e.target.value.length;
@@ -42,6 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBusyModalBtn = document.getElementById('closeBusyModalBtn');
     const cancelBusyModalBtn = document.getElementById('cancelBusyModalBtn');
     const submitBusyModalBtn = document.getElementById('submitBusyModalBtn');
+
+    const rouletteModal = document.getElementById('rouletteModal');
+    const openRouletteModalBtn = document.getElementById('openRouletteModalBtn');
+    const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
+    const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
+    const executeRouletteBtn = document.getElementById('executeRouletteBtn');
 
     let currentYM = '2024-10';
     const userId = 1;
@@ -59,18 +60,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
 
-const rouletteModal = document.getElementById('rouletteModal');
-    const openRouletteModalBtn = document.getElementById('openRouletteModalBtn');
-    const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
-    const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
-    const executeRouletteBtn = document.getElementById('executeRouletteBtn');
+    // モーダル開閉のイベントリスナー設定
+    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
+    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => paidLeaveModal.classList.add('hidden'));
+    });
+
+    if (openPreferredModalBtn) openPreferredModalBtn.addEventListener('click', () => preferredModal.classList.remove('hidden'));
+    [closePreferredModalBtn, cancelPreferredModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => preferredModal.classList.add('hidden'));
+    });
+
+    if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
+    [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => busyModal.classList.add('hidden'));
+    });
 
     if (openRouletteModalBtn) openRouletteModalBtn.addEventListener('click', () => rouletteModal.classList.remove('hidden'));
     [closeRouletteModalBtn, cancelRouletteModalBtn].forEach(btn => {
         if (btn) btn.addEventListener('click', () => rouletteModal.classList.add('hidden'));
     });
 
-    // --- データ取得 & レンダリング (参照先を shifts.php に変更) ---
+    // --- データ取得 & レンダリング ---
     async function loadShiftData() {
         try {
             const res = await fetch(`shifts.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
@@ -87,19 +98,20 @@ const rouletteModal = document.getElementById('rouletteModal');
     async function loadDashboardInfo() {
         try {
             const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('todayDateLabel').textContent = todayStr;
+            const todayDateLabel = document.getElementById('todayDateLabel');
+            if (todayDateLabel) todayDateLabel.textContent = todayStr;
 
             const res = await fetch(`shifts.php?action=get_dashboard_info&today=${todayStr}&user_id=${userId}`);
             const data = await res.json();
             
             const card = document.getElementById('todaysShiftCard');
-            if (data.success && data.todays_shift) {
+            if (card && data.success && data.todays_shift) {
                 const s = data.todays_shift;
                 card.innerHTML = `
                     <div class="text-sm font-bold text-green-700">${s.status}</div>
                     <div class="text-xs text-green-600 mt-0.5">${s.start_time ? s.start_time.slice(0,5) : '09:00'} ～ ${s.end_time ? s.end_time.slice(0,5) : '18:00'}</div>
                 `;
-            } else {
+            } else if (card) {
                 card.innerHTML = `<div class="text-sm font-bold text-gray-700">シフト情報なし</div>`;
             }
         } catch (err) {
@@ -109,6 +121,7 @@ const rouletteModal = document.getElementById('rouletteModal');
 
     function renderCalendar(ym, shifts, busyDays) {
         const grid = document.getElementById('calendarGrid');
+        if (!grid) return;
         grid.innerHTML = '';
 
         const [year, month] = ym.split('-').map(Number);
@@ -160,6 +173,7 @@ const rouletteModal = document.getElementById('rouletteModal');
 
     function renderSummary(summary) {
         const list = document.getElementById('shiftSummaryList');
+        if (!list) return;
         list.innerHTML = '';
         
         const types = ['通常出勤', '在宅勤務', '午前休', '有給休暇', '休日'];
@@ -175,26 +189,19 @@ const rouletteModal = document.getElementById('rouletteModal');
         });
     }
 
-    roleSelector.addEventListener('change', (e) => {
-        if (e.target.value === 'admin') {
-            pageTitle.textContent = 'シフト管理（管理者）';
-            generalActionButtons.classList.add('hidden');
-            adminActionButtons.classList.remove('hidden');
-        } else {
-            pageTitle.textContent = 'シフト管理';
-            adminActionButtons.classList.add('hidden');
-            generalActionButtons.classList.remove('hidden');
-        }
-    });
-
-    if (openPreferredModalBtn) openPreferredModalBtn.addEventListener('click', () => preferredModal.classList.remove('hidden'));
-    [closePreferredModalBtn, cancelPreferredModalBtn].forEach(btn => btn?.addEventListener('click', () => preferredModal.classList.add('hidden')));
-
-    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
-    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => btn?.addEventListener('click', () => paidLeaveModal.classList.add('hidden')));
-
-    if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
-    [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => btn?.addEventListener('click', () => busyModal.classList.add('hidden')));
+    if (roleSelector) {
+        roleSelector.addEventListener('change', (e) => {
+            if (e.target.value === 'admin') {
+                pageTitle.textContent = 'シフト管理（管理者）';
+                generalActionButtons.classList.add('hidden');
+                adminActionButtons.classList.remove('hidden');
+            } else {
+                pageTitle.textContent = 'シフト管理';
+                adminActionButtons.classList.add('hidden');
+                generalActionButtons.classList.remove('hidden');
+            }
+        });
+    }
 
     // --- 希望シフト提出処理 ---
     if (submitPreferredModalBtn) {
@@ -204,7 +211,6 @@ const rouletteModal = document.getElementById('rouletteModal');
             const startTimeInput = document.getElementById('prefStartTime').value;
             const endTimeInput = document.getElementById('prefEndTime').value;
 
-            // 対象日が未入力の場合は処理を中断
             if (!workDateInput) {
                 alert('対象日を選択してください。');
                 return;
@@ -230,8 +236,8 @@ const rouletteModal = document.getElementById('rouletteModal');
                 if (result.success) {
                     alert(result.message || '希望シフトを登録しました。');
                     preferredModal.classList.add('hidden');
-                    loadShiftData();        // カレンダーを再読み込み
-                    loadDashboardInfo();    // ダッシュボードを再読み込み
+                    loadShiftData();
+                    loadDashboardInfo();
                 } else {
                     alert('エラー: ' + (result.error || '登録に失敗しました。'));
                 }
@@ -242,40 +248,14 @@ const rouletteModal = document.getElementById('rouletteModal');
         });
     }
 
-    if (submitPaidLeaveModalBtn) {
-        submitPaidLeaveModalBtn.addEventListener('click', () => {
-            alert('有休申請を受け付けました。');
-            paidLeaveModal.classList.add('hidden');
-        });
-    }
-
-    // --- 繁忙期設定保存処理 (参照先を shifts.php に変更) ---
-    if (submitBusyModalBtn) {
-        submitBusyModalBtn.addEventListener('click', async () => {
-            const body = {
-                action: 'save_busy_setting',
-                date: document.getElementById('busyDate').value,
-                required_people: document.getElementById('busyRequiredPeople').value,
-                bonus_pt: document.getElementById('busyBonusPt').value
-            };
-            const res = await fetch('shifts.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const result = await res.json();
-            alert(result.message || '繁忙期設定完了');
-            busyModal.classList.add('hidden');
-            loadShiftData();
-        });
-    }
-    // 有休申請の送信処理
+    // --- 有休申請の送信処理 ---
     if (submitPaidLeaveModalBtn) {
         submitPaidLeaveModalBtn.addEventListener('click', async () => {
             const startDate = document.getElementById('leaveStartDate').value;
             const endDate = document.getElementById('leaveEndDate').value;
-            const reason = leaveReasonTextarea.value;
-            const leaveType = document.querySelector('input[name="leaveType"]:checked').value;
+            const reason = leaveReasonTextarea ? leaveReasonTextarea.value : '';
+            const leaveTypeEl = document.querySelector('input[name="leaveType"]:checked');
+            const leaveType = leaveTypeEl ? leaveTypeEl.value : 'full';
 
             if (!startDate || !endDate) {
                 alert('開始日と終了日を選択してください。');
@@ -317,6 +297,28 @@ const rouletteModal = document.getElementById('rouletteModal');
         });
     }
 
+    // --- 繁忙期設定保存処理 ---
+    if (submitBusyModalBtn) {
+        submitBusyModalBtn.addEventListener('click', async () => {
+            const body = {
+                action: 'save_busy_setting',
+                date: document.getElementById('busyDate').value,
+                required_people: document.getElementById('busyRequiredPeople').value,
+                bonus_pt: document.getElementById('busyBonusPt').value
+            };
+            const res = await fetch('shifts.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const result = await res.json();
+            alert(result.message || '繁忙期設定完了');
+            busyModal.classList.add('hidden');
+            loadShiftData();
+        });
+    }
+
+    // --- ルーレット実行処理 ---
     if (executeRouletteBtn) {
         executeRouletteBtn.addEventListener('click', async () => {
             const targetDate = document.getElementById('rouletteDate').value;

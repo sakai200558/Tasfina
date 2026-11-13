@@ -117,7 +117,7 @@ if ($method === 'POST') {
                 start_time = VALUES(start_time), 
                 end_time = VALUES(end_time), 
                 status = VALUES(status),
-                upated_at = NOW()
+                updated_at = NOW()
             ");
             $stmt->execute([$user_id, $work_date, $start_time, $end_time, $status]);
 
@@ -135,6 +135,7 @@ if ($method === 'POST') {
         $bonus_pt = $input['bonus_pt'] ?? 2.0;
 
         try {
+            // テーブル定義のカラム名 'required_peple' に合わせて修正
             $stmt = $pdo->prepare("
                 INSERT INTO busy_day_settings (date, required_peple, bonus_pt, is_active) 
                 VALUES (?, ?, ?, 1)
@@ -147,9 +148,8 @@ if ($method === 'POST') {
         }
         exit;
     }
-}
 
-// --- 有休申請の登録 ---
+    // --- 有休申請の登録 ---
     if ($action === 'submit_paid_leave') {
         $start_date = $input['start_date'] ?? '';
         $end_date = $input['end_date'] ?? '';
@@ -162,13 +162,12 @@ if ($method === 'POST') {
         }
 
         try {
-            // 例として shifts テーブルに有休ステータスとして登録する処理
             $stmt = $pdo->prepare("
                 INSERT INTO shifts (user_id, work_date, status, created_at) 
                 VALUES (?, ?, '有給休暇', NOW())
                 ON DUPLICATE KEY UPDATE 
                 status = '有給休暇',
-                upated_at = NOW()
+                updated_at = NOW()
             ");
             $stmt->execute([$user_id, $start_date]);
 
@@ -190,13 +189,12 @@ if ($method === 'POST') {
         }
 
         try {
-            // ルーレットで選ばれた結果を shifts テーブルに自動割り当て登録する例
             $stmt = $pdo->prepare("
                 INSERT INTO shifts (user_id, work_date, status, created_at) 
                 VALUES (?, ?, ?, NOW())
                 ON DUPLICATE KEY UPDATE 
                 status = VALUES(status),
-                upated_at = NOW()
+                updated_at = NOW()
             ");
             $stmt->execute([$user_id, $target_date, $shift_type]);
 
@@ -206,6 +204,7 @@ if ($method === 'POST') {
         }
         exit;
     }
+}
 
 echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
 ?>
