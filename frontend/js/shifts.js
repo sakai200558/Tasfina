@@ -9,70 +9,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextMonthBtn = document.getElementById('nextMonthBtn');
     const currentYMEl = document.getElementById('currentYM');
 
-    // モーダル関連要素
+    // モーダル関連
     const preferredModal = document.getElementById('preferredModal');
+    const openPreferredModalBtn = document.getElementById('openPreferredModalBtn');
+    const closePreferredModalBtn = document.getElementById('closePreferredModalBtn');
+    const cancelPreferredModalBtn = document.getElementById('cancelPreferredModalBtn');
+    const submitPreferredModalBtn = document.getElementById('submitPreferredModalBtn');
+
     const paidLeaveModal = document.getElementById('paidLeaveModal');
-    const busyModal = document.getElementById('busyModal');
-    const rouletteModal = document.getElementById('rouletteModal');
-
-    // --- モーダルの開閉共通ヘルパー ---
-    function setupModal(openBtnSelectors, modalEl, closeBtnSelectors) {
-        if (!modalEl) return;
-        
-        // 開くボタン（複数可）
-        openBtnSelectors.forEach(selector => {
-            document.querySelectorAll(selector).forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modalEl.classList.remove('hidden');
-                });
-            });
-        });
-
-        // 閉じる・キャンセルボタン（複数可）
-        closeBtnSelectors.forEach(selector => {
-            document.querySelectorAll(selector).forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modalEl.classList.add('hidden');
-                });
-            });
-        });
-    }
-
-    // 各モーダルのバインド
-    setupModal(
-        ['#openPreferredModalBtn'], 
-        preferredModal, 
-        ['#closePreferredModalBtn', '#cancelPreferredModalBtn']
-    );
+    const openPaidLeaveBtn = document.getElementById('openPaidLeaveBtn');
+    const closePaidLeaveModalBtn = document.getElementById('closePaidLeaveModalBtn');
+    const cancelPaidLeaveModalBtn = document.getElementById('cancelPaidLeaveModalBtn');
+    const submitPaidLeaveModalBtn = document.getElementById('submitPaidLeaveModalBtn');
     
-    setupModal(
-        ['#openPaidLeaveBtn'], 
-        paidLeaveModal, 
-        ['#closePaidLeaveModalBtn', '#cancelPaidLeaveModalBtn']
-    );
-
-    setupModal(
-        ['#openBusyModalBtn'], 
-        busyModal, 
-        ['#closeBusyModalBtn', '#cancelBusyModalBtn']
-    );
-
-    // シフトルーレットは一般・管理者両方から開けるためクラスや複数セレクタを指定
-    setupModal(
-        ['#openRouletteModalBtn', '.openRouletteModalBtn'], 
-        rouletteModal, 
-        ['#closeRouletteModalBtn', '#cancelRouletteModalBtn']
-    );
-
-    // 有休申請の文字数カウント
     const leaveReasonTextarea = document.getElementById('leaveReason');
     const charCountEl = document.getElementById('charCount');
+
     if (leaveReasonTextarea && charCountEl) {
         leaveReasonTextarea.addEventListener('input', (e) => {
             const currentLen = e.target.value.length;
             charCountEl.textContent = `${currentLen} / 300`;
         });
     }
+
+    const busyModal = document.getElementById('busyModal');
+    const openBusyModalBtn = document.getElementById('openBusyModalBtn');
+    const closeBusyModalBtn = document.getElementById('closeBusyModalBtn');
+    const cancelBusyModalBtn = document.getElementById('cancelBusyModalBtn');
+    const submitBusyModalBtn = document.getElementById('submitBusyModalBtn');
+
+    const rouletteModal = document.getElementById('rouletteModal');
+    const openRouletteModalBtn = document.getElementById('openRouletteModalBtn');
+    const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
+    const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
+    const executeRouletteBtn = document.getElementById('executeRouletteBtn');
 
     let currentYM = '2024-10';
     const userId = 1;
@@ -83,12 +53,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (month > 12) { month = 1; year++; }
         else if (month < 1) { month = 12; year--; }
         currentYM = `${year}-${String(month).padStart(2, '0')}`;
-        if (currentYMEl) currentYMEl.textContent = currentYM;
+        currentYMEl.textContent = currentYM;
         loadShiftData();
     }
 
     if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
+
+    // モーダル開閉のイベントリスナー設定
+    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
+    [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => paidLeaveModal.classList.add('hidden'));
+    });
+
+    if (openPreferredModalBtn) openPreferredModalBtn.addEventListener('click', () => preferredModal.classList.remove('hidden'));
+    [closePreferredModalBtn, cancelPreferredModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => preferredModal.classList.add('hidden'));
+    });
+
+    if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
+    [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => busyModal.classList.add('hidden'));
+    });
+
+    if (openRouletteModalBtn) openRouletteModalBtn.addEventListener('click', () => rouletteModal.classList.remove('hidden'));
+    [closeRouletteModalBtn, cancelRouletteModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => rouletteModal.classList.add('hidden'));
+    });
 
     // --- データ取得 & レンダリング ---
     async function loadShiftData() {
@@ -171,13 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             cell.addEventListener('click', () => {
-                const selectedDateText = document.getElementById('selectedDateText');
-                const detailShiftType = document.getElementById('detailShiftType');
-                const detailTime = document.getElementById('detailTime');
-
-                if (selectedDateText) selectedDateText.textContent = `${year}年${month}月${i}日`;
-                if (detailShiftType) detailShiftType.textContent = typeName || 'ー';
-                if (detailTime) detailTime.textContent = shift && shift.start_time ? `${shift.start_time.slice(0,5)} ～ ${shift.end_time.slice(0,5)}` : 'ー';
+                document.getElementById('selectedDateText').textContent = `${year}年${month}月${i}日`;
+                document.getElementById('detailShiftType').textContent = typeName || 'ー';
+                document.getElementById('detailTime').textContent = shift && shift.start_time ? `${shift.start_time.slice(0,5)} ～ ${shift.end_time.slice(0,5)}` : 'ー';
             });
 
             grid.appendChild(cell);
@@ -205,19 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (roleSelector) {
         roleSelector.addEventListener('change', (e) => {
             if (e.target.value === 'admin') {
-                if (pageTitle) pageTitle.textContent = 'シフト管理（管理者）';
-                if (generalActionButtons) generalActionButtons.classList.add('hidden');
-                if (adminActionButtons) adminActionButtons.classList.remove('hidden');
+                pageTitle.textContent = 'シフト管理（管理者）';
+                generalActionButtons.classList.add('hidden');
+                adminActionButtons.classList.remove('hidden');
             } else {
-                if (pageTitle) pageTitle.textContent = 'シフト管理';
-                if (adminActionButtons) adminActionButtons.classList.add('hidden');
-                if (generalActionButtons) generalActionButtons.classList.remove('hidden');
+                pageTitle.textContent = 'シフト管理';
+                adminActionButtons.classList.add('hidden');
+                generalActionButtons.classList.remove('hidden');
             }
         });
     }
 
-    // --- 各種登録・送信処理 ---
-    const submitPreferredModalBtn = document.getElementById('submitPreferredModalBtn');
+    // --- 希望シフト提出処理 ---
     if (submitPreferredModalBtn) {
         submitPreferredModalBtn.addEventListener('click', async () => {
             const workDateInput = document.getElementById('prefDate').value;
@@ -249,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (result.success) {
                     alert(result.message || '希望シフトを登録しました。');
-                    if (preferredModal) preferredModal.classList.add('hidden');
+                    preferredModal.classList.add('hidden');
                     loadShiftData();
                     loadDashboardInfo();
                 } else {
@@ -262,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const submitPaidLeaveModalBtn = document.getElementById('submitPaidLeaveModalBtn');
+    // --- 有休申請の送信処理 ---
     if (submitPaidLeaveModalBtn) {
         submitPaidLeaveModalBtn.addEventListener('click', async () => {
             const startDate = document.getElementById('leaveStartDate').value;
@@ -299,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (result.success) {
                     alert(result.message || '有休申請を送信しました。');
-                    if (paidLeaveModal) paidLeaveModal.classList.add('hidden');
+                    paidLeaveModal.classList.add('hidden');
                     loadShiftData();
                 } else {
                     alert('エラー: ' + (result.error || '申請に失敗しました。'));
@@ -311,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const submitBusyModalBtn = document.getElementById('submitBusyModalBtn');
+    // --- 繁忙期設定保存処理 ---
     if (submitBusyModalBtn) {
         submitBusyModalBtn.addEventListener('click', async () => {
             const body = {
@@ -327,12 +313,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await res.json();
             alert(result.message || '繁忙期設定完了');
-            if (busyModal) busyModal.classList.add('hidden');
+            busyModal.classList.add('hidden');
             loadShiftData();
         });
     }
 
-    const executeRouletteBtn = document.getElementById('executeRouletteBtn');
+    // --- ルーレット実行処理 ---
     if (executeRouletteBtn) {
         executeRouletteBtn.addEventListener('click', async () => {
             const targetDate = document.getElementById('rouletteDate').value;
@@ -355,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (result.success) {
                     alert(result.message || 'シフトルーレットによる割り当てが完了しました。');
-                    if (rouletteModal) rouletteModal.classList.add('hidden');
+                    rouletteModal.classList.add('hidden');
                     loadShiftData();
                 } else {
                     alert('エラー: ' + (result.error || '処理に失敗しました。'));

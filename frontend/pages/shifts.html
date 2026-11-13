@@ -59,8 +59,7 @@
                         <button class="flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">
                             シフト確定
                         </button>
-                        <!-- IDではなくクラスに変更して重複を解消 -->
-                        <button class="openRouletteModalBtn flex items-center px-4 py-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded-md shadow-sm hover:bg-blue-50">
+                        <button id="openRouletteModalBtn" class="flex items-center px-4 py-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded-md shadow-sm hover:bg-blue-50">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                              </svg>
@@ -79,7 +78,7 @@
                         <button class="flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">
                             シフト確定
                         </button>
-                        <!-- こちらもクラス指定に統一 -->
+                        <!-- IDの重複を避けるため管理者側はクラスや別IDに調整可能ですが、今回はJS側で要素取得を調整済み -->
                         <button class="openRouletteModalBtn flex items-center px-4 py-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded-md shadow-sm hover:bg-blue-50">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -87,6 +86,8 @@
                             シフトルーレット
                         </button>
                     </div>
+                </div>
+            </div>
 
             <!-- メインレイアウト -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
