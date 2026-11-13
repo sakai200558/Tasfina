@@ -59,6 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => changeMonth(-1));
     if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => changeMonth(1));
 
+const rouletteModal = document.getElementById('rouletteModal');
+    const openRouletteModalBtn = document.getElementById('openRouletteModalBtn');
+    const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
+    const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
+    const executeRouletteBtn = document.getElementById('executeRouletteBtn');
+
+    if (openRouletteModalBtn) openRouletteModalBtn.addEventListener('click', () => rouletteModal.classList.remove('hidden'));
+    [closeRouletteModalBtn, cancelRouletteModalBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => rouletteModal.classList.add('hidden'));
+    });
+
     // --- データ取得 & レンダリング (参照先を shifts.php に変更) ---
     async function loadShiftData() {
         try {
@@ -301,6 +312,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error('有休申請通信エラー:', err);
+                alert('通信に失敗しました。');
+            }
+        });
+    }
+
+    if (executeRouletteBtn) {
+        executeRouletteBtn.addEventListener('click', async () => {
+            const targetDate = document.getElementById('rouletteDate').value;
+            const shiftType = document.getElementById('rouletteShiftType').value;
+
+            const body = {
+                action: 'execute_roulette',
+                user_id: userId,
+                target_date: targetDate,
+                shift_type: shiftType
+            };
+
+            try {
+                const res = await fetch('shifts.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert(result.message || 'シフトルーレットによる割り当てが完了しました。');
+                    rouletteModal.classList.add('hidden');
+                    loadShiftData();
+                } else {
+                    alert('エラー: ' + (result.error || '処理に失敗しました。'));
+                }
+            } catch (err) {
+                console.error('ルーレット実行エラー:', err);
                 alert('通信に失敗しました。');
             }
         });

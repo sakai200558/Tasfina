@@ -179,5 +179,33 @@ if ($method === 'POST') {
         exit;
     }
 
+    // --- シフトルーレットの実行・割り当て処理 ---
+    if ($action === 'execute_roulette') {
+        $target_date = $input['target_date'] ?? '';
+        $shift_type = $input['shift_type'] ?? '在宅勤務';
+
+        if (empty($target_date)) {
+            echo json_encode(['success' => false, 'error' => '対象日が指定されていません。']);
+            exit;
+        }
+
+        try {
+            // ルーレットで選ばれた結果を shifts テーブルに自動割り当て登録する例
+            $stmt = $pdo->prepare("
+                INSERT INTO shifts (user_id, work_date, status, created_at) 
+                VALUES (?, ?, ?, NOW())
+                ON DUPLICATE KEY UPDATE 
+                status = VALUES(status),
+                upated_at = NOW()
+            ");
+            $stmt->execute([$user_id, $target_date, $shift_type]);
+
+            echo json_encode(['success' => true, 'message' => 'シフトルーレットによりメンバーが選出・割り当てられました。']);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
 echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
 ?>
