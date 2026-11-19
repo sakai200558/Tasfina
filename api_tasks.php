@@ -1,1 +1,0 @@
-<?php require_once "db.php"; header("Content-Type: application/json; charset=utf-8"); try { $stmt = $pdo->query("SELECT * FROM tasks ORDER BY due_date ASC"); echo json_encode(["status" => "success", "data" => $stmt->fetchAll()], JSON_UNESCAPED_UNICODE); } catch (Exception $e) { echo json_encode(["status" => "error", "message" => $e->getMessage()]); }

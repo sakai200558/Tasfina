@@ -1,225 +1,142 @@
-<<<<<<< HEAD
-document.addEventListener('DOMContentLoaded', () => {
- const form=document.getElementById('taskCreateForm'); if(!form)return;
- const start=document.getElementById('startDate'), due=document.getElementById('dueDate');
- const today=new Date(); const localToday=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
- start.min=localToday; due.min=localToday;
- start.addEventListener('change',()=>{due.min=start.value||localToday;if(due.value&&due.value<start.value)due.value=start.value;});
- form.addEventListener('submit',e=>{
-  e.preventDefault();
-  const title=document.getElementById('taskTitle'), assignee=document.getElementById('assignee'), error=document.getElementById('titleError'), message=document.getElementById('formMessage');
-  [title,assignee,start,due].forEach(el=>el.classList.remove('is-invalid'));error.textContent='';message.textContent='';
-  let valid=true;
-  if(!title.value.trim()){title.classList.add('is-invalid');error.textContent='タスク名を入力してください。';valid=false;}
-  [assignee,start,due].forEach(el=>{if(!el.value){el.classList.add('is-invalid');valid=false;}});
-  if(start.value&&due.value&&due.value<start.value){due.classList.add('is-invalid');message.style.color='#d84c4c';message.textContent='期限は開始日以降の日付を指定してください。';valid=false;}
-  if(!valid){if(!message.textContent)message.textContent='必須項目を確認してください。';message.style.color='#d84c4c';return;}
-  message.style.color='#2b9a70';message.textContent='入力内容を確認しました。保存処理はPHP・MySQL接続後に有効になります。';
- });
-});
-=======
-
 /* ========================================
-   新規タスク作成モーダル
+   新規タスク作成モーダル（インライン対応版）
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const openButton = document.getElementById(
-        "openTaskCreateModal"
-    );
-
-    const container = document.getElementById(
-        "taskCreateModalContainer"
-    );
-
-    if (!openButton || !container) {
+    const openButton = document.getElementById("openTaskCreateModal");
+    if (!openButton) {
         return;
     }
 
-    let modalLoaded = false;
+    // 1. ページ読み込み時に担当者一覧をセレクトボックスに読み込む
+    loadAssignees();
 
-    /* ========================================
-       モーダルHTML読み込み
-    ======================================== */
+    // 2. モーダルを開くボタンのイベント
+    openButton.addEventListener("click", () => {
+        const modalElement = document.getElementById("taskCreateModal");
+        if (!modalElement) return;
 
-    async function loadTaskCreateModal() {
-
-        if (modalLoaded) {
-            return true;
-        }
-
-        try {
-
-            const response = await fetch(
-                "../modals/task-create.html"
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `モーダル読み込み失敗: ${response.status}`
-                );
-            }
-
-            const html = await response.text();
-
-            container.innerHTML = html;
-
-            initializeTaskCreateForm();
-
-            modalLoaded = true;
-
-            return true;
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert(
-                "新規タスク作成画面を読み込めませんでした。"
-            );
-
-            return false;
-        }
-    }
-
-    /* ========================================
-       モーダルを開く
-    ======================================== */
-
-    openButton.addEventListener("click", async () => {
-
-        const loaded = await loadTaskCreateModal();
-
-        if (!loaded) {
-            return;
-        }
-
-        const modalElement = document.getElementById(
-            "taskCreateModal"
-        );
-
-        const modal = bootstrap.Modal.getOrCreateInstance(
-            modalElement
-        );
-
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         modal.show();
     });
 
-    /* ========================================
-       フォーム初期化
-    ======================================== */
-
-    function initializeTaskCreateForm() {
-
-        const form = document.getElementById(
-            "taskCreateForm"
-        );
-
-        const titleInput = document.getElementById(
-            "taskTitle"
-        );
-
-        const titleError = document.getElementById(
-            "titleError"
-        );
-
-        const formMessage = document.getElementById(
-            "formMessage"
-        );
-
-        form.addEventListener("submit", event => {
-
+    // 3. フォームの送信処理を初期化
+    const form = document.getElementById("taskCreateForm");
+    if (form) {
+        form.addEventListener("submit", async event => {
             event.preventDefault();
 
-            titleError.textContent = "";
-            formMessage.textContent = "";
+            const titleInput = document.getElementById("taskTitle");
+            const titleError = document.getElementById("titleError");
+            const formMessage = document.getElementById("formMessage");
 
-            const title = titleInput.value.trim();
+            if (titleError) titleError.textContent = "";
+            if (formMessage) formMessage.textContent = "";
 
-            const assignee = document.getElementById(
-                "assignee"
-            ).value;
-
-            const priority = document.getElementById(
-                "priority"
-            ).value;
-
-            const description = document.getElementById(
-                "taskDescription"
-            ).value.trim();
-
-            const startDate = document.getElementById(
-                "startDate"
-            ).value;
-
-            const dueDate = document.getElementById(
-                "dueDate"
-            ).value;
+            const title = titleInput ? titleInput.value.trim() : "";
+            const assignee = document.getElementById("assignee").value;
+            const priority = document.getElementById("priority").value;
+            const description = document.getElementById("taskDescription") ? document.getElementById("taskDescription").value.trim() : "";
+            const startDate = document.getElementById("startDate").value;
+            const dueDate = document.getElementById("dueDate").value;
 
             /* 入力チェック */
-
             if (!title) {
-
-                titleError.textContent =
-                    "タスク名を入力してください。";
-
-                titleInput.focus();
-
+                if (titleError) titleError.textContent = "タスク名を入力してください。";
+                if (titleInput) titleInput.focus();
                 return;
             }
 
             if (!assignee || !startDate || !dueDate) {
-
-                formMessage.textContent =
-                    "必須項目をすべて入力してください。";
-
+                if (formMessage) formMessage.textContent = "必須項目をすべて入力してください。";
                 return;
             }
 
             if (dueDate < startDate) {
-
-                formMessage.textContent =
-                    "期限は開始日以降に設定してください。";
-
+                if (formMessage) formMessage.textContent = "期限は開始日以降に設定してください。";
                 return;
             }
 
-            /* 送信データ */
-
+            /* 送信データ（PHPの api_create_task.php に合わせる） */
             const taskData = {
                 title,
                 description,
-                assignee,
-                priority,
-                startDate,
-                dueDate
+                assignee, // 担当者の user_id
+                difficulty_level: priority,
+                estimated_hours: 4.0,
+                due_date: dueDate
             };
 
-            console.log(
-                "新規タスク作成（デモ）",
-                taskData
-            );
+            try {
+                const response = await fetch("../../backend/api_create_task.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(taskData)
+                });
 
-            /* モーダルを閉じる */
+                const result = await response.json();
 
-            const modalElement = document.getElementById(
-                "taskCreateModal"
-            );
+                if (result.status === "success") {
+                    if (formMessage) {
+                        formMessage.style.color = "#2b9a70";
+                        formMessage.textContent = "タスクが正常に登録されました！";
+                    }
 
-            const modal = bootstrap.Modal.getInstance(
-                modalElement
-            );
+                    /* モーダルを閉じる */
+                    const modalElement = document.getElementById("taskCreateModal");
+                    const modal = bootstrap.Modal.getInstance(modalElement);
 
-            modal.hide();
+                    setTimeout(() => {
+                        if (modal) modal.hide();
+                        form.reset();
+                        location.reload(); // 一覧を更新するためにリロード
+                    }, 1000);
 
-            form.reset();
+                } else {
+                    if (formMessage) {
+                        formMessage.style.color = "#d84c4c";
+                        formMessage.textContent = "エラー: " + result.message;
+                    }
+                }
 
-            alert(
-                "入力内容を確認しました（デモ）。"
-            );
+            } catch (error) {
+                console.error("通信エラー:", error);
+                if (formMessage) {
+                    formMessage.style.color = "#d84c4c";
+                    formMessage.textContent = "サーバーとの通信に失敗しました。";
+                }
+            }
         });
     }
 
+    /* ========================================
+       担当者セレクトボックスにメンバー一覧を読み込む
+    ======================================== */
+    async function loadAssignees() {
+        try {
+            const response = await fetch("../../backend/api_users.php");
+            if (!response.ok) {
+                throw new Error("ユーザー一覧の取得に失敗しました");
+            }
+            const users = await response.json();
+
+            const assigneeSelect = document.getElementById("assignee");
+            if (!assigneeSelect) return;
+
+            assigneeSelect.innerHTML = '<option value="">担当者を選択してください</option>';
+
+            users.forEach(user => {
+                const option = document.createElement("option");
+                option.value = user.id; // user_id
+                option.textContent = user.name; // display_name
+                assigneeSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error("メンバー読み込みエラー:", error);
+        }
+    }
+
 });
->>>>>>> 055901f (設定)
