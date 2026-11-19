@@ -92,16 +92,17 @@ document.addEventListener("DOMContentLoaded", () => {
        集計カード
     ======================================== */
     function updateSummary() {
+// ★ ここを修正（データベースのステータスや表示名に合わせて条件を調整）
         const progressCount = tasks.filter(
-            task => task.status === "進行中" || task.status === "in_progress"
+            task => task.status === "未着手" || task.status === "assigned"
         ).length;
 
         const pendingCount = tasks.filter(
-            task => task.status === "承認待ち" || task.status === "pending"
+            task => task.status === "承認待ち"
         ).length;
 
         const doneCount = tasks.filter(
-            task => task.status === "完了" || task.status === "completed" || task.status === "done" || task.status === "closed"
+            task => task.status === "完了"
         ).length;
 
         document.getElementById("progressCount")

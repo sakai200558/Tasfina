@@ -12,10 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. ページ読み込み時に担当者一覧をセレクトボックスに読み込む
     loadAssignees();
 
-    // 2. モーダルを開くボタンのイベント
-    openButton.addEventListener("click", () => {
+// 2. モーダルを開くボタンのイベント
+    openButton.addEventListener("click", async () => {
         const modalElement = document.getElementById("taskCreateModal");
         if (!modalElement) return;
+
+        await loadAssignees();
 
         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         modal.show();
@@ -41,6 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const startDate = document.getElementById("startDate").value;
             const dueDate = document.getElementById("dueDate").value;
 
+            // ★ ここに難易度と不快度を取得する処理を追加！
+            const difficultyLevel = document.getElementById("difficultyLevel").value;
+            const discomfortLevel = document.getElementById("discomfortLevel").value;
+
             /* 入力チェック */
             if (!title) {
                 if (titleError) titleError.textContent = "タスク名を入力してください。";
@@ -63,7 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 title,
                 description,
                 assignee, // 担当者の user_id
-                difficulty_level: priority,
+                difficulty_level: parseFloat(difficultyLevel), // ★ セレクトボックスの値を使用
+                discomfort_level: parseFloat(discomfortLevel), // ★ 不快度を追加
                 estimated_hours: 4.0,
                 due_date: dueDate
             };
@@ -115,13 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ========================================
        担当者セレクトボックスにメンバー一覧を読み込む
     ======================================== */
-    async function loadAssignees() {
+   async function loadAssignees() {
         try {
             const response = await fetch("../../backend/api_users.php");
             if (!response.ok) {
                 throw new Error("ユーザー一覧の取得に失敗しました");
             }
-            const users = await response.json();
+            const data = await response.json();
+            const users = Array.isArray(data) ? data : (Array.isArray(data.users) ? data.users : []);
 
             const assigneeSelect = document.getElementById("assignee");
             if (!assigneeSelect) return;
@@ -138,5 +146,4 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("メンバー読み込みエラー:", error);
         }
     }
-
 });
