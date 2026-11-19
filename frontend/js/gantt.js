@@ -1,145 +1,42 @@
 
 /* ========================================
-   Tasfina ガントチャート専用JavaScript
+   Tasfina ガントチャート
+   週間表示・PHP連携版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================
-       サンプルデータ
+       API設定
     ===================================== */
 
-    const tasks = [
-        {
-            id: 1,
-            name: "月次報告書作成",
-            department: "営業部",
-            assignee: "山田 太郎",
-            start: "2024-10-14",
-            end: "2024-10-20",
-            hours: 4.0,
-            points: 4.8,
-            workType: "専門・集中（1.2倍）",
-            status: "progress",
-            evidence: "未提出",
-            dependency: "—",
-            milestone: "2024-10-20",
-            memo: "月次の営業報告書を作成し、関係部署へ提出する。"
-        },
-        {
-            id: 2,
-            name: "顧客資料確認",
-            department: "営業部",
-            assignee: "佐藤 花子",
-            start: "2024-10-15",
-            end: "2024-10-17",
-            hours: 2.0,
-            points: 2.0,
-            workType: "定型・通常（1.0倍）",
-            status: "pending",
-            evidence: "提出済み",
-            dependency: "月次報告書作成",
-            memo: "顧客資料の確認を行う。"
-        },
-        {
-            id: 3,
-            name: "提案資料作成",
-            department: "営業部",
-            assignee: "高橋 健",
-            start: "2024-10-16",
-            end: "2024-10-18",
-            hours: 3.0,
-            points: 3.0,
-            workType: "定型・通常（1.0倍）",
-            status: "completed",
-            evidence: "提出済み",
-            dependency: "顧客資料確認",
-            memo: "顧客向けの提案資料を作成する。"
-        },
-        {
-            id: 4,
-            name: "業務マニュアル更新",
-            department: "開発部",
-            assignee: "鈴木 一郎",
-            start: "2024-10-17",
-            end: "2024-10-19",
-            hours: 3.0,
-            points: 3.0,
-            workType: "定型・通常（1.0倍）",
-            status: "progress",
-            evidence: "未提出",
-            dependency: "—",
-            memo: "既存の業務マニュアルを更新する。"
-        },
-        {
-            id: 5,
-            name: "新システム検証",
-            department: "開発部",
-            assignee: "田中 美咲",
-            start: "2024-10-18",
-            end: "2024-10-19",
-            hours: 1.5,
-            points: 1.5,
-            workType: "定型・通常（1.0倍）",
-            status: "notstarted",
-            evidence: "未提出",
-            dependency: "業務マニュアル更新",
-            memo: "新システムの動作確認を行う。"
-        },
-        {
-            id: 6,
-            name: "会議資料作成",
-            department: "総務部",
-            assignee: "伊藤 翔",
-            start: "2024-10-16",
-            end: "2024-10-17",
-            hours: 2.0,
-            points: 2.0,
-            workType: "定型・通常（1.0倍）",
-            status: "overdue",
-            evidence: "未提出",
-            dependency: "—",
-            memo: "社内会議用の資料を作成する。"
-        }
-    ];
-
-    const statusNames = {
-        progress: "進行中",
-        pending: "承認待ち",
-        completed: "完了",
-        notstarted: "未着手",
-        overdue: "期限超過"
-    };
+    const API_URL = "../../backend/natume_api.php";
 
     /* =====================================
        状態管理
     ===================================== */
 
-    let currentView = "week";
-    let currentDate = new Date(2024, 9, 17);
-    let selectedTaskId = 1;
+    // 現在の日付を初期表示
+    let currentDate = new Date();
 
-    const collapsedDepartments = new Set();
+    // PHPから取得したタスク
+    let tasks = [];
 
-    const chart = document.getElementById("ganttChart");
-    const detail = document.getElementById("taskDetail");
-    const periodLabel = document.getElementById("currentPeriod");
+    // 通信の競合を防止
+    let requestId = 0;
 
-    const assigneeFilter = document.getElementById("assigneeFilter");
-    const departmentFilter = document.getElementById("departmentFilter");
-    const statusFilter = document.getElementById("statusFilter");
+    const chart =
+        document.getElementById("ganttChart");
 
-    if (
-        !chart ||
-        !detail ||
-        !periodLabel ||
-        !assigneeFilter ||
-        !departmentFilter ||
-        !statusFilter
-    ) {
+    const periodLabel =
+        document.getElementById("currentPeriod");
+
+    if (!chart || !periodLabel) {
+
         console.error(
-            "ガントチャートに必要なHTML要素が見つかりません。"
+            "ガントチャートのHTML要素が見つかりません。"
         );
+
         return;
     }
 
@@ -148,17 +45,28 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================== */
 
     function parseDate(value) {
-        const [year, month, day] = value.split("-").map(Number);
+
+        const dateText = String(value).slice(0, 10);
+
+        const [year, month, day] =
+            dateText.split("-").map(Number);
+
         return new Date(year, month - 1, day);
     }
 
     function addDays(date, amount) {
+
         const result = new Date(date);
-        result.setDate(result.getDate() + amount);
+
+        result.setDate(
+            result.getDate() + amount
+        );
+
         return result;
     }
 
     function dayDiff(first, second) {
+
         const a = Date.UTC(
             first.getFullYear(),
             first.getMonth(),
@@ -171,10 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
             second.getDate()
         );
 
-        return Math.round((b - a) / 86400000);
+        return Math.round(
+            (b - a) / 86400000
+        );
     }
 
     function formatDate(date) {
+
         return [
             date.getFullYear(),
             String(date.getMonth() + 1).padStart(2, "0"),
@@ -182,92 +93,172 @@ document.addEventListener("DOMContentLoaded", () => {
         ].join("/");
     }
 
-    function getRange() {
-        let start;
-        let count;
-        let width;
+    function formatDateForAPI(date) {
 
-        if (currentView === "day") {
-            start = addDays(currentDate, -1);
-            count = 3;
-            width = 200;
-        } else if (currentView === "week") {
-            const day = currentDate.getDay();
-            const mondayOffset = (day + 6) % 7;
-
-            start = addDays(currentDate, -mondayOffset);
-            count = 8;
-            width = 110;
-        } else {
-            start = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-
-            count = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth() + 1,
-                0
-            ).getDate();
-
-            width = 48;
-        }
-
-        return { start, count, width };
+        return [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
+        ].join("-");
     }
-
-    /* =====================================
-       HTML文字列の安全処理
-    ===================================== */
 
     function escapeHTML(value) {
-        return String(value).replace(/[&<>"']/g, char => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        })[char]);
+
+        return String(value ?? "").replace(
+            /[&<>"']/g,
+            char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[char]
+        );
     }
 
     /* =====================================
-       フィルター
+       週間表示期間の取得
     ===================================== */
 
-    function initializeFilters() {
-        const assignees = [
-            ...new Set(tasks.map(task => task.assignee))
-        ];
+    function getWeekRange() {
 
-        const departments = [
-            ...new Set(tasks.map(task => task.department))
-        ];
+        const day = currentDate.getDay();
 
-        assignees.forEach(name => {
-            assigneeFilter.add(new Option(name, name));
-        });
+        // 月曜日を開始日とする
+        const mondayOffset = (day + 6) % 7;
 
-        departments.forEach(name => {
-            departmentFilter.add(new Option(name, name));
-        });
+        const start = addDays(
+            currentDate,
+            -mondayOffset
+        );
+
+        // 日曜日を終了日とする
+        const end = addDays(start, 6);
+
+        return {
+            start,
+            end,
+            count: 7,
+            width: 120
+        };
     }
 
-    function filteredTasks() {
-        return tasks.filter(task => (
-            (
-                assigneeFilter.value === "all" ||
-                task.assignee === assigneeFilter.value
-            ) &&
-            (
-                departmentFilter.value === "all" ||
-                task.department === departmentFilter.value
-            ) &&
-            (
-                statusFilter.value === "all" ||
-                task.status === statusFilter.value
-            )
-        ));
+    /* =====================================
+       PHPからタスク取得
+    ===================================== */
+
+    async function fetchTasks() {
+
+        const currentRequestId = ++requestId;
+
+        const range = getWeekRange();
+
+        // before = 開始日
+        const before = formatDateForAPI(range.start);
+
+        // after = 終了日
+        const after = formatDateForAPI(range.end);
+
+        // POST送信用データ
+        const requestData = new URLSearchParams();
+
+        requestData.append("before", before);
+        requestData.append("after", after);
+
+        console.log("PHPへ送信:", {
+            before: before,
+            after: after
+        });
+
+        try {
+
+            const response = await fetch(API_URL, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded;charset=UTF-8"
+                },
+
+                credentials: "same-origin",
+
+                body: requestData.toString()
+
+            });
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `HTTPエラー: ${response.status}`
+                );
+            }
+
+            const result = await response.json();
+
+            if (result.success !== true) {
+
+                throw new Error(
+                    result.comment ||
+                    result.message ||
+                    "タスクの取得に失敗しました。"
+                );
+            }
+
+            if (!Array.isArray(result.tasks)) {
+
+                throw new Error(
+                    "PHPからのタスクデータが不正です。"
+                );
+            }
+
+            // 古い通信結果は反映しない
+            if (currentRequestId !== requestId) {
+                return;
+            }
+
+            console.log("PHPから取得:", result.tasks);
+
+            // DBのカラム名を画面用に変換
+            tasks = result.tasks.map(task => ({
+
+                id: task.task_id,
+
+                name: task.task_name,
+
+                start: String(task.start_date ?? "").slice(0, 10),
+
+                end: String(task.due_date ?? "").slice(0, 10)
+
+            }));
+
+            renderChart();
+
+        } catch (error) {
+
+            if (currentRequestId !== requestId) {
+                return;
+            }
+
+            console.error(
+                "タスク取得エラー:",
+                error
+            );
+
+            tasks = [];
+
+            renderChart();
+
+            const errorMessage = document.createElement("p");
+
+            errorMessage.className =
+                "gantt-empty p-3";
+
+            errorMessage.textContent =
+                "タスクの取得に失敗しました。";
+
+            chart.appendChild(errorMessage);
+        }
     }
 
     /* =====================================
@@ -275,8 +266,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================== */
 
     function renderChart() {
-        const range = getRange();
-        const totalWidth = range.count * range.width;
+
+        const range = getWeekRange();
+
+        const totalWidth =
+            range.count * range.width;
 
         chart.style.setProperty(
             "--timeline-width",
@@ -288,8 +282,16 @@ document.addEventListener("DOMContentLoaded", () => {
             `${range.width}px`
         );
 
+        /* =====================================
+           期間表示
+        ===================================== */
+
         periodLabel.textContent =
-            `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月`;
+            `${formatDate(range.start)} ～ ${formatDate(range.end)}`;
+
+        /* =====================================
+           日付ヘッダー
+        ===================================== */
 
         const weekdays = [
             "日", "月", "火", "水", "木", "金", "土"
@@ -297,13 +299,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let html = `
             <div class="gantt-row gantt-header">
-                <div class="gantt-cell">タスク名</div>
-                <div class="gantt-cell">担当</div>
+
+                <div class="gantt-cell">
+                    タスク名
+                </div>
+
                 <div class="gantt-dates">
         `;
 
         for (let i = 0; i < range.count; i++) {
+
             const date = addDays(range.start, i);
+
             const day = date.getDay();
 
             const dayClass =
@@ -312,415 +319,156 @@ document.addEventListener("DOMContentLoaded", () => {
 
             html += `
                 <div class="gantt-date ${dayClass}">
+
                     ${date.getMonth() + 1}/${date.getDate()}
+
                     <div>(${weekdays[day]})</div>
+
                 </div>
             `;
         }
 
-        html += `</div></div>`;
-
-        const visibleTasks = filteredTasks();
-
-        const departments = [
-            ...new Set(
-                visibleTasks.map(task => task.department)
-            )
-        ];
-
-        departments.forEach(department => {
-            const collapsed =
-                collapsedDepartments.has(department);
-
-            html += `
-                <div class="gantt-row gantt-department">
-                    <div class="gantt-cell">
-                        <button
-                            type="button"
-                            class="department-toggle ${collapsed ? "collapsed" : ""}"
-                            data-department="${escapeHTML(department)}"
-                            aria-expanded="${!collapsed}"
-                        >
-                            <i class="bi bi-chevron-down"></i>
-                            ${escapeHTML(department)}
-                        </button>
-                    </div>
-                    <div class="gantt-cell"></div>
-                    <div class="gantt-timeline"></div>
+        html += `
                 </div>
-            `;
+            </div>
+        `;
 
-            if (collapsed) {
+        /* =====================================
+           タスク表示
+        ===================================== */
+
+        tasks.forEach(task => {
+
+            if (!task.start || !task.end) {
                 return;
             }
 
-            visibleTasks
-                .filter(task => task.department === department)
-                .forEach(task => {
-                    const start = parseDate(task.start);
-                    const end = parseDate(task.end);
+            const start = parseDate(task.start);
 
-                    const offset = dayDiff(range.start, start);
-                    const duration = dayDiff(start, end) + 1;
+            const end = parseDate(task.end);
 
-                    const visibleStart = Math.max(0, offset);
-                    const visibleEnd = Math.min(
-                        range.count,
-                        offset + duration
-                    );
+            if (
+                Number.isNaN(start.getTime()) ||
+                Number.isNaN(end.getTime())
+            ) {
+                return;
+            }
 
-                    let barHTML = "";
+            const offset =
+                dayDiff(range.start, start);
 
-                    if (visibleEnd > visibleStart) {
-                        const left =
-                            visibleStart * range.width + 6;
+            const duration =
+                dayDiff(start, end) + 1;
 
-                        const width =
-                            (visibleEnd - visibleStart) *
-                            range.width - 12;
+            const visibleStart =
+                Math.max(0, offset);
 
-                        barHTML = `
-                            <div
-                                class="gantt-task-bar ${task.status}"
-                                style="left:${left}px;width:${width}px"
-                            ></div>
-                        `;
+            const visibleEnd = Math.min(
+                range.count,
+                offset + duration
+            );
 
-                        const labelLeft = Math.min(
-                            left + width + 8,
-                            totalWidth - 48
-                        );
+            let barHTML = "";
 
-                        barHTML += `
-                            <span
-                                class="gantt-task-hours"
-                                style="left:${labelLeft}px"
-                            >
-                                ${task.hours.toFixed(1)}h
-                            </span>
-                        `;
-                    }
+            if (visibleEnd > visibleStart) {
 
-                    if (task.milestone) {
-                        const milestoneDate =
-                            parseDate(task.milestone);
+                const left =
+                    visibleStart * range.width + 6;
 
-                        const milestoneOffset =
-                            dayDiff(range.start, milestoneDate);
+                const width =
+                    (visibleEnd - visibleStart) *
+                    range.width - 12;
 
-                        if (
-                            milestoneOffset >= 0 &&
-                            milestoneOffset < range.count
-                        ) {
-                            barHTML += `
-                                <span
-                                    class="gantt-milestone"
-                                    style="left:${(milestoneOffset + 0.5) * range.width - 8}px"
-                                ></span>
-                            `;
-                        }
-                    }
+                barHTML = `
+                    <div
+                        class="gantt-task-bar"
+                        style="
+                            left:${left}px;
+                            width:${width}px;
+                        "
+                        title="${escapeHTML(task.start)} ～ ${escapeHTML(task.end)}"
+                    ></div>
+                `;
+            }
 
-                    html += `
-                        <div
-                            class="gantt-row gantt-task-row ${selectedTaskId === task.id ? "selected" : ""}"
-                            data-task-id="${task.id}"
-                            tabindex="0"
-                            role="button"
-                            aria-label="${escapeHTML(task.name)}の詳細を表示"
-                        >
-                            <div class="gantt-cell gantt-name">
-                                ${escapeHTML(task.name)}
-                            </div>
-                            <div class="gantt-cell gantt-assignee">
-                                ${escapeHTML(task.assignee.split(" ")[0])}
-                            </div>
-                            <div class="gantt-timeline">
-                                ${barHTML}
-                            </div>
-                        </div>
-                    `;
-                });
+            html += `
+                <div class="gantt-row gantt-task-row">
+
+                    <div class="gantt-cell gantt-name">
+                        ${escapeHTML(task.name)}
+                    </div>
+
+                    <div class="gantt-timeline">
+                        ${barHTML}
+                    </div>
+
+                </div>
+            `;
         });
 
-        if (visibleTasks.length === 0) {
+        if (tasks.length === 0) {
+
             html += `
-                <div class="gantt-empty p-4">
-                    条件に一致するタスクがありません。
+                <div class="gantt-empty p-3">
+                    この期間にタスクはありません。
                 </div>
             `;
         }
 
         chart.innerHTML = html;
-
-        chart.querySelectorAll(".department-toggle")
-            .forEach(button => {
-                button.addEventListener("click", () => {
-                    const name = button.dataset.department;
-
-                    if (collapsedDepartments.has(name)) {
-                        collapsedDepartments.delete(name);
-                    } else {
-                        collapsedDepartments.add(name);
-                    }
-
-                    renderChart();
-                });
-            });
-
-        chart.querySelectorAll(".gantt-task-row")
-            .forEach(row => {
-                const select = () => {
-                    selectedTaskId =
-                        Number(row.dataset.taskId);
-
-                    renderChart();
-                    renderDetail();
-                };
-
-                row.addEventListener("click", select);
-
-                row.addEventListener("keydown", event => {
-                    if (
-                        event.key === "Enter" ||
-                        event.key === " "
-                    ) {
-                        event.preventDefault();
-                        select();
-                    }
-                });
-            });
     }
 
     /* =====================================
-       選択中のタスク詳細
+       画面更新
     ===================================== */
 
-    function renderDetail() {
-        const task = tasks.find(
-            item => item.id === selectedTaskId
-        );
+    function updateGantt() {
 
-        if (!task) {
-            detail.innerHTML = `
-                <p class="gantt-empty">
-                    タスクを選択してください。
-                </p>
-            `;
-            return;
-        }
+        // 期間表示を更新
+        renderChart();
 
-        detail.innerHTML = `
-            <h3>${escapeHTML(task.name)}</h3>
-
-            <div class="gantt-detail-content">
-
-                <dl>
-                    <dt>担当者</dt>
-                    <dd>${escapeHTML(task.assignee)}</dd>
-
-                    <dt>部門</dt>
-                    <dd>${escapeHTML(task.department)}</dd>
-
-                    <dt>開始日</dt>
-                    <dd>${formatDate(parseDate(task.start))}</dd>
-
-                    <dt>終了日</dt>
-                    <dd>${formatDate(parseDate(task.end))}</dd>
-
-                    <dt>想定工数</dt>
-                    <dd>${task.hours.toFixed(1)} 時間</dd>
-                </dl>
-
-                <dl>
-                    <dt>算出ポイント</dt>
-                    <dd>${task.points.toFixed(1)} pt</dd>
-
-                    <dt>業務タイプ</dt>
-                    <dd>${escapeHTML(task.workType)}</dd>
-
-                    <dt>ステータス</dt>
-                    <dd>
-                        <span class="gantt-status ${task.status}">
-                            ${statusNames[task.status]}
-                        </span>
-                    </dd>
-
-                    <dt>エビデンス</dt>
-                    <dd>${escapeHTML(task.evidence)}</dd>
-
-                    <dt>依存タスク</dt>
-                    <dd>${escapeHTML(task.dependency)}</dd>
-                </dl>
-
-                <div class="gantt-detail-note">
-                    <label
-                        for="ganttMemo"
-                        class="form-label"
-                    >
-                        メモ
-                    </label>
-
-                    <textarea
-                        id="ganttMemo"
-                        readonly
-                    >${escapeHTML(task.memo)}</textarea>
-
-                    <div class="gantt-detail-actions">
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary"
-                            id="requestHours"
-                        >
-                            工数変更申請
-                        </button>
-
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            id="requestComplete"
-                        >
-                            完了申請
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // ボタンは再描画で作り直されるため、
-        // クリック処理は gantt-modals.js で管理する。
+        // PHPからタスク取得
+        fetchTasks();
     }
 
     /* =====================================
-       期間切り替え
+       前週へ移動
     ===================================== */
-
-    document.querySelectorAll(
-        ".gantt-view-switch button"
-    ).forEach(button => {
-        button.addEventListener("click", () => {
-            currentView = button.dataset.view;
-
-            document.querySelectorAll(
-                ".gantt-view-switch button"
-            ).forEach(item => {
-                item.classList.remove("active");
-            });
-
-            button.classList.add("active");
-            renderChart();
-        });
-    });
 
     document.getElementById("prevPeriod")
         ?.addEventListener("click", () => {
-            if (currentView === "day") {
-                currentDate = addDays(currentDate, -1);
-            } else if (currentView === "week") {
-                currentDate = addDays(currentDate, -7);
-            } else {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() - 1,
-                    1
-                );
-            }
 
-            renderChart();
+            currentDate = addDays(
+                currentDate,
+                -7
+            );
+
+            tasks = [];
+
+            updateGantt();
         });
+
+    /* =====================================
+       翌週へ移動
+    ===================================== */
 
     document.getElementById("nextPeriod")
         ?.addEventListener("click", () => {
-            if (currentView === "day") {
-                currentDate = addDays(currentDate, 1);
-            } else if (currentView === "week") {
-                currentDate = addDays(currentDate, 7);
-            } else {
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    1
-                );
-            }
 
-            renderChart();
-        });
-
-    document.getElementById("todayButton")
-        ?.addEventListener("click", () => {
-            currentDate = new Date();
-            renderChart();
-        });
-
-    [
-        assigneeFilter,
-        departmentFilter,
-        statusFilter
-    ].forEach(filter => {
-        filter.addEventListener("change", () => {
-            renderChart();
-        });
-    });
-
-    /* =====================================
-       モーダル側から選択タスクを取得
-    ===================================== */
-
-    window.getGanttSelectedTask = () => {
-        return tasks.find(
-            task => task.id === selectedTaskId
-        ) ?? null;
-    };
-
-    /* =====================================
-       モーダルHTMLの読み込み
-    ===================================== */
-
-    async function initializeModalHTML() {
-        try {
-            if (typeof loadModal !== "function") {
-                throw new Error(
-                    "common.js の loadModal 関数が見つかりません。"
-                );
-            }
-
-            await loadModal(
-                "ganttModals",
-                "../modals/gantt-modals.html"
+            currentDate = addDays(
+                currentDate,
+                7
             );
 
-            const hoursModal =
-                document.getElementById("workHoursModal");
+            tasks = [];
 
-            const completeModal =
-                document.getElementById("taskCompleteModal");
-
-            if (!hoursModal || !completeModal) {
-                throw new Error(
-                    "モーダルHTML内に必要なIDが見つかりません。"
-                );
-            }
-
-            console.log(
-                "ガントチャート申請モーダルの読み込みに成功しました。"
-            );
-
-        } catch (error) {
-            console.error(
-                "ガントチャート申請モーダルの読み込みエラー:",
-                error
-            );
-        }
-    }
+            updateGantt();
+        });
 
     /* =====================================
        初期表示
     ===================================== */
 
-    initializeFilters();
-    renderChart();
-    renderDetail();
-
-    initializeModalHTML();
+    updateGantt();
 
 });

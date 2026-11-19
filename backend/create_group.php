@@ -3,7 +3,7 @@
 $host = 'localhost';
 $dbname = 'Tasfina_db'; // 実際のデータベース名に変更してください
 $username = 'root';     // 実際のユーザー名に変更してください
-$password = 'password';     // 実際のパスワードに変更してください
+$password = '';     // 実際のパスワードに変更してください
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";

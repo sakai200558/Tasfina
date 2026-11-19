@@ -33,9 +33,9 @@
     <script src="../js/common.js" defer></script>
     <script src="../js/tasks.js" defer></script>
     <script src="../js/task-create.js" defer></script>
+   
 
-    <!-- 新規タスクモーダル読込専用JS -->
-    <script src="../js/tasks-modal-loader.js" defer></script>
+    
 </head>
 
 <body class="app-page">
@@ -468,7 +468,99 @@
     </div>
 
     <!-- 新規タスク作成モーダル -->
-    <div id="taskCreateModalContainer"></div>
+    <div
+        class="modal fade"
+        id="taskCreateModal"
+        tabindex="-1"
+        aria-labelledby="taskCreateModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content task-modal">
+                <form id="taskCreateForm">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="taskCreateModalLabel">
+                            <i class="bi bi-plus-lg"></i>
+                            新規タスク作成
+                        </h2>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="閉じる"
+                        ></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="taskTitle" class="form-label">タスク名 <span class="badge bg-danger">必須</span></label>
+                            <input type="text" id="taskTitle" class="form-control" placeholder="例：ログイン機能の開発" required>
+                            <div id="titleError" class="form-error"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="taskDescription" class="form-label">タスクの説明</label>
+                            <textarea id="taskDescription" class="form-control" rows="3" placeholder="タスクの目的や作業内容を入力してください。"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="assignee" class="form-label">担当者 <span class="badge bg-danger">必須</span></label>
+                            <select id="assignee" class="form-select" required>
+                                <option value="">担当者を選択してください</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">優先度</label>
+                            <select id="priority" class="form-select">
+                                <option value="1.0">低</option>
+                                <option value="2.0" selected>中</option>
+                                <option value="3.0">高</option>
+                            </select>
+                        </div>
+                        <!-- 難易度 -->
+<div class="mb-3">
+    <label for="difficultyLevel" class="form-label">難易度</label>
+    <select class="form-select" id="difficultyLevel">
+        <option value="1.0">1 (低)</option>
+        <option value="2.0">2</option>
+        <option value="3.0" selected>3 (中)</option>
+        <option value="4.0">4</option>
+        <option value="5.0">5 (高)</option>
+    </select>
+</div>
+
+<!-- 不快度 -->
+<div class="mb-3">
+    <label for="discomfortLevel" class="form-label">不快度（精神的負担）</label>
+    <select class="form-select" id="discomfortLevel">
+        <option value="1.0">1 (低)</option>
+        <option value="2.0">2</option>
+        <option value="3.0" selected>3 (中)</option>
+        <option value="4.0">4</option>
+        <option value="5.0">5 (高)</option>
+    </select>
+</div>
+
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">開始日 <span class="badge bg-danger">必須</span></label>
+                            <input type="date" id="startDate" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dueDate" class="form-label">期限 <span class="badge bg-danger">必須</span></label>
+                            <input type="date" id="dueDate" class="form-control" required>
+                        </div>
+
+                        <p id="formMessage" class="form-error" role="alert"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">キャンセル</button>
+                        <button type="submit" class="btn btn-primary">タスクを作成</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- 通知表示 -->
     <div

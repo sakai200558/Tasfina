@@ -1,100 +1,11 @@
-
 /* ========================================
-   Tasfina タスク管理
+   Tasfina タスク管理 (バックエンド連携版)
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* ========================================
-       サンプルタスクデータ
-    ======================================== */
-
-    const tasks = [
-        {
-            id: 1,
-            name: "月次報告書作成",
-            assignee: "山田",
-            dueDate: "2026-10-20",
-            status: "進行中",
-            category: "mine",
-            hours: 4.0,
-            points: 4.8,
-            workType: "専門・集中（1.2倍）",
-            evidence: "未提出"
-        },
-        {
-            id: 2,
-            name: "顧客資料確認",
-            assignee: "佐藤",
-            dueDate: "2026-10-18",
-            status: "承認待ち",
-            category: "mine",
-            hours: 2.0,
-            points: 2.4,
-            workType: "専門・集中（1.2倍）",
-            evidence: "提出済み"
-        },
-        {
-            id: 3,
-            name: "業務マニュアル更新",
-            assignee: "鈴木",
-            dueDate: "2026-10-25",
-            status: "完了",
-            category: "mine",
-            hours: 3.0,
-            points: 3.0,
-            workType: "通常業務（1.0倍）",
-            evidence: "提出済み"
-        },
-        {
-            id: 4,
-            name: "画面レイアウト作成",
-            assignee: "田中",
-            dueDate: "2026-10-27",
-            status: "進行中",
-            category: "others",
-            hours: 5.0,
-            points: 6.0,
-            workType: "専門・集中（1.2倍）",
-            evidence: "未提出"
-        },
-        {
-            id: 5,
-            name: "データベース設計",
-            assignee: "佐藤",
-            dueDate: "2026-10-29",
-            status: "進行中",
-            category: "requested",
-            hours: 6.0,
-            points: 7.2,
-            workType: "専門・集中（1.2倍）",
-            evidence: "未提出"
-        },
-        {
-            id: 6,
-            name: "ログイン機能確認",
-            assignee: "山田",
-            dueDate: "2026-10-19",
-            status: "承認待ち",
-            category: "pending",
-            hours: 2.0,
-            points: 2.0,
-            workType: "通常業務（1.0倍）",
-            evidence: "提出済み"
-        },
-        {
-            id: 7,
-            name: "テスト項目作成",
-            assignee: "鈴木",
-            dueDate: "2026-10-30",
-            status: "完了",
-            category: "others",
-            hours: 3.0,
-            points: 3.0,
-            workType: "通常業務（1.0倍）",
-            evidence: "提出済み"
-        }
-    ];
+    let tasks = [];
+    let users = []; // ユーザー一覧を保持
 
     /* ========================================
        要素取得
@@ -122,16 +33,68 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("requestCompleteButton");
 
     let activeTab = "mine";
-    let selectedTaskId = 1;
+    let selectedTaskId = null;
 
     /* ========================================
+       🚀 バックエンドからタスク一覧を取得する関数
+    ======================================== */
+  async function fetchTasks() {
+        try {
+            const response = await fetch('../../backend/api_tasks.php');
+            if (!response.ok) {
+                throw new Error('サーバーからのデータ取得に失敗しました');
+            }
+            
+            const data = await response.json();
+            
+            // 💡 ここで currentUserId を定義する！
+            const currentUserId = 101; 
+            
+            // データベースの列名をフロントエンド用のプロパティ名に変換する
+            tasks = Array.isArray(data) ? data.map(task => {
+                
+                // 担当者IDが自分のIDと一致していれば "mine"、違えば "others" に分類
+                const isMine = Number(task.assigned_user_id) === Number(currentUserId);
+
+                return {
+           id: task.id,
+                    name: task.title || "",                        
+                    assignee: task.user_name || "担当者なし", 
+                    assigned_user_id: task.assigned_user_id,
+                    dueDate: task.due_date || "",                  
+                    
+                    // ★ ここで translateStatus 関数に通して日本語に変換する！
+                    status: translateStatus(task.status), 
+                    
+                    category: isMine ? "mine" : "others", 
+                    hours: Number(task.estimated_hours || 0),      
+                    points: Number(task.calculated_burden_pts || 0),
+                    workType: task.work_type || "-",
+                    evidence: task.evidence || "未提出"
+                };
+            }) : [];
+
+            initializeAssigneeFilter();
+            updateSummary();
+            
+            if (tasks.length > 0 && selectedTaskId === null) {
+                selectedTaskId = tasks[0].id;
+            }
+
+            renderTasks();
+        } catch (error) {
+            console.error("データ取得エラー:", error);
+            showToast("タスクの読み込みに失敗しました。");
+        }
+    }
+
+/* ========================================
        集計カード
     ======================================== */
-
     function updateSummary() {
-
+// ★ ここを修正（データベースのステータスや表示名に合わせて条件を調整）
         const progressCount = tasks.filter(
-            task => task.status === "進行中"
+            task => task.status === "未着手" || task.status === "assigned"
         ).length;
 
         const pendingCount = tasks.filter(
@@ -157,18 +120,17 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     function initializeAssigneeFilter() {
+        assigneeFilter.innerHTML = '<option value="">担当者（すべて）</option>';
 
         const assignees = [
             ...new Set(tasks.map(task => task.assignee))
         ];
 
         assignees.forEach(assignee => {
-
+            if (!assignee) return;
             const option = document.createElement("option");
-
             option.value = assignee;
             option.textContent = assignee;
-
             assigneeFilter.appendChild(option);
         });
     }
@@ -178,20 +140,22 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     function getFilteredTasks() {
-
         const keyword = searchInput.value.trim().toLowerCase();
-
         const assignee = assigneeFilter.value;
 
         return tasks.filter(task => {
+            let matchesTab = false;
 
-            const matchesTab =
-                activeTab === "pending"
-                    ? task.status === "承認待ち"
-                    : task.category === activeTab;
+            if (activeTab === "pending") {
+                matchesTab = task.status === "承認待ち";
+            } else if (activeTab === "others") {
+                matchesTab = task.category === "others"; // 他メンバータブのとき
+            } else {
+                matchesTab = task.category === activeTab; // "mine" など
+            }
 
-            const matchesKeyword =
-                task.name.toLowerCase().includes(keyword);
+            const taskName = (task.name || "").toLowerCase();
+            const matchesKeyword = taskName.includes(keyword);
 
             const matchesAssignee =
                 !assignee || task.assignee === assignee;
@@ -207,13 +171,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     function renderTasks() {
-
         const filteredTasks = getFilteredTasks();
 
         tableBody.innerHTML = "";
 
         if (filteredTasks.length === 0) {
-
             const row = document.createElement("tr");
             const cell = document.createElement("td");
 
@@ -223,13 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             row.appendChild(cell);
             tableBody.appendChild(row);
-
         } else {
-
             filteredTasks.forEach(task => {
-
                 const row = document.createElement("tr");
-
                 row.tabIndex = 0;
 
                 if (task.id === selectedTaskId) {
@@ -244,10 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 ];
 
                 cells.forEach((value, index) => {
-
                     const cell = document.createElement("td");
-
-                    cell.textContent = value;
+                    cell.textContent = value || "";
 
                     if (index === 0) {
                         cell.classList.add("task-name");
@@ -261,10 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 row.addEventListener("keydown", event => {
-
-                    if (event.key === "Enter" ||
-                        event.key === " ") {
-
+                    if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
                         selectTask(task.id);
                     }
@@ -287,11 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 : null;
         }
 
-        // 選択行の背景を同期
         const rows = tableBody.querySelectorAll("tr");
-
         rows.forEach((row, index) => {
-
             row.classList.toggle(
                 "selected",
                 filteredTasks[index]?.id === selectedTaskId
@@ -306,10 +256,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     function formatDate(dateString) {
-
-        const [, month, day] = dateString.split("-");
-
-        return `${Number(month)}/${Number(day)}`;
+        if (!dateString) return "";
+        const parts = dateString.split("-");
+        if (parts.length < 3) return dateString;
+        return `${Number(parts[1])}/${Number(parts[2])}`;
     }
 
     /* ========================================
@@ -317,25 +267,38 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     function selectTask(taskId) {
-
         selectedTaskId = taskId;
-
         renderTasks();
     }
+
+    /* ========================================
+       ステータスの日本語変換
+    ======================================== */
+    function translateStatus(status) {
+        switch (status) {
+            case "assigned": return "未着手";
+            case "in_progress": return "進行中";
+            case "pending": return "承認待ち";
+            case "completed": 
+            case "done":      // ★ 追加
+            case "closed":    // ★ 追加
+                return "完了";
+            default: return status || "未着手";
+        }
+    }
+
 
     /* ========================================
        選択中タスクの詳細
     ======================================== */
 
     function getSelectedTask() {
-
         return tasks.find(
             task => task.id === selectedTaskId
         ) || null;
     }
 
     function renderTaskDetail() {
-
         const task = getSelectedTask();
 
         detailContainer.innerHTML = "";
@@ -346,38 +309,30 @@ document.addEventListener("DOMContentLoaded", () => {
             task.status === "承認待ち";
 
         if (!task) {
-
             const empty = document.createElement("p");
-
             empty.className = "task-empty";
             empty.textContent = "タスクを選択してください。";
-
             detailContainer.appendChild(empty);
             return;
         }
 
         const name = document.createElement("p");
-
         name.className = "task-detail-name";
         name.textContent = task.name;
-
         detailContainer.appendChild(name);
 
         const grid = document.createElement("div");
-
         grid.className = "task-detail-grid";
 
         const items = [
-            ["想定工数", `${task.hours.toFixed(1)}時間`],
-            ["算出ポイント", `${task.points.toFixed(1)}pt`],
-            ["業務タイプ", task.workType],
-            ["エビデンス", task.evidence]
+            ["想定工数", `${Number(task.hours || 0).toFixed(1)}時間`],
+            ["算出ポイント", `${Number(task.points || 0).toFixed(1)}pt`],
+            ["業務タイプ", task.workType || "-"],
+            ["エビデンス", task.evidence || "未提出"]
         ];
 
         items.forEach(([label, value]) => {
-
             const item = document.createElement("div");
-
             item.className = "task-detail-item";
 
             const labelElement = document.createElement("p");
@@ -388,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             item.appendChild(labelElement);
             item.appendChild(valueElement);
-
             grid.appendChild(item);
         });
 
@@ -400,21 +354,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     tabs.forEach(tab => {
-
         tab.addEventListener("click", () => {
-
             activeTab = tab.dataset.tab;
 
             tabs.forEach(item => {
-
                 const active = item === tab;
-
                 item.classList.toggle("active", active);
-
-                item.setAttribute(
-                    "aria-selected",
-                    String(active)
-                );
+                item.setAttribute("aria-selected", String(active));
             });
 
             renderTasks();
@@ -426,7 +372,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     searchInput.addEventListener("input", renderTasks);
-
     assigneeFilter.addEventListener("change", renderTasks);
 
     /* ========================================
@@ -434,24 +379,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     hoursButton.addEventListener("click", () => {
-
         const task = getSelectedTask();
-
         if (!task) return;
 
         document.getElementById("workHoursForm").reset();
-
-        document.getElementById("hoursError")
-            .textContent = "";
-
-        document.getElementById("hoursTaskName")
-            .textContent = task.name;
-
-        document.getElementById("currentHours")
-            .value = task.hours;
-
-        document.getElementById("requestedHours")
-            .value = task.hours;
+        document.getElementById("hoursError").textContent = "";
+        document.getElementById("hoursTaskName").textContent = task.name;
+        document.getElementById("currentHours").value = task.hours;
+        document.getElementById("requestedHours").value = task.hours;
 
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById("workHoursModal")
@@ -459,21 +394,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     completeButton.addEventListener("click", () => {
-
         const task = getSelectedTask();
-
         if (!task) return;
 
         document.getElementById("taskCompleteForm").reset();
-
-        document.getElementById("completeError")
-            .textContent = "";
-
-        document.getElementById("completeTaskName")
-            .textContent = task.name;
-
-        document.getElementById("actualHours")
-            .value = task.hours;
+        document.getElementById("completeError").textContent = "";
+        document.getElementById("completeTaskName").textContent = task.name;
+        document.getElementById("actualHours").value = task.hours;
 
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById("taskCompleteModal")
@@ -481,26 +408,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ========================================
-       工数変更申請
+       工数変更申請 (PHPへ送信)
     ======================================== */
 
     document.getElementById("workHoursForm")
-        .addEventListener("submit", event => {
-
+        .addEventListener("submit", async event => {
             event.preventDefault();
 
             const task = getSelectedTask();
-
             if (!task) return;
 
             const requestedHours = Number(
                 document.getElementById("requestedHours").value
             );
-
-            const reason = document.getElementById(
-                "hoursReason"
-            ).value.trim();
-
+            const reason = document.getElementById("hoursReason").value.trim();
             const error = document.getElementById("hoursError");
 
             error.textContent = "";
@@ -509,120 +430,123 @@ document.addEventListener("DOMContentLoaded", () => {
                 requestedHours <= 0 ||
                 requestedHours === task.hours ||
                 !reason) {
-
-                error.textContent =
-                    "変更後の工数と変更理由を正しく入力してください。";
-
+                error.textContent = "変更後の工数と変更理由を正しく入力してください。";
                 return;
             }
 
             const requestData = {
-                taskId: task.id,
+                id: task.id,
                 currentHours: task.hours,
                 requestedHours,
                 reason
             };
 
-            console.log("工数変更申請（仮）", requestData);
+            try {
+                const response = await fetch('../../backend/api_update_task.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
 
-            bootstrap.Modal.getInstance(
-                document.getElementById("workHoursModal")
-            ).hide();
+                const result = await response.json();
 
-            showToast(
-                "工数変更申請の内容を確認しました（デモ）。"
-            );
+                if (result.success) {
+                    bootstrap.Modal.getInstance(
+                        document.getElementById("workHoursModal")
+                    ).hide();
+
+                    showToast("工数変更を申請しました。");
+                    fetchTasks();
+                } else {
+                    error.textContent = result.message || "申請に失敗しました。";
+                }
+            } catch (err) {
+                console.error(err);
+                error.textContent = "通信エラーが発生しました。";
+            }
         });
 
     /* ========================================
-       完了申請
+       完了申請 (PHPへ送信)
     ======================================== */
 
     document.getElementById("taskCompleteForm")
-        .addEventListener("submit", event => {
-
+        .addEventListener("submit", async event => {
             event.preventDefault();
 
             const task = getSelectedTask();
-
             if (!task) return;
 
             const actualHours = Number(
                 document.getElementById("actualHours").value
             );
-
-            const report = document.getElementById(
-                "completeReport"
-            ).value.trim();
-
-            const evidence = document.getElementById(
-                "completeEvidence"
-            ).files[0];
-
-            const error = document.getElementById(
-                "completeError"
-            );
+            const report = document.getElementById("completeReport").value.trim();
+            const evidence = document.getElementById("completeEvidence").files[0];
+            const error = document.getElementById("completeError");
 
             error.textContent = "";
 
-            if (!Number.isFinite(actualHours) ||
-                actualHours <= 0 ||
-                !report) {
-
-                error.textContent =
-                    "実績工数と完了報告を正しく入力してください。";
-
+            if (!Number.isFinite(actualHours) || actualHours <= 0 || !report) {
+                error.textContent = "実績工数と完了報告を正しく入力してください。";
                 return;
             }
 
             if (evidence && evidence.size > 10 * 1024 * 1024) {
-
-                error.textContent =
-                    "添付ファイルは10MB以下にしてください。";
-
+                error.textContent = "添付ファイルは10MB以下にしてください。";
                 return;
             }
 
-            const requestData = {
-                taskId: task.id,
-                actualHours,
-                report,
-                evidenceName: evidence?.name || null
-            };
+            // PHP側（api_update_status.php）が受け取る id と status を持つオブジェクトにする
+const requestData = {
+    id: task.id,
+    status: "completed"
+};
 
-            console.log("完了申請（仮）", requestData);
+            try {
+                const response = await fetch('../../backend/api_update_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)   
+                });
 
-            bootstrap.Modal.getInstance(
-                document.getElementById("taskCompleteModal")
-            ).hide();
+                const result = await response.json();
 
-            showToast(
-                "完了申請の内容を確認しました（デモ）。"
-            );
+                if (result.status==="success") {
+                    bootstrap.Modal.getInstance(
+                        document.getElementById("taskCompleteModal")
+                    ).hide();
+
+                    showToast("完了申請の内容を確認しました。");
+                    fetchTasks();
+                } else {
+                    error.textContent = result.message || "申請に失敗しました。";
+                }
+            } catch (err) {
+                console.error(err);
+                error.textContent = "通信エラーが発生しました。";
+            }
         });
 
     /* ========================================
-       通知
+       通知トースト表示
     ======================================== */
 
     function showToast(message) {
-
         const area = document.getElementById("toastArea");
+        if (!area) return;
 
         const toast = document.createElement("div");
-
         toast.className = "task-toast";
         toast.textContent = message;
-
         area.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
 
     /* ========================================
-       初期表示
+       初期化実行
     ======================================== */
-
-    initializeAssigneeFilter();
-    updateSummary();
-    renderTasks();
-
+    fetchTasks();
 });

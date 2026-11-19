@@ -189,6 +189,20 @@ try {
         ':created_at' => $date
     ]);
 
+
+
+
+    $sql = "INSERT INTO system_settings
+            (id)
+            VALUES
+            (:user_id)";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        ':user_id' => $new_user_id
+    ]);
+
     /*
      * 5. workload_scores登録
      */
