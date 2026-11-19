@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     loadMyPageUser();
+    loadMyPageTasks();
 
 
     /* ========================================
@@ -358,4 +359,226 @@ async function loadMyPageUser() {
 
     }
 
+}
+
+/* ========================================
+   マイページ 担当タスク取得
+======================================== */
+
+async function loadMyPageTasks() {
+
+    const taskCountElement =
+        document.getElementById("mypageTaskCount");
+
+    const pendingCountElement =
+        document.getElementById("mypagePendingCount");
+
+    const recentTasksElement =
+        document.getElementById("mypageRecentTasks");
+
+    if (
+        !taskCountElement ||
+        !pendingCountElement ||
+        !recentTasksElement
+    ) {
+        return;
+    }
+
+    try {
+
+        /* =====================================
+           PHPからタスク取得
+        ===================================== */
+
+        const response = await fetch(
+            "../../backend/mypage_tasks.php",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        /* =====================================
+           未ログイン
+        ===================================== */
+
+        if (response.status === 401) {
+
+            window.location.href = "login.html";
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTPエラー: ${response.status}`
+            );
+        }
+
+        const result = await response.json();
+
+        if (
+            result.success !== true ||
+            !Array.isArray(result.tasks)
+        ) {
+
+            throw new Error(
+                result.message ||
+                "タスクを取得できませんでした。"
+            );
+        }
+
+        /* =====================================
+           担当タスク件数
+        ===================================== */
+
+        taskCountElement.textContent =
+            `${result.assigned_count}件`;
+
+        /* =====================================
+           承認待ち件数
+        ===================================== */
+
+        pendingCountElement.textContent =
+            `${result.pending_count}件`;
+
+        /* =====================================
+           最近のタスク表示
+        ===================================== */
+
+        renderMyPageTasks(
+            result.tasks,
+            recentTasksElement
+        );
+
+        console.log(
+            "マイページタスク取得成功:",
+            result
+        );
+
+    } catch (error) {
+
+        console.error(
+            "マイページタスク取得エラー:",
+            error
+        );
+
+        taskCountElement.textContent = "取得失敗";
+
+        pendingCountElement.textContent = "取得失敗";
+
+        recentTasksElement.textContent =
+            "タスク情報を取得できませんでした。";
+    }
+}
+
+
+/* ========================================
+   ステータス日本語変換
+======================================== */
+
+function translateMyPageTaskStatus(status) {
+
+    const statusNames = {
+
+        "assigned": "未着手",
+
+        "in_progress": "進行中",
+
+        "pending": "承認待ち",
+
+        "completed": "完了",
+
+        "done": "完了",
+
+        "closed": "完了"
+
+    };
+
+    return statusNames[status] || status || "未着手";
+}
+
+
+/* ========================================
+   最近のタスク描画
+======================================== */
+
+function renderMyPageTasks(tasks, container) {
+
+    container.innerHTML = "";
+
+    /* =====================================
+       未完了タスクを表示
+    ===================================== */
+
+    const activeTasks = tasks.filter(task => {
+
+        return ![
+            "completed",
+            "done",
+            "closed",
+            "完了"
+        ].includes(task.status);
+
+    });
+
+    /* =====================================
+       タスクがない場合
+    ===================================== */
+
+    if (activeTasks.length === 0) {
+
+        const empty = document.createElement("div");
+
+        empty.className = "recent-task-item";
+
+        empty.textContent =
+            "現在担当している未完了タスクはありません。";
+
+        container.appendChild(empty);
+
+        return;
+    }
+
+    /* =====================================
+       最大5件表示
+    ===================================== */
+
+    activeTasks.slice(0, 5).forEach(task => {
+
+        const item = document.createElement("div");
+
+        item.className = "recent-task-item";
+
+        /* タスク名 */
+
+        const name = document.createElement("span");
+
+        name.className = "task-name";
+
+        name.textContent =
+            task.title || "タスク名未設定";
+
+        /* ステータス */
+
+        const status = document.createElement("span");
+
+        status.className = "task-status";
+
+        status.textContent =
+            translateMyPageTaskStatus(task.status);
+
+        /* HTMLへ追加 */
+
+        item.appendChild(name);
+
+        item.appendChild(status);
+
+        container.appendChild(item);
+
+    });
 }
