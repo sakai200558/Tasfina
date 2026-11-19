@@ -10,57 +10,20 @@ document.addEventListener("DOMContentLoaded", () => {
        API設定
     ===================================== */
 
-    const API_URL = "../../backend/naume_api.php";
-
-    /* =====================================
-       タスクデータ（仮データ）
-    ===================================== */
-
-    const tasks = [
-        {
-            id: 1,
-            name: "月次報告書作成",
-            start: "2024-10-14",
-            end: "2024-10-20"
-        },
-        {
-            id: 2,
-            name: "顧客資料確認",
-            start: "2024-10-15",
-            end: "2024-10-17"
-        },
-        {
-            id: 3,
-            name: "提案資料作成",
-            start: "2024-10-16",
-            end: "2024-10-18"
-        },
-        {
-            id: 4,
-            name: "業務マニュアル更新",
-            start: "2024-10-17",
-            end: "2024-10-19"
-        },
-        {
-            id: 5,
-            name: "新システム検証",
-            start: "2024-10-18",
-            end: "2024-10-19"
-        },
-        {
-            id: 6,
-            name: "会議資料作成",
-            start: "2024-10-16",
-            end: "2024-10-17"
-        }
-    ];
+    const API_URL = "../../backend/natume_api.php";
 
     /* =====================================
        状態管理
     ===================================== */
 
-    // 初期表示する日付
-    let currentDate = new Date(2024, 9, 17);
+    // 現在の日付を初期表示
+    let currentDate = new Date();
+
+    // PHPから取得したタスク
+    let tasks = [];
+
+    // 通信の競合を防止
+    let requestId = 0;
 
     const chart =
         document.getElementById("ganttChart");
@@ -83,14 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function parseDate(value) {
 
-        const [year, month, day] =
-            value.split("-").map(Number);
+        const dateText = String(value).slice(0, 10);
 
-        return new Date(
-            year,
-            month - 1,
-            day
-        );
+        const [year, month, day] =
+            dateText.split("-").map(Number);
+
+        return new Date(year, month - 1, day);
     }
 
     function addDays(date, amount) {
@@ -127,12 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return [
             date.getFullYear(),
-            String(
-                date.getMonth() + 1
-            ).padStart(2, "0"),
-            String(
-                date.getDate()
-            ).padStart(2, "0")
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
         ].join("/");
     }
 
@@ -140,12 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return [
             date.getFullYear(),
-            String(
-                date.getMonth() + 1
-            ).padStart(2, "0"),
-            String(
-                date.getDate()
-            ).padStart(2, "0")
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
         ].join("-");
     }
 
@@ -169,21 +122,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getWeekRange() {
 
-        // 月曜日を週の開始日とする
         const day = currentDate.getDay();
 
-        const mondayOffset =
-            (day + 6) % 7;
+        // 月曜日を開始日とする
+        const mondayOffset = (day + 6) % 7;
 
         const start = addDays(
             currentDate,
             -mondayOffset
         );
 
-        const end = addDays(
-            start,
-            6
-        );
+        // 日曜日を終了日とする
+        const end = addDays(start, 6);
 
         return {
             start,
@@ -194,23 +144,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =====================================
-       PHPへ表示期間をPOST送信
+       PHPからタスク取得
     ===================================== */
 
-    async function sendPeriodToPHP() {
+    async function fetchTasks() {
+
+        const currentRequestId = ++requestId;
 
         const range = getWeekRange();
 
-        // PHPに送るデータ
-        const requestData = {
-            before: formatDateForAPI(range.start),
-            after: formatDateForAPI(range.end)
-        };
+        // before = 開始日
+        const before = formatDateForAPI(range.start);
 
-        console.log(
-            "PHPへ送信する期間:",
-            requestData
-        );
+        // after = 終了日
+        const after = formatDateForAPI(range.end);
+
+        // POST送信用データ
+        const requestData = new URLSearchParams();
+
+        requestData.append("before", before);
+        requestData.append("after", after);
+
+        console.log("PHPへ送信:", {
+            before: before,
+            after: after
+        });
 
         try {
 
@@ -219,12 +177,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type":
+                        "application/x-www-form-urlencoded;charset=UTF-8"
                 },
 
                 credentials: "same-origin",
 
-                body: JSON.stringify(requestData)
+                body: requestData.toString()
 
             });
 
@@ -237,29 +196,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.json();
 
-            if (result.success === false) {
+            if (result.success !== true) {
 
                 throw new Error(
+                    result.comment ||
                     result.message ||
-                    "PHP側でエラーが発生しました。"
+                    "タスクの取得に失敗しました。"
                 );
             }
 
-            console.log(
-                "PHPからの応答:",
-                result
-            );
+            if (!Array.isArray(result.tasks)) {
 
-            return result;
+                throw new Error(
+                    "PHPからのタスクデータが不正です。"
+                );
+            }
+
+            // 古い通信結果は反映しない
+            if (currentRequestId !== requestId) {
+                return;
+            }
+
+            console.log("PHPから取得:", result.tasks);
+
+            // DBのカラム名を画面用に変換
+            tasks = result.tasks.map(task => ({
+
+                id: task.task_id,
+
+                name: task.task_name,
+
+                start: String(task.start_date ?? "").slice(0, 10),
+
+                end: String(task.due_date ?? "").slice(0, 10)
+
+            }));
+
+            renderChart();
 
         } catch (error) {
 
+            if (currentRequestId !== requestId) {
+                return;
+            }
+
             console.error(
-                "PHPへの期間送信に失敗しました:",
+                "タスク取得エラー:",
                 error
             );
 
-            return null;
+            tasks = [];
+
+            renderChart();
+
+            const errorMessage = document.createElement("p");
+
+            errorMessage.className =
+                "gantt-empty p-3";
+
+            errorMessage.textContent =
+                "タスクの取得に失敗しました。";
+
+            chart.appendChild(errorMessage);
         }
     }
 
@@ -311,10 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for (let i = 0; i < range.count; i++) {
 
-            const date = addDays(
-                range.start,
-                i
-            );
+            const date = addDays(range.start, i);
 
             const day = date.getDay();
 
@@ -327,9 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     ${date.getMonth() + 1}/${date.getDate()}
 
-                    <div>
-                        (${weekdays[day]})
-                    </div>
+                    <div>(${weekdays[day]})</div>
 
                 </div>
             `;
@@ -346,11 +339,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tasks.forEach(task => {
 
-            const start =
-                parseDate(task.start);
+            if (!task.start || !task.end) {
+                return;
+            }
 
-            const end =
-                parseDate(task.end);
+            const start = parseDate(task.start);
+
+            const end = parseDate(task.end);
+
+            if (
+                Number.isNaN(start.getTime()) ||
+                Number.isNaN(end.getTime())
+            ) {
+                return;
+            }
 
             const offset =
                 dayDiff(range.start, start);
@@ -404,20 +406,29 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         });
 
+        if (tasks.length === 0) {
+
+            html += `
+                <div class="gantt-empty p-3">
+                    この期間にタスクはありません。
+                </div>
+            `;
+        }
+
         chart.innerHTML = html;
     }
 
     /* =====================================
-       画面更新とPHP送信
+       画面更新
     ===================================== */
 
     function updateGantt() {
 
-        // ガントチャートを更新
+        // 期間表示を更新
         renderChart();
 
-        // 表示期間をPHPに送信
-        sendPeriodToPHP();
+        // PHPからタスク取得
+        fetchTasks();
     }
 
     /* =====================================
@@ -431,6 +442,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentDate,
                 -7
             );
+
+            tasks = [];
 
             updateGantt();
         });
@@ -446,6 +459,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentDate,
                 7
             );
+
+            tasks = [];
 
             updateGantt();
         });

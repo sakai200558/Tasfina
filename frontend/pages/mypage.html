@@ -133,45 +133,55 @@
             <!-- =========================
                  ステータスカード
             ========================== -->
-            <section class="mypage-stats">
+            <!-- ステータスカード -->
+<section class="mypage-stats">
 
-                <a href="tasks.html" class="stat-card">
+    <!-- 担当タスク -->
+    <a href="tasks.html" class="stat-card">
 
-                    <span class="stat-label">
-                        担当タスク
-                    </span>
+        <span class="stat-label">
+            担当タスク
+        </span>
 
-                    <strong class="stat-value">
-                        5件
-                    </strong>
+        <strong
+            class="stat-value"
+            id="mypageTaskCount"
+        >
+            読み込み中...
+        </strong>
 
-                </a>
+    </a>
 
-                <a href="tasks.html" class="stat-card">
+    <!-- 承認待ち -->
+    <a href="tasks.html" class="stat-card">
 
-                    <span class="stat-label">
-                        承認待ち
-                    </span>
+        <span class="stat-label">
+            承認待ち
+        </span>
 
-                    <strong class="stat-value">
-                        2件
-                    </strong>
+        <strong
+            class="stat-value"
+            id="mypagePendingCount"
+        >
+            読み込み中...
+        </strong>
 
-                </a>
+    </a>
 
-                <a href="ranking.html" class="stat-card">
+    <!-- 負担スコア：現状維持 -->
+    <a href="ranking.html" class="stat-card">
 
-                    <span class="stat-label">
-                        負担スコア
-                    </span>
+        <span class="stat-label">
+            負担スコア
+        </span>
 
-                    <strong class="stat-value">
-                        24.5pt
-                    </strong>
+        <strong class="stat-value">
+            24.5pt
+        </strong>
 
-                </a>
+    </a>
 
-            </section>
+</section>
 
 
             <!-- =========================
@@ -208,48 +218,38 @@
             <!-- =========================
                  最近のタスク
             ========================== -->
-            <section class="mypage-panel">
+          <!-- 最近のタスク -->
+<section class="mypage-panel">
 
-                <div class="panel-header">
+    <div class="panel-header">
 
-                    <h2>最近のタスク</h2>
+        <h2>最近のタスク</h2>
 
-                    <a href="tasks.html">
-                        一覧を見る
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
+        <a href="tasks.html">
+            一覧を見る
+            <i class="bi bi-arrow-right"></i>
+        </a>
 
-                </div>
+    </div>
 
-                <div class="recent-task-list">
+    <!-- JavaScriptでタスクを表示 -->
+    <div
+        class="recent-task-list"
+        id="mypageRecentTasks"
+        aria-live="polite"
+    >
 
-                    <div class="recent-task-item">
+        <div class="recent-task-item">
 
-                        <span class="task-name">
-                            資料作成
-                        </span>
+            <span class="task-name">
+                読み込み中...
+            </span>
 
-                        <span class="task-status">
-                            進行中
-                        </span>
+        </div>
 
-                    </div>
+    </div>
 
-                    <div class="recent-task-item">
-
-                        <span class="task-name">
-                            月次報告
-                        </span>
-
-                        <span class="task-status">
-                            承認待ち
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </section>
+</section>
 
 
             <!-- =========================
