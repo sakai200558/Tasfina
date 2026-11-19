@@ -3,8 +3,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 $host = 'localhost';
 $dbname = 'Tasfina_db';
-$username = 'root';
-$password = 'password';
+$username = 'tasfina_user';
+$password = 'tasfina_pass';
 $charset = 'utf8mb4';
 
 try {
@@ -117,7 +117,7 @@ if ($method === 'POST') {
                 start_time = VALUES(start_time), 
                 end_time = VALUES(end_time), 
                 status = VALUES(status),
-                updated_at = NOW()
+               upated_at = NOW()
             ");
             $stmt->execute([$user_id, $work_date, $start_time, $end_time, $status]);
 
@@ -167,7 +167,7 @@ if ($method === 'POST') {
                 VALUES (?, ?, '有給休暇', NOW())
                 ON DUPLICATE KEY UPDATE 
                 status = '有給休暇',
-                updated_at = NOW()
+                upated_at = NOW()
             ");
             $stmt->execute([$user_id, $start_date]);
 
@@ -194,7 +194,7 @@ if ($method === 'POST') {
                 VALUES (?, ?, ?, NOW())
                 ON DUPLICATE KEY UPDATE 
                 status = VALUES(status),
-                updated_at = NOW()
+                upated_at = NOW()
             ");
             $stmt->execute([$user_id, $target_date, $shift_type]);
 

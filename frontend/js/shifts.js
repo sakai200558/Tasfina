@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- データ取得 & レンダリング ---
     async function loadShiftData() {
         try {
-            const res = await fetch(`shifts.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
+            const res = await fetch(`../../backend/shifts.php?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
             const data = await res.json();
             if (data.success) {
                 renderCalendar(currentYM, data.shifts, data.busy_days);
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const todayDateLabel = document.getElementById('todayDateLabel');
             if (todayDateLabel) todayDateLabel.textContent = todayStr;
 
-            const res = await fetch(`shifts.php?action=get_dashboard_info&today=${todayStr}&user_id=${userId}`);
+            const res = await fetch(`../../backend/shifts.php?action=get_dashboard_info&today=${todayStr}&user_id=${userId}`);
             const data = await res.json();
             
             const card = document.getElementById('todaysShiftCard');
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const res = await fetch('shifts.php', {
+                const res = await fetch('../../backend/shifts.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const res = await fetch('shifts.php', {
+                const res = await fetch('../../backend/shifts.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 required_people: document.getElementById('busyRequiredPeople').value,
                 bonus_pt: document.getElementById('busyBonusPt').value
             };
-            const res = await fetch('shifts.php', {
+            const res = await fetch('../../backend/shifts.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const res = await fetch('shifts.php', {
+                const res = await fetch('../../backend/shifts.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
