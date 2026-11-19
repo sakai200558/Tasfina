@@ -4,7 +4,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>ガントチャート | Tasfina</title>
 
@@ -26,23 +30,12 @@
     <!-- ガントチャート専用CSS -->
     <link rel="stylesheet" href="../css/gantt.css">
 
-    <!-- 完了申請モーダルCSS -->
-    <link rel="stylesheet" href="../css/gantt-modals.css">
-
-    <!-- Bootstrap JavaScript -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        defer
-    ></script>
-
     <!-- 共通JavaScript -->
     <script src="../js/common.js" defer></script>
 
-    <!-- ガントチャートJavaScript -->
+    <!-- ガントチャート専用JavaScript -->
     <script src="../js/gantt.js" defer></script>
 
-    <!-- モーダルJavaScript -->
-    <script src="../js/gantt-modals.js" defer></script>
 </head>
 
 <body>
@@ -55,80 +48,38 @@
         <!-- 共通サイドバー -->
         <div id="sidebar"></div>
 
+        <!-- メインコンテンツ -->
         <main class="main-content gantt-page">
 
+            <!-- タイトル -->
             <h1 class="gantt-title">
                 ガントチャート
             </h1>
 
-            <!-- 期間操作 -->
+            <!-- 期間表示 -->
             <section class="gantt-toolbar">
 
-                <div class="gantt-toolbar-left">
+                <div class="gantt-month-control">
 
-                    <!-- 表示単位 -->
-                    <div
-                        class="gantt-view-switch"
-                        role="group"
-                        aria-label="表示単位"
-                    >
-
-                        <button
-                            type="button"
-                            data-view="day"
-                        >
-                            日
-                        </button>
-
-                        <button
-                            type="button"
-                            data-view="week"
-                            class="active"
-                        >
-                            週
-                        </button>
-
-                        <button
-                            type="button"
-                            data-view="month"
-                        >
-                            月
-                        </button>
-
-                    </div>
-
-                    <!-- 期間移動 -->
-                    <div class="gantt-month-control">
-
-                        <button
-                            type="button"
-                            id="prevPeriod"
-                            aria-label="前の期間"
-                        >
-                            <i class="bi bi-chevron-left"></i>
-                        </button>
-
-                        <span id="currentPeriod"></span>
-
-                        <button
-                            type="button"
-                            id="nextPeriod"
-                            aria-label="次の期間"
-                        >
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-
-                    </div>
-
-                    <!-- 今日 -->
+                    <!-- 前週 -->
                     <button
                         type="button"
-                        id="todayButton"
-                        class="gantt-icon-button"
-                        aria-label="今日へ移動"
-                        title="今日へ移動"
+                        id="prevPeriod"
+                        aria-label="前週"
                     >
-                        <i class="bi bi-calendar3"></i>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <!-- 現在表示している期間 -->
+                    <span id="currentPeriod"></span>
+
+                    <!-- 翌週 -->
+                    <button
+                        type="button"
+                        id="nextPeriod"
+                        aria-label="翌週"
+                    >
+                        <i class="bi bi-chevron-right"></i>
                     </button>
 
                 </div>
@@ -138,7 +89,7 @@
             <!-- ガントチャート -->
             <section
                 class="gantt-chart-section"
-                aria-label="タスクの期間一覧"
+                aria-label="タスクの週間スケジュール"
             >
 
                 <div class="gantt-scroll">
@@ -152,33 +103,9 @@
 
             </section>
 
-            <!-- 説明 -->
-            <div class="gantt-legend">
-                <span>
-                    <i class="legend-color period"></i>
-                    タスクの実施期間
-                </span>
-            </div>
-
-            <!-- 選択中のタスク -->
-            <section class="gantt-detail">
-
-                <h2>選択中のタスク</h2>
-
-                <div id="taskDetail">
-                    <p class="gantt-empty">
-                        タスクを選択してください。
-                    </p>
-                </div>
-
-            </section>
-
         </main>
 
     </div>
-
-    <!-- モーダルHTML配置先 -->
-    <div id="ganttModals"></div>
 
 </body>
 </html>
