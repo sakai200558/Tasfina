@@ -5,11 +5,12 @@ try {
     // データベース接続ファイルの読み込み
     require_once __DIR__ . '/db.php';
 
-    // tasks と users を結合して担当者名を取得するSQL
+     // tasks と users を結合して担当者名を取得するSQL
     $sql = "SELECT tasks.*, users.display_name AS user_name 
             FROM tasks 
             LEFT JOIN users ON tasks.assigned_user_id = users.user_id 
             ORDER BY tasks.due_date ASC";
+
             
     $stmt = $pdo->query($sql);
     $rawTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -47,7 +47,7 @@ if (empty($assigned_user_id)) {
 
 try {
     // ★ assigned_user_id を含めて INSERT する
-    $sql = "INSERT INTO tasks (organization_id, department_id, assigned_user_id, title, description, difficulty_level, discomfort_level, estimated_hours, calculated_burden_pts, status, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+   $sql = "INSERT INTO tasks (organization_id, department_id, assigned_user_id, title, description, difficulty_level, discomfort_level, estimated_hours, calculated_burden_pts, status, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         $organization_id,
