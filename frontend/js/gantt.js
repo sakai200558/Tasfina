@@ -1,13 +1,19 @@
 
 /* ========================================
    Tasfina ガントチャート
-   シンプル期間表示版
+   週間表示・PHP連携版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================
-       タスクデータ
+       API設定
+    ===================================== */
+
+    const API_URL = "../../backend/naume_api.php";
+
+    /* =====================================
+       タスクデータ（仮データ）
     ===================================== */
 
     const tasks = [
@@ -53,21 +59,21 @@ document.addEventListener("DOMContentLoaded", () => {
        状態管理
     ===================================== */
 
-    let currentView = "week";
-
-    // サンプルデータの期間を初期表示
+    // 初期表示する日付
     let currentDate = new Date(2024, 9, 17);
 
-    let selectedTaskId = 1;
+    const chart =
+        document.getElementById("ganttChart");
 
-    const chart = document.getElementById("ganttChart");
-    const detail = document.getElementById("taskDetail");
-    const periodLabel = document.getElementById("currentPeriod");
+    const periodLabel =
+        document.getElementById("currentPeriod");
 
-    if (!chart || !detail || !periodLabel) {
+    if (!chart || !periodLabel) {
+
         console.error(
             "ガントチャートのHTML要素が見つかりません。"
         );
+
         return;
     }
 
@@ -76,19 +82,30 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================== */
 
     function parseDate(value) {
+
         const [year, month, day] =
             value.split("-").map(Number);
 
-        return new Date(year, month - 1, day);
+        return new Date(
+            year,
+            month - 1,
+            day
+        );
     }
 
     function addDays(date, amount) {
+
         const result = new Date(date);
-        result.setDate(result.getDate() + amount);
+
+        result.setDate(
+            result.getDate() + amount
+        );
+
         return result;
     }
 
     function dayDiff(first, second) {
+
         const a = Date.UTC(
             first.getFullYear(),
             first.getMonth(),
@@ -101,18 +118,39 @@ document.addEventListener("DOMContentLoaded", () => {
             second.getDate()
         );
 
-        return Math.round((b - a) / 86400000);
+        return Math.round(
+            (b - a) / 86400000
+        );
     }
 
     function formatDate(date) {
+
         return [
             date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, "0"),
-            String(date.getDate()).padStart(2, "0")
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0"),
+            String(
+                date.getDate()
+            ).padStart(2, "0")
         ].join("/");
     }
 
+    function formatDateForAPI(date) {
+
+        return [
+            date.getFullYear(),
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0"),
+            String(
+                date.getDate()
+            ).padStart(2, "0")
+        ].join("-");
+    }
+
     function escapeHTML(value) {
+
         return String(value ?? "").replace(
             /[&<>"']/g,
             char => ({
@@ -126,77 +164,102 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =====================================
-       表示期間の計算
+       週間表示期間の取得
     ===================================== */
 
-    function getRange() {
+    function getWeekRange() {
 
-        let start;
-        let count;
-        let width;
+        // 月曜日を週の開始日とする
+        const day = currentDate.getDay();
 
-        if (currentView === "day") {
+        const mondayOffset =
+            (day + 6) % 7;
 
-            start = addDays(currentDate, -1);
-            count = 3;
-            width = 200;
+        const start = addDays(
+            currentDate,
+            -mondayOffset
+        );
 
-        } else if (currentView === "week") {
+        const end = addDays(
+            start,
+            6
+        );
 
-            const day = currentDate.getDay();
-            const mondayOffset = (day + 6) % 7;
-
-            start = addDays(
-                currentDate,
-                -mondayOffset
-            );
-
-            count = 7;
-            width = 120;
-
-        } else {
-
-            start = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth(),
-                1
-            );
-
-            count = new Date(
-                currentDate.getFullYear(),
-                currentDate.getMonth() + 1,
-                0
-            ).getDate();
-
-            width = 45;
-        }
-
-        return { start, count, width };
+        return {
+            start,
+            end,
+            count: 7,
+            width: 120
+        };
     }
 
     /* =====================================
-       期間ラベル
+       PHPへ表示期間をPOST送信
     ===================================== */
 
-    function updatePeriodLabel() {
+    async function sendPeriodToPHP() {
 
-        const range = getRange();
+        const range = getWeekRange();
 
-        const end = addDays(
-            range.start,
-            range.count - 1
+        // PHPに送るデータ
+        const requestData = {
+            before: formatDateForAPI(range.start),
+            after: formatDateForAPI(range.end)
+        };
+
+        console.log(
+            "PHPへ送信する期間:",
+            requestData
         );
 
-        if (currentView === "month") {
+        try {
 
-            periodLabel.textContent =
-                `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月`;
+            const response = await fetch(API_URL, {
 
-        } else {
+                method: "POST",
 
-            periodLabel.textContent =
-                `${formatDate(range.start)} ～ ${formatDate(end)}`;
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
+                credentials: "same-origin",
+
+                body: JSON.stringify(requestData)
+
+            });
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `HTTPエラー: ${response.status}`
+                );
+            }
+
+            const result = await response.json();
+
+            if (result.success === false) {
+
+                throw new Error(
+                    result.message ||
+                    "PHP側でエラーが発生しました。"
+                );
+            }
+
+            console.log(
+                "PHPからの応答:",
+                result
+            );
+
+            return result;
+
+        } catch (error) {
+
+            console.error(
+                "PHPへの期間送信に失敗しました:",
+                error
+            );
+
+            return null;
         }
     }
 
@@ -206,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderChart() {
 
-        const range = getRange();
+        const range = getWeekRange();
 
         const totalWidth =
             range.count * range.width;
@@ -221,7 +284,16 @@ document.addEventListener("DOMContentLoaded", () => {
             `${range.width}px`
         );
 
-        updatePeriodLabel();
+        /* =====================================
+           期間表示
+        ===================================== */
+
+        periodLabel.textContent =
+            `${formatDate(range.start)} ～ ${formatDate(range.end)}`;
+
+        /* =====================================
+           日付ヘッダー
+        ===================================== */
 
         const weekdays = [
             "日", "月", "火", "水", "木", "金", "土"
@@ -252,8 +324,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
             html += `
                 <div class="gantt-date ${dayClass}">
+
                     ${date.getMonth() + 1}/${date.getDate()}
-                    <div>(${weekdays[day]})</div>
+
+                    <div>
+                        (${weekdays[day]})
+                    </div>
+
                 </div>
             `;
         }
@@ -263,10 +340,17 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+        /* =====================================
+           タスク表示
+        ===================================== */
+
         tasks.forEach(task => {
 
-            const start = parseDate(task.start);
-            const end = parseDate(task.end);
+            const start =
+                parseDate(task.start);
+
+            const end =
+                parseDate(task.end);
 
             const offset =
                 dayDiff(range.start, start);
@@ -295,21 +379,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 barHTML = `
                     <div
-                        class="gantt-task-bar period"
-                        style="left:${left}px;width:${width}px"
+                        class="gantt-task-bar"
+                        style="
+                            left:${left}px;
+                            width:${width}px;
+                        "
                         title="${escapeHTML(task.start)} ～ ${escapeHTML(task.end)}"
                     ></div>
                 `;
             }
 
             html += `
-                <div
-                    class="gantt-row gantt-task-row ${selectedTaskId === task.id ? "selected" : ""}"
-                    data-task-id="${task.id}"
-                    tabindex="0"
-                    role="button"
-                    aria-label="${escapeHTML(task.name)}の期間を表示"
-                >
+                <div class="gantt-row gantt-task-row">
 
                     <div class="gantt-cell gantt-name">
                         ${escapeHTML(task.name)}
@@ -324,277 +405,55 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         chart.innerHTML = html;
-
-        /* =====================================
-           タスク選択
-        ===================================== */
-
-        chart.querySelectorAll(".gantt-task-row")
-            .forEach(row => {
-
-                const selectTask = () => {
-
-                    selectedTaskId =
-                        Number(row.dataset.taskId);
-
-                    renderChart();
-                    renderDetail();
-                };
-
-                row.addEventListener(
-                    "click",
-                    selectTask
-                );
-
-                row.addEventListener(
-                    "keydown",
-                    event => {
-
-                        if (
-                            event.key === "Enter" ||
-                            event.key === " "
-                        ) {
-                            event.preventDefault();
-                            selectTask();
-                        }
-                    }
-                );
-            });
     }
 
     /* =====================================
-       選択タスク詳細
+       画面更新とPHP送信
     ===================================== */
 
-    function renderDetail() {
+    function updateGantt() {
 
-        const task = tasks.find(
-            item => item.id === selectedTaskId
-        );
+        // ガントチャートを更新
+        renderChart();
 
-        if (!task) {
-
-            detail.innerHTML = `
-                <p class="gantt-empty">
-                    タスクを選択してください。
-                </p>
-            `;
-
-            return;
-        }
-
-        const start = parseDate(task.start);
-        const end = parseDate(task.end);
-
-        const duration =
-            dayDiff(start, end) + 1;
-
-        detail.innerHTML = `
-            <h3>${escapeHTML(task.name)}</h3>
-
-            <div class="gantt-detail-content">
-
-                <dl>
-                    <dt>開始日</dt>
-                    <dd>${formatDate(start)}</dd>
-
-                    <dt>終了日</dt>
-                    <dd>${formatDate(end)}</dd>
-
-                    <dt>期間</dt>
-                    <dd>${duration}日間</dd>
-                </dl>
-
-                <div class="gantt-detail-actions">
-
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        id="requestComplete"
-                    >
-                        <i class="bi bi-check-circle"></i>
-                        完了申請
-                    </button>
-
-                </div>
-
-            </div>
-        `;
+        // 表示期間をPHPに送信
+        sendPeriodToPHP();
     }
 
     /* =====================================
-       表示単位切り替え
-    ===================================== */
-
-    document.querySelectorAll(
-        ".gantt-view-switch button"
-    ).forEach(button => {
-
-        button.addEventListener("click", () => {
-
-            currentView = button.dataset.view;
-
-            document.querySelectorAll(
-                ".gantt-view-switch button"
-            ).forEach(item => {
-                item.classList.remove("active");
-            });
-
-            button.classList.add("active");
-
-            renderChart();
-        });
-    });
-
-    /* =====================================
-       前後の期間へ移動
+       前週へ移動
     ===================================== */
 
     document.getElementById("prevPeriod")
         ?.addEventListener("click", () => {
 
-            if (currentView === "day") {
+            currentDate = addDays(
+                currentDate,
+                -7
+            );
 
-                currentDate = addDays(
-                    currentDate,
-                    -1
-                );
-
-            } else if (currentView === "week") {
-
-                currentDate = addDays(
-                    currentDate,
-                    -7
-                );
-
-            } else {
-
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() - 1,
-                    1
-                );
-            }
-
-            renderChart();
+            updateGantt();
         });
+
+    /* =====================================
+       翌週へ移動
+    ===================================== */
 
     document.getElementById("nextPeriod")
         ?.addEventListener("click", () => {
 
-            if (currentView === "day") {
+            currentDate = addDays(
+                currentDate,
+                7
+            );
 
-                currentDate = addDays(
-                    currentDate,
-                    1
-                );
-
-            } else if (currentView === "week") {
-
-                currentDate = addDays(
-                    currentDate,
-                    7
-                );
-
-            } else {
-
-                currentDate = new Date(
-                    currentDate.getFullYear(),
-                    currentDate.getMonth() + 1,
-                    1
-                );
-            }
-
-            renderChart();
+            updateGantt();
         });
-
-    /* =====================================
-       今日へ移動
-    ===================================== */
-
-    document.getElementById("todayButton")
-        ?.addEventListener("click", () => {
-
-            currentDate = new Date();
-
-            renderChart();
-        });
-
-    /* =====================================
-       モーダル用選択タスク取得
-    ===================================== */
-
-    window.getGanttSelectedTask = () => {
-
-        const task = tasks.find(
-            item => item.id === selectedTaskId
-        );
-
-        if (!task) {
-            return null;
-        }
-
-        // 既存のモーダルが参照する
-        // プロパティを維持する
-        return {
-            ...task,
-            department: "",
-            assignee: "",
-            hours: 0,
-            points: 0,
-            status: "progress"
-        };
-    };
-
-    /* =====================================
-       モーダルHTML読み込み
-    ===================================== */
-
-    async function initializeModalHTML() {
-
-        try {
-
-            if (typeof loadModal !== "function") {
-                throw new Error(
-                    "common.js のloadModalが見つかりません。"
-                );
-            }
-
-            await loadModal(
-                "ganttModals",
-                "../modals/gantt-modals.html"
-            );
-
-            if (
-                !document.getElementById(
-                    "taskCompleteModal"
-                )
-            ) {
-                throw new Error(
-                    "完了申請モーダルが見つかりません。"
-                );
-            }
-
-            console.log(
-                "完了申請モーダルを読み込みました。"
-            );
-
-        } catch (error) {
-
-            console.error(
-                "モーダル読み込みエラー:",
-                error
-            );
-        }
-    }
 
     /* =====================================
        初期表示
     ===================================== */
 
-    renderChart();
-    renderDetail();
-
-    initializeModalHTML();
+    updateGantt();
 
 });
