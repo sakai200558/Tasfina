@@ -4,7 +4,7 @@ header('Content-Type: application/json; charset=utf-8');
 $host = 'localhost';
 $dbname = 'Tasfina_db';
 $username = 'root';
-$password = '';
+$password = 'password';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
