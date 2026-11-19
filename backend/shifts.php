@@ -5,6 +5,10 @@ $host = 'localhost';
 $dbname = 'Tasfina_db';
 $username = 'root';
 $password = 'password';
+<<<<<<< HEAD
+=======
+$charset = 'utf8mb4';
+>>>>>>> 45d0e5839968a02dd36e069b14b520f0ffd5860e
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
@@ -116,7 +120,7 @@ if ($method === 'POST') {
                 start_time = VALUES(start_time), 
                 end_time = VALUES(end_time), 
                 status = VALUES(status),
-                upated_at = NOW()
+                updated_at = NOW()
             ");
             $stmt->execute([$user_id, $work_date, $start_time, $end_time, $status]);
 
@@ -134,6 +138,7 @@ if ($method === 'POST') {
         $bonus_pt = $input['bonus_pt'] ?? 2.0;
 
         try {
+            // テーブル定義のカラム名 'required_peple' に合わせて修正
             $stmt = $pdo->prepare("
                 INSERT INTO busy_day_settings (date, required_peple, bonus_pt, is_active) 
                 VALUES (?, ?, ?, 1)
@@ -141,6 +146,62 @@ if ($method === 'POST') {
             $stmt->execute([$date, $required_people, $bonus_pt]);
 
             echo json_encode(['success' => true, 'message' => '繁忙期設定を保存しました。']);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // --- 有休申請の登録 ---
+    if ($action === 'submit_paid_leave') {
+        $start_date = $input['start_date'] ?? '';
+        $end_date = $input['end_date'] ?? '';
+        $reason = $input['reason'] ?? '';
+        $leave_type = $input['leave_type'] ?? 'full';
+
+        if (empty($start_date) || empty($end_date)) {
+            echo json_encode(['success' => false, 'error' => '日付が正しく選択されていません。']);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO shifts (user_id, work_date, status, created_at) 
+                VALUES (?, ?, '有給休暇', NOW())
+                ON DUPLICATE KEY UPDATE 
+                status = '有給休暇',
+                updated_at = NOW()
+            ");
+            $stmt->execute([$user_id, $start_date]);
+
+            echo json_encode(['success' => true, 'message' => '有休申請を受け付けました。']);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // --- シフトルーレットの実行・割り当て処理 ---
+    if ($action === 'execute_roulette') {
+        $target_date = $input['target_date'] ?? '';
+        $shift_type = $input['shift_type'] ?? '在宅勤務';
+
+        if (empty($target_date)) {
+            echo json_encode(['success' => false, 'error' => '対象日が指定されていません。']);
+            exit;
+        }
+
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO shifts (user_id, work_date, status, created_at) 
+                VALUES (?, ?, ?, NOW())
+                ON DUPLICATE KEY UPDATE 
+                status = VALUES(status),
+                updated_at = NOW()
+            ");
+            $stmt->execute([$user_id, $target_date, $shift_type]);
+
+            echo json_encode(['success' => true, 'message' => 'シフトルーレットによりメンバーが選出・割り当てられました。']);
         } catch (PDOException $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
