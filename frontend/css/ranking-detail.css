@@ -1,0 +1,530 @@
+
+/* ========================================
+   Tasfina 負担スコア詳細モーダル
+======================================== */
+
+.ranking-detail-modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    color: #17213b;
+    box-shadow: 0 16px 60px rgba(15, 35, 70, 0.16);
+}
+
+.ranking-modal-header {
+    padding: 20px 26px;
+    background: #f7faff;
+    border-bottom: 1px solid #e1e8f2;
+}
+
+.ranking-modal-eyebrow {
+    margin: 0 0 4px;
+    color: #0868d9;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ranking-modal-header .modal-title {
+    color: #0c1738;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.ranking-modal-body {
+    padding: 24px 26px;
+    background: #ffffff;
+}
+
+.ranking-modal-status {
+    margin-bottom: 16px;
+    padding: 14px;
+    border-radius: 7px;
+    background: #fff3f3;
+    color: #a42c2c;
+    font-size: 14px;
+}
+
+.ranking-modal-status[hidden],
+#rankingModalContent[hidden] {
+    display: none;
+}
+
+/* ========================================
+   メンバープロフィール
+======================================== */
+
+.ranking-modal-profile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border: 1px solid #dce7f5;
+    border-radius: 9px;
+    background: #f3f8ff;
+}
+
+.ranking-modal-person {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+}
+
+.ranking-modal-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #e1ecfa;
+    color: #6689b5;
+    font-size: 43px;
+}
+
+.ranking-modal-person h3 {
+    margin: 0 0 5px;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.ranking-modal-person p {
+    margin: 0 0 7px;
+    color: #66758f;
+    font-size: 13px;
+}
+
+.ranking-modal-period {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 5px;
+    background: #e1edff;
+    color: #095bb9;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ranking-modal-total {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.ranking-modal-total > span {
+    display: block;
+    margin-bottom: 4px;
+    color: #66758f;
+    font-size: 13px;
+}
+
+.ranking-modal-total div {
+    color: #e33434;
+}
+
+.ranking-modal-total div strong {
+    font-size: 36px;
+    line-height: 1.2;
+}
+
+.ranking-modal-total div small {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ranking-modal-total p {
+    margin: 7px 0 0;
+    color: #68758c;
+    font-size: 12px;
+}
+
+.ranking-modal-total p strong {
+    margin-left: 6px;
+}
+
+.ranking-modal-change-up {
+    color: #e33434;
+}
+
+.ranking-modal-change-down {
+    color: #159b6e;
+}
+
+.ranking-modal-change-neutral {
+    color: #75839b;
+}
+
+/* ========================================
+   サマリーカード
+======================================== */
+
+.ranking-modal-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.ranking-modal-stat {
+    min-width: 0;
+    padding: 17px 15px;
+    border: 1px solid #e0e6ef;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.ranking-modal-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    font-size: 19px;
+}
+
+.ranking-modal-stat-icon.blue {
+    background: #e8f2ff;
+    color: #0868d9;
+}
+
+.ranking-modal-stat-icon.purple {
+    background: #f1eaff;
+    color: #8b58c5;
+}
+
+.ranking-modal-stat-icon.green {
+    background: #e3f7ed;
+    color: #249b69;
+}
+
+.ranking-modal-stat-icon.orange {
+    background: #fff0df;
+    color: #e68b20;
+}
+
+.ranking-modal-stat > span {
+    display: block;
+    margin-bottom: 6px;
+    color: #64738d;
+    font-size: 12px;
+}
+
+.ranking-modal-stat > strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+/* ========================================
+   セクション
+======================================== */
+
+.ranking-modal-section {
+    margin-top: 26px;
+}
+
+.ranking-modal-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 13px;
+}
+
+.ranking-modal-section-heading h3 {
+    margin: 0;
+    color: #17213b;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.ranking-modal-section-heading h3 i {
+    margin-right: 8px;
+    color: #0868d9;
+}
+
+.ranking-modal-section-heading > span {
+    color: #77849a;
+    font-size: 12px;
+}
+
+/* ========================================
+   スコア内訳
+======================================== */
+
+.ranking-modal-breakdown-layout {
+    padding: 18px;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+}
+
+.ranking-modal-breakdown-bar {
+    display: flex;
+    height: 22px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #edf1f6;
+}
+
+.ranking-modal-breakdown-segment {
+    height: 100%;
+    min-width: 0;
+}
+
+.ranking-modal-breakdown-segment.normal,
+.ranking-modal-breakdown-dot.normal {
+    background: #83baff;
+}
+
+.ranking-modal-breakdown-segment.remote,
+.ranking-modal-breakdown-dot.remote {
+    background: #76d2b5;
+}
+
+.ranking-modal-breakdown-segment.morning,
+.ranking-modal-breakdown-dot.morning {
+    background: #ffc45d;
+}
+
+.ranking-modal-breakdown-segment.leave,
+.ranking-modal-breakdown-dot.leave {
+    background: #ff9797;
+}
+
+.ranking-modal-breakdown-segment.busy,
+.ranking-modal-breakdown-dot.busy {
+    background: #ff7e7e;
+}
+
+.ranking-modal-breakdown-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin-top: 17px;
+}
+
+.ranking-modal-breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #edf0f5;
+    font-size: 13px;
+}
+
+.ranking-modal-breakdown-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #53617b;
+}
+
+.ranking-modal-breakdown-dot {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+
+.ranking-modal-breakdown-item strong {
+    white-space: nowrap;
+}
+
+/* ========================================
+   タスク別ポイントテーブル
+======================================== */
+
+.ranking-modal-table-wrap {
+    border: 1px solid #e0e6ef;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.ranking-modal-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ranking-modal-table th,
+.ranking-modal-table td {
+    padding: 13px 15px;
+    border-bottom: 1px solid #e8edf4;
+    vertical-align: middle;
+}
+
+.ranking-modal-table thead th {
+    background: #f5f8fc;
+    color: #42516b;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ranking-modal-table td:nth-child(2),
+.ranking-modal-table td:last-child {
+    white-space: nowrap;
+}
+
+.ranking-modal-table td:last-child {
+    color: #0868d9;
+    font-weight: 700;
+}
+
+.ranking-modal-table tfoot {
+    background: #f3f8ff;
+}
+
+.ranking-modal-table tfoot th,
+.ranking-modal-table tfoot td {
+    border-bottom: none;
+    font-weight: 700;
+}
+
+/* ========================================
+   計算根拠
+======================================== */
+
+.ranking-modal-calculation {
+    padding: 18px 20px;
+    border: 1px solid #dce7f5;
+    border-radius: 8px;
+    background: #f8fbff;
+}
+
+.ranking-modal-calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e4eaf3;
+    font-size: 13px;
+}
+
+.ranking-modal-calc-row strong {
+    white-space: nowrap;
+}
+
+.ranking-modal-calc-total {
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 2px solid #d7e5f5;
+    border-bottom: none;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ranking-modal-calc-total strong {
+    color: #0868d9;
+    font-size: 21px;
+}
+
+.ranking-modal-calc-note {
+    margin: 10px 0 0;
+    color: #687892;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* ========================================
+   フッター
+======================================== */
+
+.ranking-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 26px;
+    background: #fafcff;
+    border-top: 1px solid #e1e8f2;
+}
+
+.ranking-modal-footer > span {
+    color: #718099;
+    font-size: 12px;
+}
+
+.ranking-modal-footer > span i {
+    margin-right: 5px;
+}
+
+.ranking-modal-close-button {
+    min-width: 110px;
+    padding: 9px 20px;
+    border: 1px solid #cdd8e7;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #35425c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ranking-modal-close-button:hover {
+    background: #edf3fa;
+}
+
+/* ========================================
+   レスポンシブ
+======================================== */
+
+@media (max-width: 768px) {
+
+    .ranking-modal-body {
+        padding: 18px;
+    }
+
+    .ranking-modal-header,
+    .ranking-modal-footer {
+        padding: 16px 18px;
+    }
+
+    .ranking-modal-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ranking-modal-profile {
+        align-items: flex-start;
+    }
+
+    .ranking-modal-breakdown-list {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .ranking-modal-profile {
+        flex-direction: column;
+    }
+
+    .ranking-modal-total {
+        width: 100%;
+        text-align: left;
+    }
+
+    .ranking-modal-person h3 {
+        font-size: 17px;
+    }
+
+    .ranking-modal-stat > strong {
+        font-size: 19px;
+    }
+
+    .ranking-modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ranking-modal-close-button {
+        width: 100%;
+    }
+
+}

@@ -1,0 +1,163 @@
+
+/* ========================================
+   Tasfina 業務タイプ・倍率編集
+======================================== */
+
+.work-type-modal {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ヘッダー */
+
+.work-type-modal .modal-header {
+    background: #f7faff;
+    border-bottom: 1px solid #dce5f0;
+    padding: 20px 24px;
+}
+
+.work-type-modal .modal-title {
+    color: #172b4d;
+    font-weight: 700;
+}
+
+.work-type-modal-description {
+    margin: 8px 0 0;
+    color: #74839a;
+    font-size: 13px;
+}
+
+/* 本体 */
+
+.work-type-modal .modal-body {
+    padding: 24px;
+}
+
+/* 説明欄 */
+
+.work-type-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    margin-bottom: 20px;
+    background: #edf5ff;
+    border-radius: 8px;
+    color: #315b8e;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.work-type-info i {
+    font-size: 17px;
+}
+
+/* テーブル */
+
+.work-type-table {
+    border: 1px solid #dce5f0;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.work-type-table thead th {
+    background: #f4f7fb;
+    color: #344767;
+    font-weight: 600;
+    border-bottom: 1px solid #dce5f0;
+    white-space: nowrap;
+}
+
+.work-type-table th,
+.work-type-table td {
+    padding: 12px;
+    border-color: #e2e8f0;
+}
+
+.work-type-table .form-control {
+    min-width: 100px;
+    font-size: 14px;
+}
+
+.work-type-name-input {
+    min-width: 160px !important;
+}
+
+.work-type-multiplier-input {
+    width: 110px;
+}
+
+.work-type-multiplier-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.work-type-multiplier-wrapper span {
+    color: #64748b;
+}
+
+/* 状態切り替え */
+
+.work-type-table .form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: auto;
+}
+
+.work-type-table .form-check-input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.work-type-table .form-check-label {
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* 削除ボタン */
+
+.work-type-delete-button {
+    white-space: nowrap;
+}
+
+/* 注意書き */
+
+.work-type-note {
+    margin: 14px 0 0;
+    color: #8090a5;
+    font-size: 12px;
+}
+
+/* フッター */
+
+.work-type-modal .modal-footer {
+    padding: 16px 24px;
+    background: #fafcff;
+    border-top: 1px solid #dce5f0;
+}
+
+.work-type-modal .modal-footer .btn {
+    min-width: 120px;
+}
+
+/* スマートフォン */
+
+@media (max-width: 576px) {
+
+    .work-type-modal .modal-header,
+    .work-type-modal .modal-body,
+    .work-type-modal .modal-footer {
+        padding: 16px;
+    }
+
+    .work-type-table {
+        min-width: 620px;
+    }
+
+    .work-type-modal .modal-footer .btn {
+        min-width: 100px;
+    }
+}

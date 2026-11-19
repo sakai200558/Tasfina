@@ -198,9 +198,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ======================================== */
 
             showError(
-                result.message ||
-                "メールアドレスまたはパスワードが違います。"
-            );
+    result.comment ||
+    result.message ||
+    "メールアドレスまたはパスワードが違います。"
+);
 
         } catch (error) {
 

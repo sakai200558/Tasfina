@@ -1,0 +1,84 @@
+
+/* ========================================
+   プロフィール編集モーダル
+======================================== */
+
+.profile-edit-modal {
+    max-width: 100%;
+}
+
+.profile-edit-modal .modal-header {
+    background-color: #f8fafc;
+}
+
+.profile-edit-description {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 22px;
+}
+
+.profile-edit-required {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.profile-edit-divider {
+    margin: 24px 0 20px;
+    border-color: #dbe3ed;
+    opacity: 1;
+}
+
+.profile-edit-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #17213a;
+    margin-bottom: 16px;
+}
+
+.profile-edit-modal .profile-edit-readonly {
+    background-color: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.profile-edit-note {
+    margin-top: 12px;
+    margin-bottom: 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.profile-edit-save {
+    background-color: #5085c5;
+    border-color: #5085c5;
+    font-weight: 600;
+}
+
+.profile-edit-save:hover {
+    background-color: #376fae;
+    border-color: #376fae;
+}
+
+.profile-edit-save:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+#profileEditMessage[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 576px) {
+    .profile-edit-modal .modal-body {
+        padding: 18px;
+    }
+
+    .profile-edit-modal .modal-footer {
+        padding: 14px 18px;
+    }
+
+    .profile-edit-modal .modal-footer .btn {
+        flex: 1;
+        min-width: 0;
+    }
+}

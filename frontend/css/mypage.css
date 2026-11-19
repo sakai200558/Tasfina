@@ -373,3 +373,16 @@
         flex-wrap: wrap;
     }
 }
+.profile-edit-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+/* ========================================
+   所属部門コードのコピー表示制御
+======================================== */
+
+.profile-copy-button[hidden] {
+    display: none;
+}

@@ -1,0 +1,380 @@
+
+/* ========================================
+   Tasfina 部門詳細モーダル専用CSS
+======================================== */
+
+.dept-detail-modal {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    color: #17213a;
+}
+
+.dept-detail-header {
+    padding: 24px 28px;
+    background: #f7faff;
+    border-bottom: 1px solid #dce5f0;
+    align-items: flex-start;
+}
+
+.dept-detail-eyebrow {
+    margin: 0 0 6px;
+    color: #0866d8;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dept-detail-eyebrow i {
+    margin-right: 5px;
+}
+
+.dept-detail-header .modal-title {
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.dept-detail-manager {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.dept-detail-body {
+    padding: 26px 28px;
+    background: #fff;
+}
+
+.dept-detail-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-bottom: 22px;
+}
+
+.dept-detail-caption {
+    display: block;
+    margin-bottom: 7px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.dept-detail-pill {
+    display: inline-block;
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.dept-detail-pill.normal {
+    color: #087b4c;
+    background: #e2f7ed;
+}
+
+.dept-detail-pill.busy {
+    color: #a76500;
+    background: #fff1cf;
+}
+
+.dept-detail-pill.critical {
+    color: #c52f42;
+    background: #ffe5e9;
+}
+
+.dept-detail-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 13px;
+    margin-bottom: 26px;
+}
+
+.dept-detail-stat {
+    padding: 18px;
+    border: 1px solid #dce5f0;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.dept-detail-stat span {
+    display: block;
+    color: #52617d;
+    font-size: 12px;
+    margin-bottom: 9px;
+}
+
+.dept-detail-stat strong {
+    display: block;
+    font-size: 26px;
+    color: #17213a;
+}
+
+.dept-detail-stat-score {
+    background: #edf5ff;
+    border-color: #cce1ff;
+}
+
+.dept-detail-stat-score strong {
+    color: #0866d8;
+}
+
+.dept-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.dept-detail-column {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dept-detail-section {
+    padding: 20px;
+    border: 1px solid #dce5f0;
+    border-radius: 9px;
+}
+
+.dept-detail-section h3 {
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dept-detail-section h3 i {
+    margin-right: 7px;
+    color: #0866d8;
+}
+
+.dept-detail-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dept-detail-section-heading span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.dept-detail-member-list,
+.dept-detail-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dept-detail-member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.dept-detail-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e1edfc;
+    color: #0866d8;
+    font-size: 21px;
+}
+
+.dept-detail-member-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.dept-detail-member-info strong,
+.dept-detail-member-info small {
+    display: block;
+}
+
+.dept-detail-member-info strong {
+    font-size: 13px;
+}
+
+.dept-detail-member-info small {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.dept-detail-member-status {
+    font-size: 11px;
+    white-space: nowrap;
+    color: #52617d;
+}
+
+.dept-detail-attendance {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.dept-detail-attendance-item {
+    padding: 13px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.dept-detail-attendance-item span {
+    display: block;
+    color: #52617d;
+    font-size: 12px;
+}
+
+.dept-detail-attendance-item strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 22px;
+}
+
+.dept-detail-task {
+    padding: 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.dept-detail-task-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dept-detail-task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 9px;
+    color: #64748b;
+    font-size: 11px;
+}
+
+.dept-detail-task-badge {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    background: #e8f1ff;
+    color: #0866d8;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.dept-detail-task-badge.delayed {
+    background: #ffe5e9;
+    color: #c52f42;
+}
+
+.dept-detail-load-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 13px;
+    font-size: 13px;
+}
+
+.dept-detail-load-top strong {
+    font-size: 22px;
+}
+
+.dept-detail-progress {
+    height: 12px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #e7edf5;
+}
+
+.dept-detail-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: 20px;
+    background: #16a36a;
+    transition: width 0.25s;
+}
+
+.dept-detail-progress-bar.busy {
+    background: #e6a23c;
+}
+
+.dept-detail-progress-bar.critical {
+    background: #dc3545;
+}
+
+.dept-detail-load p {
+    margin: 12px 0 0;
+    color: #52617d;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.dept-detail-score-note {
+    display: flex;
+    gap: 8px;
+    margin-top: 17px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.dept-detail-empty {
+    margin: 0;
+    padding: 14px;
+    color: #64748b;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.dept-detail-footer {
+    padding: 16px 28px;
+    background: #fff;
+    border-top: 1px solid #dce5f0;
+}
+
+@media (max-width: 900px) {
+    .dept-detail-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dept-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575px) {
+    .dept-detail-header,
+    .dept-detail-body {
+        padding: 18px;
+    }
+
+    .dept-detail-section {
+        padding: 15px;
+    }
+
+    .dept-detail-summary {
+        gap: 9px;
+    }
+
+    .dept-detail-stat {
+        padding: 13px;
+    }
+
+    .dept-detail-stat strong {
+        font-size: 21px;
+    }
+
+    .dept-detail-attendance {
+        grid-template-columns: 1fr;
+    }
+}

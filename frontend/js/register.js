@@ -191,29 +191,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.json();
 
-            if (!response.ok) {
-                showError(
-                    result.message || "登録処理に失敗しました。"
-                );
-                return;
-            }
+           if (!response.ok) {
+    showError(
+        result.comment ||
+        result.message ||
+        "登録処理に失敗しました。"
+    );
+    return;
+}
 
             /* ========================================
                登録成功
             ======================================== */
 
-            if (result.register === true) {
+            if (result.success === true) {
 
-                // 登録成功後はログイン画面へ
-                window.location.href = "login.html";
+    // 登録成功後はログイン画面へ
+    window.location.href = "login.html";
 
-            } else {
+} else {
 
-                showError(
-                    result.message || "新規登録に失敗しました。"
-                );
+    showError(
+        result.comment || "新規登録に失敗しました。"
+    );
 
-            }
+}
 
         } catch (error) {
 

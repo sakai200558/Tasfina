@@ -1,6 +1,7 @@
 
 /* ========================================
    Tasfina 組織図画面専用JavaScript
+   部門詳細モーダル対応版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: "山田 太郎",
             reading: "やまだ たろう",
             department: "代表取締役",
-            role: "全門管理者",
+            role: "全社管理者",
             employeeId: "A001",
             email: "taro.yamada@tasfina.jp",
             score: 3.2,
@@ -243,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================
        組織データ
+       部門詳細モーダル用ID追加
     ===================================== */
 
     const departments = [
@@ -255,16 +257,19 @@ document.addEventListener("DOMContentLoaded", () => {
             count: 12,
             teams: [
                 {
+                    id: "sales-1",
                     name: "営業1課",
                     manager: "sales1",
                     count: 5
                 },
                 {
+                    id: "sales-2",
                     name: "営業2課",
                     manager: "sales2",
                     count: 4
                 },
                 {
+                    id: "sales-3",
                     name: "営業3課",
                     manager: "sales3",
                     count: 3
@@ -280,16 +285,19 @@ document.addEventListener("DOMContentLoaded", () => {
             count: 10,
             teams: [
                 {
+                    id: "development-1",
                     name: "開発1課",
                     manager: "development1",
                     count: 4
                 },
                 {
+                    id: "development-2",
                     name: "開発2課",
                     manager: "development2",
                     count: 3
                 },
                 {
+                    id: "development-3",
                     name: "開発3課",
                     manager: "development3",
                     count: 3
@@ -305,11 +313,13 @@ document.addEventListener("DOMContentLoaded", () => {
             count: 8,
             teams: [
                 {
+                    id: "support-1",
                     name: "カスタマーサポート課",
                     manager: "support1",
                     count: 4
                 },
                 {
+                    id: "support-2",
                     name: "運用サポート課",
                     manager: "support2",
                     count: 4
@@ -320,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     /* =====================================
-       HTML要素
+       HTML要素取得
     ===================================== */
 
     const treeElement =
@@ -338,43 +348,69 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedMemberId = "salesManager";
 
     /* =====================================
-       安全なHTML文字列変換
+       HTML文字列エスケープ
     ===================================== */
 
     function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, character => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        })[character]);
+
+        return String(value).replace(
+            /[&<>"']/g,
+            character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[character]
+        );
+
     }
 
     /* =====================================
        組織カード作成
     ===================================== */
 
-    function createCard(title, memberId, count = null, type = "") {
+    function createCard(
+        title,
+        memberId,
+        count = null,
+        type = "",
+        departmentId = null
+    ) {
 
         const member = members[memberId];
 
+        if (!member) {
+            return "";
+        }
+
         const selectedClass =
-            selectedMemberId === memberId ? "is-selected" : "";
+            selectedMemberId === memberId
+                ? "is-selected"
+                : "";
 
         const countHtml = count === null
             ? ""
-            : `<span class="org-card-count">
+            : `
+                <span class="org-card-count">
                     <i class="bi bi-people-fill"></i>
                     ${count}名
-               </span>`;
+                </span>
+            `;
+
+        // 部門・課のカードだけに部門IDを付与
+        const departmentAttribute = departmentId
+            ? `data-department-id="${escapeHtml(departmentId)}"`
+            : "";
 
         return `
             <button
                 type="button"
                 class="org-card ${type} ${selectedClass}"
                 data-member-id="${escapeHtml(memberId)}"
+                ${departmentAttribute}
             >
+
                 <div class="org-card-header">
                     ${escapeHtml(title)}
                 </div>
@@ -386,15 +422,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
 
                     <div class="org-card-person">
-                        <strong>${escapeHtml(member.name)}</strong>
-                        <small>${escapeHtml(member.role)}</small>
+                        <strong>
+                            ${escapeHtml(member.name)}
+                        </strong>
+
+                        <small>
+                            ${escapeHtml(member.role)}
+                        </small>
                     </div>
 
                     ${countHtml}
 
                 </div>
+
             </button>
         `;
+
     }
 
     /* =====================================
@@ -403,6 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderOrganization() {
 
+        // 代表取締役
         const rootHtml = `
             <div class="org-tree-root">
                 ${createCard(
@@ -414,18 +458,22 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+        // 各部門・各課
         const branchesHtml = departments.map(department => {
 
             const teamsHtml = department.teams.map(team => {
 
                 return `
                     <div class="org-team-item">
+
                         ${createCard(
                             team.name,
                             team.manager,
                             team.count,
-                            "org-team-card"
+                            "org-team-card",
+                            team.id
                         )}
+
                     </div>
                 `;
 
@@ -441,7 +489,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         department.name,
                         department.manager,
                         department.count,
-                        "org-department-card"
+                        "org-department-card",
+                        department.id
                     )}
 
                     <div class="org-teams">
@@ -455,12 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         treeElement.innerHTML = `
             ${rootHtml}
+
             <div class="org-tree-branches">
                 ${branchesHtml}
             </div>
         `;
 
         applyFilters();
+
     }
 
     /* =====================================
@@ -471,10 +522,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const member = members[memberId];
 
-        if (!member) return;
+        if (!member) {
+            return;
+        }
 
         selectedMemberId = memberId;
 
+        // 基本情報
         document.getElementById("detailName")
             .textContent = member.name;
 
@@ -493,6 +547,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("detailEmail")
             .textContent = member.email;
 
+        // 負担スコア
         document.getElementById("detailScore")
             .textContent = member.score.toFixed(1);
 
@@ -507,7 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isIncrease
         );
 
-        const changeIcon = isIncrease
+        const changeIcon = member.change > 0
             ? "bi-arrow-up"
             : member.change < 0
                 ? "bi-arrow-down"
@@ -515,7 +570,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         changeElement.innerHTML = `
             <i class="bi ${changeIcon}"></i>
-            <span>${member.change > 0 ? "+" : ""}${member.change.toFixed(1)}</span>
+
+            <span>
+                ${member.change > 0 ? "+" : ""}
+                ${member.change.toFixed(1)}
+            </span>
+
             <small>（前月比）</small>
         `;
 
@@ -531,31 +591,69 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("detailShiftList")
             .innerHTML = shiftTypes.map(([key, label]) => `
                 <div class="org-shift-row">
+
                     <span class="org-shift-label ${key}">
                         ${label}
                     </span>
+
                     <span class="org-shift-count">
                         ${member.shifts[key]}日
                     </span>
+
                 </div>
             `).join("");
 
         // 選択カードの強調
-        document.querySelectorAll(".org-card")
+        treeElement.querySelectorAll(".org-card")
             .forEach(card => {
+
                 card.classList.toggle(
                     "is-selected",
                     card.dataset.memberId === memberId
                 );
+
             });
 
-        // 編集画面へ渡すメンバーID
+        // 編集対象メンバーID
         document.getElementById("editMemberButton")
             .dataset.memberId = memberId;
 
-        // シフト画面への遷移先
+        // シフト詳細へのリンク
         document.getElementById("memberShiftLink")
-            .href = `shifts.html?member=${encodeURIComponent(memberId)}`;
+            .href =
+                `shifts.html?member=${encodeURIComponent(memberId)}`;
+
+    }
+
+    /* =====================================
+       部門詳細モーダル表示
+    ===================================== */
+
+    function showDepartmentDetail(departmentId) {
+
+        if (!departmentId) {
+            return;
+        }
+
+        // department-detail.js の公開関数を呼び出す
+        if (
+            window.TasfinaDepartmentDetail &&
+            typeof window.TasfinaDepartmentDetail.open === "function"
+        ) {
+
+            window.TasfinaDepartmentDetail.open(
+                departmentId
+            );
+
+        } else {
+
+            console.error(
+                "部門詳細モーダルを開けません。" +
+                "department-detail.js の読み込みを確認してください。"
+            );
+
+        }
+
     }
 
     /* =====================================
@@ -578,13 +676,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let hasMatch = false;
 
+        // 代表取締役
         const rootCard =
             treeElement.querySelector(".org-root-card");
 
         const president = members.president;
 
         const rootMatches = (
-            president.name + president.reading + "代表取締役"
+            president.name +
+            president.reading +
+            "代表取締役"
         ).toLocaleLowerCase("ja").includes(keyword);
 
         rootCard.classList.toggle(
@@ -592,13 +693,20 @@ document.addEventListener("DOMContentLoaded", () => {
             keyword !== "" && rootMatches
         );
 
-        if (rootMatches) hasMatch = true;
+        if (rootMatches) {
+            hasMatch = true;
+        }
 
+        // 部門・課の検索
         departments.forEach(department => {
 
             const branch = treeElement.querySelector(
                 `[data-department="${department.id}"]`
             );
+
+            if (!branch) {
+                return;
+            }
 
             const manager = members[department.manager];
 
@@ -626,14 +734,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     teamManager.reading
                 ).toLocaleLowerCase("ja");
 
-                const matches = teamText.includes(keyword);
+                const matches =
+                    teamText.includes(keyword);
 
                 teamCards[index].classList.toggle(
                     "search-match",
                     keyword !== "" && matches
                 );
 
-                if (matches) teamMatches = true;
+                if (matches) {
+                    teamMatches = true;
+                }
+
             });
 
             const matches =
@@ -652,7 +764,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     keyword !== "" && departmentMatches
                 );
 
-            if (matches) hasMatch = true;
+            if (matches) {
+                hasMatch = true;
+            }
+
         });
 
         noResults.hidden = hasMatch;
@@ -660,34 +775,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =====================================
-       イベント
+       イベント処理
     ===================================== */
 
-    // カードクリック
+    // 組織カードクリック
     treeElement.addEventListener("click", event => {
 
         const card = event.target.closest(".org-card");
 
-        if (!card) return;
+        if (!card || !treeElement.contains(card)) {
+            return;
+        }
 
-        showMemberDetail(card.dataset.memberId);
+        // 既存のメンバー詳細を更新
+        const memberId = card.dataset.memberId;
+
+        if (memberId) {
+            showMemberDetail(memberId);
+        }
+
+        // 部門・課のカードならモーダルを開く
+        const departmentId =
+            card.dataset.departmentId;
+
+        if (departmentId) {
+            showDepartmentDetail(departmentId);
+        }
+
     });
 
     // 検索
-    searchInput.addEventListener("input", applyFilters);
+    searchInput.addEventListener(
+        "input",
+        applyFilters
+    );
 
-    // 階層切り替え
-    levelSelect.addEventListener("change", applyFilters);
+    // 表示階層切り替え
+    levelSelect.addEventListener(
+        "change",
+        applyFilters
+    );
 
-    // 編集ボタン
+    // メンバー編集ボタン
     document.getElementById("editMemberButton")
         .addEventListener("click", event => {
 
-            const memberId = event.currentTarget.dataset.memberId;
+            const memberId =
+                event.currentTarget.dataset.memberId;
 
-            // 編集画面は今後実装
+            if (!memberId) {
+                return;
+            }
+
+            // 編集画面へ遷移
             window.location.href =
                 `profile-edit.html?member=${encodeURIComponent(memberId)}`;
+
         });
 
     /* =====================================
@@ -695,6 +838,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================== */
 
     renderOrganization();
+
     showMemberDetail(selectedMemberId);
 
 });
