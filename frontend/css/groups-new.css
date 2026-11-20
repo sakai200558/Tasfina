@@ -12,6 +12,7 @@
     color: #17213a;
 }
 
+
 /* ========================================
    ページ見出し
 ======================================== */
@@ -37,7 +38,6 @@
    フォームレイアウト
 ======================================== */
 
-/* 2カラムから1カラムに変更 */
 .groups-layout {
     display: block;
     width: 100%;
@@ -155,102 +155,6 @@
 
     font-size: 12px;
     color: #64748b;
-}
-
-
-/* ========================================
-   部門カラー
-======================================== */
-
-.color-options {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-
-    gap: 12px;
-    padding-top: 5px;
-}
-
-/* カラー選択 */
-.color-choice {
-    position: relative;
-    cursor: pointer;
-}
-
-.color-choice input {
-    position: absolute;
-
-    opacity: 0;
-
-    width: 1px;
-    height: 1px;
-}
-
-/* カラー円 */
-.color-swatch {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 27px;
-    height: 27px;
-
-    border-radius: 50%;
-
-    color: #ffffff;
-
-    transition: transform 0.15s;
-}
-
-/* チェックアイコン */
-.color-swatch i {
-    display: none;
-    font-size: 16px;
-}
-
-/* 選択中のチェック表示 */
-.color-choice input:checked + .color-swatch i {
-    display: block;
-}
-
-/* キーボード操作時 */
-.color-choice input:focus-visible + .color-swatch {
-    outline: 3px solid #17213a;
-    outline-offset: 3px;
-}
-
-/* ホバー */
-.color-choice:hover .color-swatch {
-    transform: scale(1.12);
-}
-
-/* カラー一覧 */
-.swatch-blue {
-    background: #0866d8;
-}
-
-.swatch-green {
-    background: #65d4a4;
-}
-
-.swatch-yellow {
-    background: #ffc857;
-}
-
-.swatch-orange {
-    background: #ff8b41;
-}
-
-.swatch-red {
-    background: #fa6d78;
-}
-
-.swatch-purple {
-    background: #aa72d9;
-}
-
-.swatch-gray {
-    background: #94a3b8;
 }
 
 

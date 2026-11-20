@@ -25,9 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const descriptionInput =
         document.getElementById("departmentDescription");
 
-    const iconSelect =
-        document.getElementById("departmentIcon");
-
     const managerSelect =
         document.getElementById("departmentManager");
 
@@ -52,22 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
        バックエンドAPIのURL
     ===================================== */
 
-    const API_URL = "../../backend/bumontuika.php";
-
-
-    /* =====================================
-       選択中の部門カラー取得
-    ===================================== */
-
-    function getSelectedColor() {
-
-        const selectedRadio = document.querySelector(
-            "input[name='departmentColor']:checked"
-        );
-
-        return selectedRadio?.value || "blue";
-
-    }
+    const API_URL = "../../backend/bumon_tuika.php";
 
 
     /* =====================================
@@ -104,6 +86,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     }
+
+
+    /* =====================================
+       文字数カウントイベント
+    ===================================== */
 
     nameInput.addEventListener(
         "input",
@@ -152,14 +139,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function resetDepartmentForm() {
 
+        // フォームを初期状態に戻す
         form.reset();
 
+        // 文字数カウント更新
         updateCharacterCount();
 
+        // 検索欄初期化
         if (memberSearch) {
             memberSearch.value = "";
         }
 
+        // 非表示のメンバーを再表示
         document.querySelectorAll(".member-option")
             .forEach(option => {
 
@@ -178,10 +169,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         event.preventDefault();
 
-        // 二重送信防止
+        /* =====================================
+           二重送信防止
+        ===================================== */
+
         if (submitButton?.disabled) {
             return;
         }
+
 
         /* =====================================
            入力チェック
@@ -207,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+
         /* =====================================
            入力値取得
         ===================================== */
@@ -217,12 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const description =
             descriptionInput.value.trim();
 
-        const color =
-            getSelectedColor();
-
-        const icon =
-            iconSelect.value;
-
         const manager =
             managerSelect.value;
 
@@ -231,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /* =====================================
-           PHPへ送信するデータ
+           PHPへ送信するJSONデータ
         ===================================== */
 
         const departmentData = {
@@ -241,10 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
             parentDepartment: parentDepartment,
 
             description: description,
-
-            color: color,
-
-            icon: icon,
 
             manager: manager,
 
@@ -266,8 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `以下の内容で部門を作成しますか？\n\n` +
             `部門名：${departmentName}\n` +
             `上位部門：${parentName}\n` +
-            `部門カラー：${color}\n` +
-            `部門アイコン：${icon}\n` +
+            `部門の説明：${description || "未設定"}\n` +
             `管理者：${manager || "未設定"}\n` +
             `メンバー数：${members.length}名`;
 
@@ -321,13 +306,15 @@ document.addEventListener("DOMContentLoaded", () => {
                PHPレスポンス取得
             ===================================== */
 
-            const responseText = await response.text();
+            const responseText =
+                await response.text();
 
             let result;
 
             try {
 
-                result = JSON.parse(responseText);
+                result =
+                    JSON.parse(responseText);
 
             } catch (parseError) {
 
@@ -344,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /* =====================================
-               HTTPエラー
+               HTTPエラー確認
             ===================================== */
 
             if (!response.ok) {
@@ -370,6 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "部門を正常に登録しました。"
                 );
 
+                // 登録成功時にフォームを初期化
                 resetDepartmentForm();
 
             } else {
