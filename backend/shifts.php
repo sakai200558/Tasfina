@@ -3,8 +3,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 $host = 'localhost';
 $dbname = 'Tasfina_db';
-$username = 'tasfina_user';
-$password = 'tasfina_pass';
+$username = 'root';
+$password = 'password';
 
 $charset = 'utf8mb4';
 
