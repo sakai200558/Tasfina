@@ -164,40 +164,50 @@
     <!-- モーダル群の定義（追加部分）                   -->
     <!-- ========================================== -->
 
-    <!-- 希望シフト提出モーダル -->
-    <div id="preferredModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 animate-fade-in">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800">希望シフト提出</h3>
-                <button id="closePreferredModalBtn" class="text-gray-400 hover:text-gray-600 font-bold">&times;</button>
+    <!-- 希望シフト提出モーダル（複数日一括入力対応） -->
+    <div id="preferredModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">希望シフト提出</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">希望する勤務形態・勤務時間を選択してください。</p>
+                </div>
+                <button id="closePreferredModalBtn" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">対象日</label>
-                    <input type="date" id="prefDate" class="w-full p-2 text-sm border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">シフト種別</label>
-                    <select id="prefStatus" class="w-full p-2 text-sm border border-gray-300 rounded-md">
-                        <option value="通常出勤">通常出勤</option>
-                        <option value="在宅勤務">在宅勤務</option>
-                        <option value="午前休">午前休</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
+            <div class="p-6 overflow-y-auto space-y-4 text-xs flex-1">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">開始時間</label>
-                        <input type="time" id="prefStartTime" value="09:00" class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                        <label class="block font-bold text-gray-700 mb-1">対象期間</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="prevShiftReqMonthBtn" class="px-2.5 py-1 border border-gray-300 rounded hover:bg-gray-100">&lt;</button>
+                            <span id="shiftReqMonthLabel" class="font-bold text-sm px-2">2024年10月</span>
+                            <button type="button" id="nextShiftReqMonthBtn" class="px-2.5 py-1 border border-gray-300 rounded hover:bg-gray-100">&gt;</button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">終了時間</label>
-                        <input type="time" id="prefEndTime" value="18:00" class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-2.5 text-blue-800 text-[11px] space-y-0.5">
+                        <div class="font-bold">提出時の注意</div>
+                        <div>・未選択日は「特に希望なし」として扱われます。</div>
+                        <div>・希望はシフト確定の参考とします。</div>
+                        <div>・確定後の変更はできません。</div>
                     </div>
                 </div>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="grid grid-cols-7 text-center font-bold bg-gray-50 border-b border-gray-200 py-1.5">
+                        <div class="text-red-500">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="text-blue-500">土</div>
+                    </div>
+                    <div id="shiftRequestCalendarGrid" class="grid grid-cols-7 gap-1 p-2 max-h-72 overflow-y-auto bg-gray-50/40"></div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">希望の補足コメント（任意）</label>
+                    <textarea id="shiftRequestComment" maxlength="300" rows="2" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none" placeholder="希望する時間帯やその他の希望があれば入力してください（例：午前のみ／連休希望 など）"></textarea>
+                    <div id="shiftCommentCount" class="text-right text-[10px] text-gray-400 mt-0.5">0 / 300</div>
+                </div>
             </div>
-            <div class="flex justify-end gap-2 mt-6">
-                <button id="cancelPreferredModalBtn" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">キャンセル</button>
-                <button id="submitPreferredModalBtn" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">登録する</button>
+            <div class="flex justify-end gap-2 px-6 py-3 border-t border-gray-200 bg-gray-50">
+                <button id="cancelPreferredModalBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-100">キャンセル</button>
+                <button id="submitPreferredModalBtn" class="px-4 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700">提出する</button>
             </div>
         </div>
     </div>
@@ -248,8 +258,8 @@
                 </div>
 
                 <!-- 取得日数 -->
-                <div class="text-gray-700 font-medium">
-                    取得日数 <span id="leaveDaysCount" class="font-bold text-gray-900">1 日</span>
+                <div class="bg-gray-50 border border-gray-200 rounded px-3 py-2 text-gray-700 font-medium">
+                    取得日数 <span id="leaveDaysCount" class="font-bold text-gray-900 ml-2">1 日</span>
                 </div>
 
                 <!-- 取得理由 -->
@@ -269,7 +279,7 @@
                 </div>
 
                 <!-- 注意事項 -->
-                <div class="text-gray-500 space-y-1 text-[11px] pt-1">
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-3 text-gray-600 space-y-1 text-[11px]">
                     <div>・有休申請は取得希望日の3日前までに申請してください。</div>
                     <div>・半日取得の場合、対象日の午前または午後を選択してください。</div>
                     <div>・承認後、シフトに自動で反映されます。</div>
@@ -283,30 +293,43 @@
         </div>
     </div>
 
-    <!-- 繁忙期設定モーダル -->
-    <div id="busyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <!-- 繁忙期設定モーダル（期間一括登録対応） -->
+    <div id="busyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 animate-fade-in">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">繁忙期設定</h3>
-                <button id="closeBusyModalBtn" class="text-gray-400 hover:text-gray-600 font-bold">&times;</button>
+                <button id="closeBusyModalBtn" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">対象日</label>
-                    <input type="date" id="busyDate" class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                    <label class="block font-bold text-gray-700 mb-1">名称 <span class="text-red-500">*</span></label>
+                    <input type="text" id="busyPeriodName" value="下期繁忙" class="w-full p-2 text-sm border border-gray-300 rounded-md">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">必要人数</label>
-                    <input type="number" id="busyRequiredPeople" value="5" class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                    <label class="block font-bold text-gray-700 mb-1">期間 <span class="text-red-500">*</span></label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="busyStartDate" class="flex-1 p-2 text-sm border border-gray-300 rounded-md">
+                        <span class="text-gray-500">～</span>
+                        <input type="date" id="busyEndDate" class="flex-1 p-2 text-sm border border-gray-300 rounded-md">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">ボーナスポイント</label>
-                    <input type="number" step="0.1" id="busyBonusPt" value="2.0" class="w-full p-2 text-sm border border-gray-300 rounded-md">
+                    <label class="block font-bold text-gray-700 mb-1">加算ポイント <span class="text-red-500">*</span></label>
+                    <select id="busyBonusPt" class="w-full p-2 text-sm border border-gray-300 rounded-md bg-white">
+                        <option value="1.0">1.0 pt</option>
+                        <option value="1.5">1.5 pt</option>
+                        <option value="2.0" selected>2.0 pt</option>
+                        <option value="3.0">3.0 pt</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">備考</label>
+                    <textarea id="busyNote" rows="2" class="w-full p-2 text-sm border border-gray-300 rounded-md resize-none" placeholder="備考を入力してください"></textarea>
                 </div>
             </div>
             <div class="flex justify-end gap-2 mt-6">
-                <button id="cancelBusyModalBtn" class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300">キャンセル</button>
-                <button id="submitBusyModalBtn" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">保存する</button>
+                <button id="cancelBusyModalBtn" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-100">キャンセル</button>
+                <button id="submitBusyModalBtn" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">登録する</button>
             </div>
         </div>
     </div>
