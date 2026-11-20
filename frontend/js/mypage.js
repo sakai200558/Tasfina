@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadMyPageUser();
     loadMyPageTasks();
-
+    loadMyPageBurdenScore();
 
     /* ========================================
        所属部門コードのコピー
@@ -581,4 +581,183 @@ function renderMyPageTasks(tasks, container) {
         container.appendChild(item);
 
     });
+}
+/* ========================================
+   マイページ 負担スコア取得
+   ranking.php 連携版
+======================================== */
+
+async function loadMyPageBurdenScore() {
+
+    const scoreElement =
+        document.getElementById("mypageBurdenScore");
+
+    if (!scoreElement) {
+        return;
+    }
+
+    scoreElement.textContent = "読み込み中...";
+
+    try {
+
+        /* =====================================
+           ログイン中のユーザー情報を取得
+        ===================================== */
+
+        const userResponse = await fetch(
+            "../../backend/userprofile.php",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            }
+        );
+
+        if (userResponse.status === 401) {
+
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!userResponse.ok) {
+
+            throw new Error(
+                "ユーザー情報の取得に失敗しました。"
+            );
+        }
+
+        const userResult = await userResponse.json();
+
+        if (
+            userResult.success !== true ||
+            !userResult.user
+        ) {
+
+            throw new Error(
+                "ログイン中のユーザーを取得できませんでした。"
+            );
+        }
+
+        const userId = Number(
+            userResult.user.user_id ??
+            userResult.user.id
+        );
+
+        if (!Number.isSafeInteger(userId) || userId <= 0) {
+
+            throw new Error(
+                "ユーザーIDを取得できませんでした。"
+            );
+        }
+
+        /* =====================================
+           ランキングAPIから負担スコアを取得
+        ===================================== */
+
+        const rankingResponse = await fetch(
+            "../../backend/ranking.php",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            }
+        );
+
+        if (rankingResponse.status === 401) {
+
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!rankingResponse.ok) {
+
+            throw new Error(
+                `ランキング取得エラー: HTTP ${rankingResponse.status}`
+            );
+        }
+
+        const rankingResult =
+            await rankingResponse.json();
+
+        if (
+            rankingResult.success !== true ||
+            !Array.isArray(rankingResult.users)
+        ) {
+
+            throw new Error(
+                rankingResult.message ||
+                "負担スコアを取得できませんでした。"
+            );
+        }
+
+        /* =====================================
+           自分のランキングデータを検索
+        ===================================== */
+
+        const myRanking = rankingResult.users.find(
+            user => Number(user.user_id) === userId
+        );
+
+        if (!myRanking) {
+
+            scoreElement.textContent = "未取得";
+
+            console.warn(
+                "ランキングにログインユーザーが見つかりません。",
+                userId
+            );
+
+            return;
+        }
+
+        /* =====================================
+           負担スコアの数値チェック
+        ===================================== */
+
+        const rawScore = myRanking.total_score;
+
+        if (
+            rawScore === null ||
+            rawScore === undefined ||
+            rawScore === "" ||
+            !Number.isFinite(Number(rawScore))
+        ) {
+
+            scoreElement.textContent = "未取得";
+
+            return;
+        }
+
+        /* =====================================
+           小数点第1位まで表示
+        ===================================== */
+
+        const score = Number(rawScore);
+
+        scoreElement.textContent =
+            `${score.toFixed(1)}pt`;
+
+        console.log(
+            "マイページ負担スコア取得成功:",
+            {
+                userId: userId,
+                score: score
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "マイページ負担スコア取得エラー:",
+            error
+        );
+
+        scoreElement.textContent = "取得失敗";
+    }
 }

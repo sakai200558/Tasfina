@@ -156,20 +156,28 @@ try {
     // 成功レスポンス
     // ========================================
 
-    sendResponse(200, [
-        "success" => true,
-        "user" => [
-            "name" => $user["display_name"],
-            "email" => $user["email"],
-            "role_code" => $user["role_code"],
-            "job_title" => $user["job_title"],
-            "level_factor" => $user["level_factor"],
+   /* ========================================
+   成功レスポンス
+======================================== */
 
-            // 所属部門
-            "department_name" => $departmentName,
-            "department_code" => $departmentCode
-        ]
-    ]);
+sendResponse(200, [
+    "success" => true,
+    "user" => [
+
+        // ユーザーIDを追加
+        "user_id" => (int)$user["user_id"],
+
+        "name" => $user["display_name"],
+        "email" => $user["email"],
+        "role_code" => $user["role_code"],
+        "job_title" => $user["job_title"],
+        "level_factor" => $user["level_factor"],
+
+        // 所属部門
+        "department_name" => $departmentName,
+        "department_code" => $departmentCode
+    ]
+]);
 
 } catch (PDOException $e) {
 
