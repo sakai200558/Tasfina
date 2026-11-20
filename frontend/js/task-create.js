@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!openButton) {
         return;
     }
+    let currentUserId = null; // ★ この1行を追加
 
     // 1. ページ読み込み時に担当者一覧をセレクトボックスに読み込む
     loadAssignees();
@@ -38,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const title = titleInput ? titleInput.value.trim() : "";
             const assignee = document.getElementById("assignee").value;
+             const approverSelect = document.getElementById("approver"); // ★ 追加
+            const approver = approverSelect ? approverSelect.value : ""; // ★ 追加
             const priority = document.getElementById("priority").value;
             const description = document.getElementById("taskDescription") ? document.getElementById("taskDescription").value.trim() : "";
             const startDate = document.getElementById("startDate").value;
@@ -58,6 +61,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (formMessage) formMessage.textContent = "必須項目をすべて入力してください。";
                 return;
             }
+             // ★ ここから追加：自分のタスクなら承認者を必須にする
+            const isSelfTask = currentUserId !== null && String(assignee) === String(currentUserId);
+            if (isSelfTask && !approver) {
+                if (formMessage) {
+                    formMessage.style.color = "#d84c4c";
+                    formMessage.textContent = "自分のタスクを作成する場合は、承認者を選択してください。";
+                }
+                return;
+            }
+            // ★ ここまで追加
 
             if (dueDate < startDate) {
                 if (formMessage) formMessage.textContent = "期限は開始日以降に設定してください。";
@@ -69,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 title,
                 description,
                 assignee, // 担当者の user_id
+                 approver: isSelfTask ? approver : null, // ★ この1行を追加
                 difficulty_level: parseFloat(difficultyLevel), // ★ セレクトボックスの値を使用
                 discomfort_level: parseFloat(discomfortLevel), // ★ 不快度を追加
                 estimated_hours: 4.0,
@@ -117,12 +131,48 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         });
+
     }
+
+        // ★ ここから追加
+    function ensureApproverField(assigneeSelect) {
+        let wrapper = document.getElementById("approverWrapper");
+        if (!wrapper) {
+            wrapper = document.createElement("div");
+            wrapper.id = "approverWrapper";
+            wrapper.className = "mb-3";
+            wrapper.innerHTML = `
+                <label for="approver" class="form-label">
+                    承認者 <span class="badge bg-danger">必須</span>
+                </label>
+                <select id="approver" class="form-select">
+                    <option value="">承認者を選択してください</option>
+                </select>
+                <div class="form-text">自分のタスクは他のメンバーの承認が必要です。</div>
+            `;
+            const assigneeGroup = assigneeSelect.closest(".mb-3") || assigneeSelect.parentElement;
+            assigneeGroup.insertAdjacentElement("afterend", wrapper);
+            assigneeSelect.addEventListener("change", toggleApproverVisibility);
+        }
+        return document.getElementById("approver");
+    }
+
+    function toggleApproverVisibility() {
+        const assigneeSelect = document.getElementById("assignee");
+        const wrapper = document.getElementById("approverWrapper");
+        if (!assigneeSelect || !wrapper) return;
+
+        const isSelf = currentUserId !== null && String(assigneeSelect.value) === String(currentUserId);
+        wrapper.style.display = isSelf ? "block" : "none";
+    }
+    // ★ ここまで追加
+
+
 
     /* ========================================
        担当者セレクトボックスにメンバー一覧を読み込む
     ======================================== */
-   async function loadAssignees() {
+    async function loadAssignees() {
         try {
             const response = await fetch("../../backend/api_users.php");
             if (!response.ok) {
@@ -130,18 +180,36 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const data = await response.json();
             const users = Array.isArray(data) ? data : (Array.isArray(data.users) ? data.users : []);
+            currentUserId = data.current_user_id ?? null;
 
             const assigneeSelect = document.getElementById("assignee");
             if (!assigneeSelect) return;
 
+            const approverSelect = ensureApproverField(assigneeSelect);
+
             assigneeSelect.innerHTML = '<option value="">担当者を選択してください</option>';
+            approverSelect.innerHTML = '<option value="">承認者を選択してください</option>';
 
             users.forEach(user => {
                 const option = document.createElement("option");
-                option.value = user.id; // user_id
-                option.textContent = user.name; // display_name
+                option.value = user.id;
+                option.textContent = user.name;
+                if (currentUserId !== null && String(user.id) === String(currentUserId)) {
+                    option.selected = true;
+                }
                 assigneeSelect.appendChild(option);
+
+                // 承認者には「自分以外」だけを追加
+                if (currentUserId === null || String(user.id) !== String(currentUserId)) {
+                    const appOption = document.createElement("option");
+                    appOption.value = user.id;
+                    appOption.textContent = user.name;
+                    approverSelect.appendChild(appOption);
+                }
             });
+
+            toggleApproverVisibility();
+
         } catch (error) {
             console.error("メンバー読み込みエラー:", error);
         }

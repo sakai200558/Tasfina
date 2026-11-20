@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let activeTab = "mine";
     let selectedTaskId = null;
+    let currentUserId = null; // ★ ここに追加
 
     /* ========================================
        🚀 バックエンドからタスク一覧を取得する関数
@@ -48,31 +49,54 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             
             // 💡 ここで currentUserId を定義する！
-            const currentUserId = 101; 
+            currentUserId = null; 
+
+             try {
+                const userRes = await fetch('../../backend/api_users.php');
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    currentUserId = userData.current_user_id ?? null;
+                }
+            } catch (e) {
+                console.error('ユーザーID取得エラー:', e);
+            }
             
             // データベースの列名をフロントエンド用のプロパティ名に変換する
             tasks = Array.isArray(data) ? data.map(task => {
                 
-                // 担当者IDが自分のIDと一致していれば "mine"、違えば "others" に分類
                 const isMine = Number(task.assigned_user_id) === Number(currentUserId);
+                const isRequested = Number(task.created_by) === Number(currentUserId) && !isMine;
+
+                let category = "others";
+                if (isMine) {
+                    category = "mine";
+                } else if (isRequested) {
+                    category = "requested";
+                }
 
                 return {
-           id: task.id,
+                    id: task.id,
                     name: task.title || "",                        
                     assignee: task.user_name || "担当者なし", 
+                    creator: task.creator_name || "不明", // ★ この1行を追加
                     assigned_user_id: task.assigned_user_id,
+                    created_by: task.created_by,
                     dueDate: task.due_date || "",                  
                     
                     // ★ ここで translateStatus 関数に通して日本語に変換する！
                     status: translateStatus(task.status), 
                     
-                    category: isMine ? "mine" : "others", 
+                    category: category, 
                     hours: Number(task.estimated_hours || 0),      
                     points: Number(task.calculated_burden_pts || 0),
                     workType: task.work_type || "-",
-                    evidence: task.evidence || "未提出"
+                    evidence: task.evidence || "未提出",
+                    requestedHours: task.requested_hours ? Number(task.requested_hours) : null, // ★ 追加
+                    hoursReason: task.hours_change_reason || "" // ★ 追加
+
                 };
             }) : [];
+
 
             initializeAssigneeFilter();
             updateSummary();
@@ -91,18 +115,22 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ========================================
        集計カード
     ======================================== */
-    function updateSummary() {
-// ★ ここを修正（データベースのステータスや表示名に合わせて条件を調整）
+     function updateSummary() {
+        // 1. 進行中：自分のタスクのうち「未着手」または「進行中」のもの
         const progressCount = tasks.filter(
-            task => task.status === "未着手" || task.status === "assigned"
+            task => task.category === "mine" &&
+                (task.status === "未着手" || task.status === "進行中" || task.status === "assigned")
         ).length;
 
+        // 2. 承認待ち：自分が担当しているか、自分が承認者（requested）である「承認待ち」のもの
         const pendingCount = tasks.filter(
-            task => task.status === "承認待ち"
+           task => (task.category === "mine" || task.category === "requested") &&
+                (task.status === "承認待ち" || task.status === "工数変更承認待ち")
         ).length;
 
+        // 3. 完了：自分のタスクのうち「完了」したもの
         const doneCount = tasks.filter(
-            task => task.status === "完了"
+            task => task.category === "mine" && task.status === "完了"
         ).length;
 
         document.getElementById("progressCount")
@@ -114,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("doneCount")
             .textContent = `${doneCount}件`;
     }
+
 
     /* ========================================
        担当者フィルター
@@ -147,12 +176,14 @@ document.addEventListener("DOMContentLoaded", () => {
             let matchesTab = false;
 
             if (activeTab === "pending") {
-                matchesTab = task.status === "承認待ち";
+                  matchesTab = task.status === "承認待ち" || task.status === "工数変更承認待ち";
             } else if (activeTab === "others") {
-                matchesTab = task.category === "others"; // 他メンバータブのとき
+                // ★ 自分以外のタスク（他メンバー ＋ 自分が依頼したタスク）をすべて表示
+                matchesTab = task.category === "others" || task.category === "requested";
             } else {
-                matchesTab = task.category === activeTab; // "mine" など
+                matchesTab = task.category === activeTab; // "mine" や "requested"
             }
+
 
             const taskName = (task.name || "").toLowerCase();
             const matchesKeyword = taskName.includes(keyword);
@@ -262,6 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${Number(parts[1])}/${Number(parts[2])}`;
     }
 
+
+
     /* ========================================
        タスク選択
     ======================================== */
@@ -279,6 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
             case "assigned": return "未着手";
             case "in_progress": return "進行中";
             case "pending": return "承認待ち";
+            case "hours_pending": return "工数変更承認待ち"; // ★ 追加
             case "completed": 
             case "done":      // ★ 追加
             case "closed":    // ★ 追加
@@ -303,10 +337,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
         detailContainer.innerHTML = "";
 
-        hoursButton.disabled = !task;
+  // ★ 自分が担当者（作業者）かどうかを判定
+        const isAssignee = task && Number(task.assigned_user_id) === Number(currentUserId);
+
+               // ★ 担当者本人でない場合は、申請ボタンを無効化（承認待ち中も無効化）
+        hoursButton.disabled = !task || !isAssignee || task.status === "完了" || task.status === "承認待ち" || task.status === "工数変更承認待ち";
         completeButton.disabled =
-            !task || task.status === "完了" ||
-            task.status === "承認待ち";
+            !task || !isAssignee || task.status === "完了" ||
+            task.status === "承認待ち" || task.status === "工数変更承認待ち";
+
+        // ★ 「承認待ち」または「工数変更承認待ち」かつ「依頼者本人」のときだけ承認ボタンを表示
+        const approveButton = document.getElementById("approveTaskButton");
+        if (approveButton) {
+            const isRequester = task && Number(task.created_by) === Number(currentUserId);
+            const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
+            approveButton.style.display = (isPendingStatus && isRequester)
+                ? "inline-block"
+                : "none";
+
+            if (task && task.status === "工数変更承認待ち") {
+                approveButton.textContent = "工数変更を承認する";
+            } else {
+                approveButton.textContent = "承認する（ポイント付与）";
+            }
+        }
 
         if (!task) {
             const empty = document.createElement("p");
@@ -325,11 +379,17 @@ document.addEventListener("DOMContentLoaded", () => {
         grid.className = "task-detail-grid";
 
         const items = [
+            ["依頼者", task.creator || "不明"],
             ["想定工数", `${Number(task.hours || 0).toFixed(1)}時間`],
             ["算出ポイント", `${Number(task.points || 0).toFixed(1)}pt`],
             ["業務タイプ", task.workType || "-"],
             ["エビデンス", task.evidence || "未提出"]
         ];
+
+          // ★ 工数変更の承認待ち中は、申請内容と理由を詳細に表示する
+        if (task.status === "工数変更承認待ち" && task.requestedHours) {
+            items.push(["工数変更申請", `${task.requestedHours.toFixed(1)}時間へ変更（理由: ${task.hoursReason || "なし"}）`]);
+        }
 
         items.forEach(([label, value]) => {
             const item = document.createElement("div");
@@ -347,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         detailContainer.appendChild(grid);
-    }
+}
 
     /* ========================================
        タブ切り替え
@@ -499,7 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // PHP側（api_update_status.php）が受け取る id と status を持つオブジェクトにする
 const requestData = {
     id: task.id,
-    status: "completed"
+    status: "pending"
 };
 
             try {
@@ -544,6 +604,49 @@ const requestData = {
             toast.remove();
         }, 3000);
     }
+
+        /* ========================================
+       タスク承認・ポイント付与 (PHPへ送信)
+    ======================================== */
+      const approveTaskButton = document.getElementById("approveTaskButton");
+    if (approveTaskButton) {
+        approveTaskButton.addEventListener("click", async () => {
+            const task = getSelectedTask();
+            if (!task) return;
+
+            const isHoursApproval = task.status === "工数変更承認待ち";
+            const confirmMsg = isHoursApproval
+                ? `「${task.name}」の工数を ${task.requestedHours}時間 に変更することを承認しますか？`
+                : `「${task.name}」を承認して、担当者に ${task.points}pt を付与しますか？`;
+
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('../../backend/api_update_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: task.id,
+                        status: isHoursApproval ? 'approve_hours' : 'completed'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showToast(result.message);
+                    await fetchTasks();
+                } else {
+                    showToast(result.message || '承認に失敗しました。');
+                }
+            } catch (error) {
+                console.error('承認エラー:', error);
+                showToast('通信エラーが発生しました。');
+            }
+        });
+    }
+exit
 
     /* ========================================
        初期化実行

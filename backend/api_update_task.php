@@ -1,4 +1,5 @@
 <?php
+session_start(); // ★ 先頭に追加
 header("Content-Type: application/json; charset=utf-8");
 require_once "db.php";
 
@@ -24,23 +25,22 @@ if (empty($id)) {
 }
 
 try {
-// ★ 追加①：まずはそのタスクの難易度（difficulty_level）や不快度（discomfort_level）をデータベースから取得する
-    $stmt = $pdo->prepare("SELECT difficulty_level, discomfort_level FROM tasks WHERE id = ?");
+    // 担当者本人かチェックする
+    $currentUserId = $_SESSION["user_id"] ?? null;
+    $stmt = $pdo->prepare("SELECT assigned_user_id FROM tasks WHERE id = ?");
     $stmt->execute([$id]);
     $task = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $difficulty_level = (float)($task['difficulty_level'] ?? 1.0);
-    $discomfort_level = (float)($task['discomfort_level'] ?? 1.0);
+    if (!$task || (int)$task['assigned_user_id'] !== (int)$currentUserId) {
+        echo json_encode(["success" => false, "message" => "担当者本人のみ工数変更を申請できます"]);
+        exit;
+    }
 
-    // ★ 追加②：タスク作成時と同じ計算式でポイントを再計算する
-    $base_pts = ($requestedHours * 10) + ($difficulty_level * 5) + ($discomfort_level * 8);
-    $calculated_burden_pts = (int)round($base_pts);
-
-    // ★ 追加③：SQL文で estimated_hours と calculated_burden_pts の両方を更新する
-    $updateStmt = $pdo->prepare("UPDATE tasks SET estimated_hours = ?, calculated_burden_pts = ? WHERE id = ?");
-    $updateStmt->execute([$requestedHours, $calculated_burden_pts, $id]);
+    // 本番の工数やポイントは変えず、希望工数・理由を仮保存してステータスを「工数変更承認待ち(hours_pending)」にする
+    $updateStmt = $pdo->prepare("UPDATE tasks SET requested_hours = ?, hours_change_reason = ?, status = 'hours_pending' WHERE id = ?");
+    $updateStmt->execute([$requestedHours, $reason, $id]);
     
-    echo json_encode(["success" => true, "message" => "工数とポイントを更新しました"]);
+    echo json_encode(["success" => true, "message" => "工数変更申請を送信しました（承認待ち）"]);
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }

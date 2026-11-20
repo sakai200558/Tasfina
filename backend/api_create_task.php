@@ -1,4 +1,5 @@
 <?php
+session_start(); // ★ セッションからログインユーザーIDを取得する場合に追加
 header("Content-Type: application/json; charset=utf-8");
 require_once "db.php";
 
@@ -12,6 +13,13 @@ $input = json_decode(file_get_contents("php://input"), true);
 if (!$input) {
     $input = $_POST;
 }
+
+// 現在のログインユーザーIDを取得
+$login_user_id = $_SESSION["user_id"] ?? ($input["created_by"] ?? ($input["user_id"] ?? null));
+// 画面から「承認者（approver）」が送られてきた場合はそちらを、無ければログインユーザー自身を承認者（created_by）にする
+$created_by = !empty($input["approver"]) ? (int)$input["approver"] : $login_user_id;
+
+
 
 $title = $input["title"] ?? "";
 $due_date = $input["due_date"] ?? "";
@@ -45,14 +53,22 @@ if (empty($assigned_user_id)) {
     exit;
 }
 
+// ★ ここから追加：自分自身を担当者にする場合は、自分以外の承認者を必須にする
+if ((int)$assigned_user_id === (int)$login_user_id && (empty($created_by) || (int)$created_by === (int)$login_user_id)) {
+    echo json_encode(["status" => "error", "message" => "自分のタスクを作成する場合は、自分以外の承認者を選択してください"]);
+    exit;
+}
+// ★ ここまで追加
+
 try {
     // ★ assigned_user_id を含めて INSERT する
-   $sql = "INSERT INTO tasks (organization_id, department_id, assigned_user_id, title, description, difficulty_level, discomfort_level, estimated_hours, calculated_burden_pts, status, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+   $sql = "INSERT INTO tasks (organization_id, department_id, assigned_user_id, created_by, title, description, difficulty_level, discomfort_level, estimated_hours, calculated_burden_pts, status, due_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         $organization_id,
         $department_id,
         $assigned_user_id,
+        $created_by,
         $title,
         $description,
         $difficulty_level,
