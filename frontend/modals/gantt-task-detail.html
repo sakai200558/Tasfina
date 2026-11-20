@@ -1,0 +1,132 @@
+
+<!-- ========================================
+     ガントチャート タスク詳細モーダル
+======================================== -->
+
+<div
+    class="modal fade"
+    id="ganttTaskDetailModal"
+    tabindex="-1"
+    aria-labelledby="ganttTaskDetailModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+
+        <div class="modal-content gantt-detail-modal">
+
+            <div class="modal-header">
+
+                <h2
+                    class="modal-title"
+                    id="ganttTaskDetailModalLabel"
+                >
+                    <i class="bi bi-list-task"></i>
+                    タスク詳細
+                </h2>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="閉じる"
+                ></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="gantt-detail-field">
+                    <label>タスク名</label>
+                    <div
+                        id="detailTaskTitle"
+                        class="gantt-detail-value"
+                    ></div>
+                </div>
+
+                <div class="gantt-detail-field">
+                    <label>タスクの説明</label>
+                    <div
+                        id="detailTaskDescription"
+                        class="gantt-detail-value gantt-detail-description"
+                    ></div>
+                </div>
+
+                <div class="gantt-detail-field">
+                    <label>担当者</label>
+                    <div
+                        id="detailTaskAssignee"
+                        class="gantt-detail-value"
+                    ></div>
+                </div>
+
+                <div class="gantt-detail-grid">
+
+                    <div class="gantt-detail-field">
+                        <label>優先度</label>
+                        <div
+                            id="detailTaskPriority"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                    <div class="gantt-detail-field">
+                        <label>ステータス</label>
+                        <div
+                            id="detailTaskStatus"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                    <div class="gantt-detail-field">
+                        <label>難易度</label>
+                        <div
+                            id="detailTaskDifficulty"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                    <div class="gantt-detail-field">
+                        <label>不快度（精神的負担）</label>
+                        <div
+                            id="detailTaskDiscomfort"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                    <div class="gantt-detail-field">
+                        <label>開始日</label>
+                        <div
+                            id="detailTaskStartDate"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                    <div class="gantt-detail-field">
+                        <label>期限</label>
+                        <div
+                            id="detailTaskDueDate"
+                            class="gantt-detail-value"
+                        ></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    閉じる
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

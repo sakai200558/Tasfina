@@ -5,22 +5,37 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // =====================================
-    // HTML要素の取得
-    // =====================================
+    /* =====================================
+       HTML要素の取得
+    ===================================== */
 
-    const form = document.getElementById("departmentForm");
+    const form =
+        document.getElementById("departmentForm");
 
     if (!form) {
         return;
     }
 
-    const nameInput = document.getElementById("departmentName");
-    const parentSelect = document.getElementById("parentDepartment");
-    const descriptionInput = document.getElementById("departmentDescription");
-    const iconSelect = document.getElementById("departmentIcon");
-    const managerSelect = document.getElementById("departmentManager");
-    const memberSearch = document.getElementById("memberSearch");
+    const nameInput =
+        document.getElementById("departmentName");
+
+    const parentSelect =
+        document.getElementById("parentDepartment");
+
+    const descriptionInput =
+        document.getElementById("departmentDescription");
+
+    const managerSelect =
+        document.getElementById("departmentManager");
+
+    const memberSearch =
+        document.getElementById("memberSearch");
+
+    const nameCount =
+        document.getElementById("nameCount");
+
+    const descriptionCount =
+        document.getElementById("descriptionCount");
 
     const submitButton = form.querySelector(
         'button[type="submit"]'
@@ -30,164 +45,67 @@ document.addEventListener("DOMContentLoaded", () => {
         "#memberList input[type='checkbox']"
     );
 
-    const colorRadios = document.querySelectorAll(
-        "input[name='departmentColor']"
-    );
+    /* =====================================
+       バックエンドAPIのURL
+    ===================================== */
 
-    // =====================================
-    // バックエンドAPIのURL
-    // =====================================
+    const API_URL = "../../backend/bumon_tuika.php";
 
-    const API_URL = "../../backend/groups-new.php";
 
-    // =====================================
-    // カラー設定
-    // =====================================
-
-    const colorSettings = {
-        blue: {
-            accent: "#0866d8",
-            tint: "#eaf4ff"
-        },
-        green: {
-            accent: "#32b985",
-            tint: "#e2f8ee"
-        },
-        yellow: {
-            accent: "#e7a923",
-            tint: "#fff4d4"
-        },
-        orange: {
-            accent: "#f58235",
-            tint: "#fff0e2"
-        },
-        red: {
-            accent: "#ef5969",
-            tint: "#ffe8eb"
-        },
-        purple: {
-            accent: "#9b65ce",
-            tint: "#f3e9ff"
-        },
-        gray: {
-            accent: "#8492a6",
-            tint: "#edf1f5"
-        }
-    };
-
-    function getSelectedColor() {
-        return document.querySelector(
-            "input[name='departmentColor']:checked"
-        )?.value || "blue";
-    }
-
-    // =====================================
-    // 選択メンバー取得
-    // =====================================
+    /* =====================================
+       選択メンバー取得
+    ===================================== */
 
     function getSelectedMembers() {
+
         return Array.from(memberCheckboxes)
             .filter(checkbox => checkbox.checked)
             .map(checkbox => checkbox.value);
+
     }
 
-    // =====================================
-    // 文字数カウント
-    // =====================================
+
+    /* =====================================
+       文字数カウント
+    ===================================== */
 
     function updateCharacterCount() {
-        document.getElementById("nameCount").textContent =
-            Array.from(nameInput.value).length;
 
-        document.getElementById("descriptionCount").textContent =
-            Array.from(descriptionInput.value).length;
+        if (nameCount) {
+
+            nameCount.textContent =
+                Array.from(nameInput.value).length;
+
+        }
+
+        if (descriptionCount) {
+
+            descriptionCount.textContent =
+                Array.from(descriptionInput.value).length;
+
+        }
+
     }
 
-    // =====================================
-    // 組織図・確認欄の更新
-    // =====================================
 
-    function updatePreview() {
+    /* =====================================
+       文字数カウントイベント
+    ===================================== */
 
-        const departmentName = nameInput.value.trim();
+    nameInput.addEventListener(
+        "input",
+        updateCharacterCount
+    );
 
-        const parentName =
-            parentSelect.options[parentSelect.selectedIndex].text;
+    descriptionInput.addEventListener(
+        "input",
+        updateCharacterCount
+    );
 
-        const managerName =
-            managerSelect.value || "管理者未設定";
 
-        const members = getSelectedMembers();
-        const selectedColor = getSelectedColor();
-        const color = colorSettings[selectedColor];
-
-        const iconClass = iconSelect.value;
-
-        const iconName =
-            iconSelect.options[iconSelect.selectedIndex].text
-                .replace("（デフォルト）", "");
-
-        document.getElementById("previewDepartmentName")
-            .textContent = departmentName || "部門名";
-
-        document.getElementById("previewManager")
-            .textContent = managerName;
-
-        document.getElementById("previewMemberCount")
-            .textContent = `${members.length}名`;
-
-        document.getElementById("previewIcon")
-            .className = `bi ${iconClass}`;
-
-        const preview = document.getElementById(
-            "newDepartmentPreview"
-        );
-
-        preview.style.setProperty(
-            "--department-accent",
-            color.accent
-        );
-
-        preview.style.setProperty(
-            "--department-tint",
-            color.tint
-        );
-
-        document.getElementById("confirmName")
-            .textContent = departmentName || "—";
-
-        document.getElementById("confirmParent")
-            .textContent = parentName;
-
-        document.getElementById("confirmColor")
-            .style.backgroundColor = color.accent;
-
-        document.getElementById("confirmIcon")
-            .className = `bi ${iconClass}`;
-
-        document.getElementById("confirmIconName")
-            .textContent = iconName;
-
-        document.getElementById("confirmManager")
-            .textContent = managerSelect.value || "—";
-
-        document.getElementById("confirmMemberCount")
-            .textContent = `${members.length}名`;
-
-        document.querySelectorAll(".org-department")
-            .forEach(department => {
-                department.classList.toggle(
-                    "parent-selected",
-                    department.dataset.dept === parentSelect.value
-                );
-            });
-
-        updateCharacterCount();
-    }
-
-    // =====================================
-    // メンバー検索
-    // =====================================
+    /* =====================================
+       メンバー検索
+    ===================================== */
 
     if (memberSearch) {
 
@@ -207,48 +125,69 @@ document.addEventListener("DOMContentLoaded", () => {
                         "is-hidden",
                         !name.includes(keyword)
                     );
+
                 });
+
         });
+
     }
 
-    // =====================================
-    // 入力変更イベント
-    // =====================================
 
-    [
-        nameInput,
-        parentSelect,
-        descriptionInput,
-        iconSelect,
-        managerSelect
-    ].forEach(element => {
+    /* =====================================
+       フォーム初期化
+    ===================================== */
 
-        element.addEventListener("input", updatePreview);
-        element.addEventListener("change", updatePreview);
+    function resetDepartmentForm() {
 
-    });
+        // フォームを初期状態に戻す
+        form.reset();
 
-    colorRadios.forEach(radio => {
-        radio.addEventListener("change", updatePreview);
-    });
+        // 文字数カウント更新
+        updateCharacterCount();
 
-    memberCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", updatePreview);
-    });
+        // 検索欄初期化
+        if (memberSearch) {
+            memberSearch.value = "";
+        }
 
-    // =====================================
-    // 部門追加（API通信）
-    // =====================================
+        // 非表示のメンバーを再表示
+        document.querySelectorAll(".member-option")
+            .forEach(option => {
+
+                option.classList.remove("is-hidden");
+
+            });
+
+    }
+
+
+    /* =====================================
+       部門追加処理
+    ===================================== */
 
     form.addEventListener("submit", async (event) => {
 
         event.preventDefault();
 
+        /* =====================================
+           二重送信防止
+        ===================================== */
+
+        if (submitButton?.disabled) {
+            return;
+        }
+
+
+        /* =====================================
+           入力チェック
+        ===================================== */
+
         if (!form.reportValidity()) {
             return;
         }
 
-        const departmentName = nameInput.value.trim();
+        const departmentName =
+            nameInput.value.trim();
 
         if (!departmentName) {
 
@@ -257,36 +196,63 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             nameInput.reportValidity();
+
             nameInput.setCustomValidity("");
 
             return;
         }
 
-        const members = getSelectedMembers();
-        const manager = managerSelect.value;
 
-        // =====================================
-        // 送信するJSONデータ
-        // =====================================
+        /* =====================================
+           入力値取得
+        ===================================== */
+
+        const parentDepartment =
+            parentSelect.value;
+
+        const description =
+            descriptionInput.value.trim();
+
+        const manager =
+            managerSelect.value;
+
+        const members =
+            getSelectedMembers();
+
+
+        /* =====================================
+           PHPへ送信するJSONデータ
+        ===================================== */
 
         const departmentData = {
+
             name: departmentName,
-            parentDepartment: parentSelect.value,
-            description: descriptionInput.value.trim(),
-            icon: iconSelect.value,
-            color: getSelectedColor(),
+
+            parentDepartment: parentDepartment,
+
+            description: description,
+
             manager: manager,
+
             members: members
+
         };
 
-        // =====================================
-        // 登録確認
-        // =====================================
+
+        /* =====================================
+           登録確認
+        ===================================== */
+
+        const parentName =
+            parentSelect.options[
+                parentSelect.selectedIndex
+            ].text.trim();
 
         const message =
             `以下の内容で部門を作成しますか？\n\n` +
             `部門名：${departmentName}\n` +
-            `上位部門：${parentSelect.options[parentSelect.selectedIndex].text}\n` +
+            `上位部門：${parentName}\n` +
+            `部門の説明：${description || "未設定"}\n` +
             `管理者：${manager || "未設定"}\n` +
             `メンバー数：${members.length}名`;
 
@@ -294,25 +260,26 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // =====================================
-        // 二重送信防止
-        // =====================================
 
-        if (submitButton?.disabled) {
-            return;
-        }
+        /* =====================================
+           送信ボタン無効化
+        ===================================== */
 
-        const originalButtonText =
-            submitButton?.textContent || "";
+        const originalButtonHTML =
+            submitButton?.innerHTML || "";
 
         if (submitButton) {
+
             submitButton.disabled = true;
+
             submitButton.textContent = "登録中...";
+
         }
 
-        // =====================================
-        // PHPへJSON形式でPOST送信
-        // =====================================
+
+        /* =====================================
+           PHPへPOST送信
+        ===================================== */
 
         try {
 
@@ -323,36 +290,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 credentials: "same-origin",
 
                 headers: {
+
                     "Content-Type": "application/json",
+
                     "Accept": "application/json"
+
                 },
 
                 body: JSON.stringify(departmentData)
 
             });
 
-            // =====================================
-            // PHPからのレスポンス取得
-            // =====================================
 
-            const result = await response.json();
+            /* =====================================
+               PHPレスポンス取得
+            ===================================== */
 
-            // =====================================
-            // HTTPエラー
-            // =====================================
+            const responseText =
+                await response.text();
+
+            let result;
+
+            try {
+
+                result =
+                    JSON.parse(responseText);
+
+            } catch (parseError) {
+
+                console.error(
+                    "PHPレスポンス:",
+                    responseText
+                );
+
+                throw new Error(
+                    "サーバーから正しいJSON形式の応答がありませんでした。"
+                );
+
+            }
+
+
+            /* =====================================
+               HTTPエラー確認
+            ===================================== */
 
             if (!response.ok) {
 
                 throw new Error(
                     result.message ||
                     result.comment ||
-                    "部門の登録に失敗しました。"
+                    `登録に失敗しました。（HTTP ${response.status}）`
                 );
+
             }
 
-            // =====================================
-            // 登録成功
-            // =====================================
+
+            /* =====================================
+               登録成功
+            ===================================== */
 
             if (result.success === true) {
 
@@ -362,11 +357,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     "部門を正常に登録しました。"
                 );
 
-                // フォームを初期化
-                form.reset();
-
-                // プレビューを更新
-                updatePreview();
+                // 登録成功時にフォームを初期化
+                resetDepartmentForm();
 
             } else {
 
@@ -380,7 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
 
-            console.error("部門追加エラー:", error);
+            console.error(
+                "部門追加エラー:",
+                error
+            );
 
             alert(
                 error.message ||
@@ -389,20 +384,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } finally {
 
-            // ボタンを元の状態に戻す
+            /* =====================================
+               送信ボタン復元
+            ===================================== */
+
             if (submitButton) {
+
                 submitButton.disabled = false;
-                submitButton.textContent = originalButtonText;
+
+                submitButton.innerHTML =
+                    originalButtonHTML;
+
             }
 
         }
 
     });
 
-    // =====================================
-    // 初期表示
-    // =====================================
 
-    updatePreview();
+    /* =====================================
+       初期表示
+    ===================================== */
+
+    updateCharacterCount();
 
 });

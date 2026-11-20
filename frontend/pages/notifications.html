@@ -1,1 +1,356 @@
-通知
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>通知一覧 | Tasfina</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- 共通CSS -->
+    <link rel="stylesheet" href="../css/common.css">
+
+    <!-- 通知専用CSS -->
+    <link rel="stylesheet" href="../css/notifications.css">
+
+    <!-- 共通JavaScript -->
+    <script src="../js/common.js" defer></script>
+
+    <!-- 通知専用JavaScript -->
+    <script src="../js/notifications.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- 共通ヘッダー -->
+    <div id="header"></div>
+
+    <div class="app-layout">
+
+        <!-- 共通サイドバー -->
+        <div id="sidebar"></div>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content notifications-main">
+
+            <!-- ページ見出し -->
+            <div class="notifications-page-heading">
+
+                <div>
+                    <h1>通知一覧</h1>
+                    <p>
+                        システムからのお知らせや、
+                        各種通知を確認できます。
+                    </p>
+                </div>
+
+                <div class="notifications-heading-actions">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        id="markAllReadButton"
+                    >
+                        <i class="bi bi-check2-all"></i>
+                        すべて既読にする
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- 通知件数 -->
+            <div class="notifications-summary">
+
+                <div class="notifications-summary-item">
+
+                    <div class="summary-icon summary-icon-all">
+                        <i class="bi bi-bell"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-label">すべての通知</span>
+                        <strong id="totalNotificationCount">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="notifications-summary-item">
+
+                    <div class="summary-icon summary-icon-unread">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-label">未読の通知</span>
+                        <strong id="unreadNotificationCount">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="notifications-summary-item">
+
+                    <div class="summary-icon summary-icon-read">
+                        <i class="bi bi-envelope-open"></i>
+                    </div>
+
+                    <div>
+                        <span class="summary-label">既読の通知</span>
+                        <strong id="readNotificationCount">0</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- 通知一覧パネル -->
+            <section class="notifications-panel">
+
+                <!-- パネル見出し -->
+                <div class="notifications-panel-heading">
+
+                    <div>
+                        <h2>受信した通知</h2>
+                        <p>
+                            通知を選択すると詳細を確認できます。
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        id="deleteReadButton"
+                    >
+                        <i class="bi bi-trash"></i>
+                        既読通知を削除
+                    </button>
+
+                </div>
+
+                <!-- 表示タブ -->
+                <div
+                    class="notifications-tabs"
+                    role="group"
+                    aria-label="通知の既読状態"
+                >
+
+                    <button
+                        type="button"
+                        class="notification-tab active"
+                        data-filter="all"
+                        aria-pressed="true"
+                    >
+                        すべて
+                        <span id="allTabCount">0</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="notification-tab"
+                        data-filter="unread"
+                        aria-pressed="false"
+                    >
+                        未読
+                        <span id="unreadTabCount">0</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="notification-tab"
+                        data-filter="read"
+                        aria-pressed="false"
+                    >
+                        既読
+                        <span id="readTabCount">0</span>
+                    </button>
+
+                </div>
+
+                <!-- 検索・絞り込み -->
+                <div class="notifications-toolbar">
+
+                    <div class="notification-search">
+
+                        <i class="bi bi-search"></i>
+
+                        <input
+                            type="search"
+                            id="notificationSearch"
+                            class="form-control"
+                            placeholder="通知を検索"
+                            aria-label="通知を検索"
+                        >
+
+                    </div>
+
+                    <select
+                        id="notificationTypeFilter"
+                        class="form-select"
+                        aria-label="通知の種類"
+                    >
+
+                        <option value="all">すべての種類</option>
+                        <option value="shift">シフト関連</option>
+                        <option value="leave">有給申請</option>
+                        <option value="score">負担スコア</option>
+                        <option value="chat">チャット</option>
+                        <option value="announcement">お知らせ</option>
+                        <option value="system">システム</option>
+
+                    </select>
+
+                </div>
+
+                <!-- 一覧表示件数 -->
+                <div class="notifications-list-heading">
+
+                    <span id="notificationResultCount">
+                        0件の通知
+                    </span>
+
+                    <span class="notifications-list-note">
+                        新しい通知から表示
+                    </span>
+
+                </div>
+
+                <!-- JavaScriptで通知を生成 -->
+                <div
+                    class="notifications-list"
+                    id="notificationsList"
+                    aria-live="polite"
+                ></div>
+
+                <!-- 通知がない場合 -->
+                <div
+                    class="notifications-empty"
+                    id="notificationsEmpty"
+                    hidden
+                >
+
+                    <i class="bi bi-bell-slash"></i>
+
+                    <h3>通知がありません</h3>
+
+                    <p>
+                        条件に一致する通知はありません。
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- 通知詳細モーダル -->
+    <div
+        class="modal fade"
+        id="notificationDetailModal"
+        tabindex="-1"
+        aria-labelledby="notificationDetailTitle"
+        aria-hidden="true"
+    >
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h2
+                        class="modal-title fs-5"
+                        id="notificationDetailTitle"
+                    >
+                        通知詳細
+                    </h2>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="閉じる"
+                    ></button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="notification-detail-header">
+
+                        <div
+                            class="notification-detail-icon"
+                            id="notificationDetailIcon"
+                        >
+                            <i class="bi bi-bell"></i>
+                        </div>
+
+                        <div>
+
+                            <span
+                                class="notification-detail-category"
+                                id="notificationDetailCategory"
+                            ></span>
+
+                            <h3 id="notificationDetailHeading"></h3>
+
+                            <time id="notificationDetailDate"></time>
+
+                        </div>
+
+                    </div>
+
+                    <p
+                        class="notification-detail-message"
+                        id="notificationDetailMessage"
+                    ></p>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        閉じる
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="notificationDetailCloseButton"
+                        data-bs-dismiss="modal"
+                    >
+                        確認しました
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
