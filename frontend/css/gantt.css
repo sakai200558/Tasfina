@@ -445,3 +445,28 @@
     flex-shrink: 0;
     color: #ffffff;
 }
+
+/* ========================================
+   タスク詳細クリック対応
+======================================== */
+
+.gantt-task-bar {
+    cursor: pointer;
+}
+
+.gantt-task-bar:focus-visible {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 2px;
+    z-index: 3;
+}
+
+.gantt-task-bar.is-completed {
+    background-color: #9ca3af;
+    border-color: #6b7280;
+    color: #ffffff;
+}
+
+.gantt-task-bar.is-completed:hover {
+    background-color: #858d99;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.25);
+}

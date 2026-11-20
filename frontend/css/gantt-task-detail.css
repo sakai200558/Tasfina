@@ -1,0 +1,92 @@
+
+/* ========================================
+   Tasfina ガントチャート
+   タスク詳細モーダル
+======================================== */
+
+.gantt-detail-modal {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    color: #17213a;
+}
+
+.gantt-detail-modal .modal-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #dce3ed;
+    padding: 20px 24px;
+}
+
+.gantt-detail-modal .modal-title {
+    font-size: 21px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gantt-detail-modal .modal-title i {
+    color: #0065c8;
+}
+
+.gantt-detail-modal .modal-body {
+    padding: 25px;
+}
+
+.gantt-detail-field {
+    margin-bottom: 20px;
+}
+
+.gantt-detail-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #344563;
+}
+
+.gantt-detail-value {
+    min-height: 44px;
+    padding: 11px 13px;
+    border: 1px solid #d8e0eb;
+    border-radius: 7px;
+    background: #f8fafc;
+    color: #17213a;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.gantt-detail-description {
+    min-height: 90px;
+    white-space: pre-wrap;
+}
+
+.gantt-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 18px;
+}
+
+.gantt-detail-modal .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #dce3ed;
+}
+
+.gantt-detail-modal .modal-footer .btn {
+    min-width: 110px;
+}
+
+@media screen and (max-width: 576px) {
+
+    .gantt-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gantt-detail-modal .modal-body {
+        padding: 18px;
+    }
+
+    .gantt-detail-modal .modal-title {
+        font-size: 18px;
+    }
+}
