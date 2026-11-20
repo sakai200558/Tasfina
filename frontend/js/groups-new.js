@@ -49,14 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     /* =====================================
-       バックエンドAPI
+       バックエンドAPIのURL
     ===================================== */
 
-    const API_URL = "../../backend/groups-new.php";
+    const API_URL = "../../backend/bumontuika.php";
 
 
     /* =====================================
-       選択中の部門カラーを取得
+       選択中の部門カラー取得
     ===================================== */
 
     function getSelectedColor() {
@@ -77,9 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function getSelectedMembers() {
 
         return Array.from(memberCheckboxes)
-
             .filter(checkbox => checkbox.checked)
-
             .map(checkbox => checkbox.value);
 
     }
@@ -106,11 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     }
-
-
-    /* =====================================
-       文字数カウントイベント
-    ===================================== */
 
     nameInput.addEventListener(
         "input",
@@ -141,12 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const name = option.textContent
                         .toLocaleLowerCase("ja");
 
-                    const matches =
-                        name.includes(keyword);
-
                     option.classList.toggle(
                         "is-hidden",
-                        !matches
+                        !name.includes(keyword)
                     );
 
                 });
@@ -164,10 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         form.reset();
 
-        // 文字数カウントを初期化
         updateCharacterCount();
 
-        // メンバー検索結果を再表示
+        if (memberSearch) {
+            memberSearch.value = "";
+        }
+
         document.querySelectorAll(".member-option")
             .forEach(option => {
 
@@ -179,12 +171,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================
-       部門追加（API通信）
+       部門追加処理
     ===================================== */
 
     form.addEventListener("submit", async (event) => {
 
         event.preventDefault();
+
+        // 二重送信防止
+        if (submitButton?.disabled) {
+            return;
+        }
 
         /* =====================================
            入力チェック
@@ -214,27 +211,27 @@ document.addEventListener("DOMContentLoaded", () => {
            入力値取得
         ===================================== */
 
-        const members =
-            getSelectedMembers();
-
-        const manager =
-            managerSelect.value;
-
         const parentDepartment =
             parentSelect.value;
 
         const description =
             descriptionInput.value.trim();
 
-        const icon =
-            iconSelect.value;
-
         const color =
             getSelectedColor();
 
+        const icon =
+            iconSelect.value;
+
+        const manager =
+            managerSelect.value;
+
+        const members =
+            getSelectedMembers();
+
 
         /* =====================================
-           PHPに送信するJSONデータ
+           PHPへ送信するデータ
         ===================================== */
 
         const departmentData = {
@@ -245,9 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             description: description,
 
-            icon: icon,
-
             color: color,
+
+            icon: icon,
 
             manager: manager,
 
@@ -263,12 +260,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const parentName =
             parentSelect.options[
                 parentSelect.selectedIndex
-            ].text;
+            ].text.trim();
 
         const message =
             `以下の内容で部門を作成しますか？\n\n` +
             `部門名：${departmentName}\n` +
             `上位部門：${parentName}\n` +
+            `部門カラー：${color}\n` +
+            `部門アイコン：${icon}\n` +
             `管理者：${manager || "未設定"}\n` +
             `メンバー数：${members.length}名`;
 
@@ -278,12 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /* =====================================
-           二重送信防止
+           送信ボタン無効化
         ===================================== */
-
-        if (submitButton?.disabled) {
-            return;
-        }
 
         const originalButtonHTML =
             submitButton?.innerHTML || "";
@@ -298,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /* =====================================
-           PHPへJSON形式でPOST送信
+           PHPへPOST送信
         ===================================== */
 
         try {
@@ -323,14 +318,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /* =====================================
-               PHPからのレスポンス取得
+               PHPレスポンス取得
             ===================================== */
 
-            const result = await response.json();
+            const responseText = await response.text();
+
+            let result;
+
+            try {
+
+                result = JSON.parse(responseText);
+
+            } catch (parseError) {
+
+                console.error(
+                    "PHPレスポンス:",
+                    responseText
+                );
+
+                throw new Error(
+                    "サーバーから正しいJSON形式の応答がありませんでした。"
+                );
+
+            }
 
 
             /* =====================================
-               HTTPエラー確認
+               HTTPエラー
             ===================================== */
 
             if (!response.ok) {
@@ -338,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(
                     result.message ||
                     result.comment ||
-                    "部門の登録に失敗しました。"
+                    `登録に失敗しました。（HTTP ${response.status}）`
                 );
 
             }
@@ -356,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     "部門を正常に登録しました。"
                 );
 
-                // フォームを初期化
                 resetDepartmentForm();
 
             } else {
@@ -384,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
 
             /* =====================================
-               ボタンを元の状態に戻す
+               送信ボタン復元
             ===================================== */
 
             if (submitButton) {
