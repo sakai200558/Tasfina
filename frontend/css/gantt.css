@@ -420,3 +420,28 @@
     }
 
 }
+
+/* ========================================
+   完了タスクの色分け
+======================================== */
+
+.gantt-task-bar.is-completed {
+    background-color: #9ca3af;
+    border-color: #6b7280;
+    color: #ffffff;
+}
+
+.gantt-task-bar.is-completed:hover {
+    background-color: #858d99;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.25);
+}
+
+/* 完了チェックアイコン */
+
+.gantt-complete-icon {
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 13px;
+    flex-shrink: 0;
+    color: #ffffff;
+}

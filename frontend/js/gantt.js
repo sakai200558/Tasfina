@@ -1,3 +1,4 @@
+
 /* ========================================
    Tasfina ガントチャート
    週間表示・PHP連携版
@@ -6,6 +7,7 @@
    終了日：due_date
 
    週跨ぎタスク対応
+   完了タスクの色分け対応
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -14,21 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
        API設定
     ===================================== */
 
-    const API_URL =
-        "../../backend/natume_api.php";
+    const API_URL = "../../backend/natume_api.php";
 
     /* =====================================
        状態管理
     ===================================== */
 
     let currentDate = new Date();
-
     let tasks = [];
-
     let requestId = 0;
-
     let isLoading = false;
-
     let errorMessage = "";
 
     /* =====================================
@@ -60,11 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("todayButton");
 
     if (!chart || !periodLabel) {
-
         console.error(
             "ガントチャートの要素が見つかりません。"
         );
-
         return;
     }
 
@@ -74,18 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function parseDate(value) {
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
+        if (value === null || value === undefined) {
             return null;
         }
 
         if (value instanceof Date) {
 
-            if (
-                Number.isNaN(value.getTime())
-            ) {
+            if (Number.isNaN(value.getTime())) {
                 return null;
             }
 
@@ -102,6 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return null;
         }
 
+        // YYYY-MM-DD
+        // YYYY/MM/DD
+        // YYYY-MM-DD HH:mm:ss
+        // YYYY-MM-DDTHH:mm:ss
         const match = text.match(
             /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/
         );
@@ -111,9 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const year = Number(match[1]);
-
         const month = Number(match[2]);
-
         const day = Number(match[3]);
 
         const date = new Date(
@@ -150,9 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* =====================================
        日数差計算
-
-       UTCを使い、夏時間などによる
-       日数計算のずれを防止
     ===================================== */
 
     function dayDiff(first, second) {
@@ -284,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `タスク ${index + 1}`;
 
         /*
-           PHPでは以下の名前で返却
+           PHPから返却される日付
 
            start_date = DATE(created_at)
            end_date   = due_date
@@ -308,13 +297,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const end =
             parseDate(endValue);
 
+        /* =====================================
+           ステータス取得
+
+           DBのstatusカラムを使用
+        ===================================== */
+
+        const status =
+            String(task.status ?? "").trim();
+
         return {
             id: id,
             name: String(name),
             start: start,
             end: end,
-            status: task.status ?? ""
+            status: status
         };
+    }
+
+    /* =====================================
+       完了判定
+    ===================================== */
+
+    function isCompletedTask(task) {
+
+        return task.status === "completed";
     }
 
     /* =====================================
@@ -365,9 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         isLoading = true;
-
         errorMessage = "";
-
         tasks = [];
 
         renderChart();
@@ -516,7 +521,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             tasks = [];
-
             isLoading = false;
 
             errorMessage =
@@ -696,10 +700,10 @@ document.addEventListener("DOMContentLoaded", () => {
             /* =====================================
                表示週との交差期間
 
-               タスク開始日が前週でも
+               開始日が前週の場合：
                今週の月曜日から描画
 
-               タスク終了日が翌週でも
+               終了日が翌週の場合：
                今週の日曜日まで描画
             ===================================== */
 
@@ -739,21 +743,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
 
             /* =====================================
+               完了ステータス判定
+            ===================================== */
+
+            const isCompleted =
+                isCompletedTask(task);
+
+            const statusClass =
+                isCompleted
+                    ? "is-completed"
+                    : "";
+
+            /* =====================================
                ツールチップ
             ===================================== */
 
             const tooltip =
                 `${task.name}\n` +
                 `開始日：${formatDate(start)}\n` +
-                `終了日：${formatDate(end)}`;
+                `終了日：${formatDate(end)}\n` +
+                `ステータス：${task.status || "未設定"}`;
 
             /* =====================================
                タスクバー
+
+               完了タスク：
+               グレー＋チェックアイコン
+
+               その他：
+               従来の青色
             ===================================== */
 
             const barHTML = `
                 <div
-                    class="gantt-task-bar"
+                    class="gantt-task-bar ${statusClass}"
                     style="
                         left: ${left}px;
                         width: ${width}px;
@@ -764,6 +787,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="gantt-bar-label">
                         ${escapeHTML(task.name)}
                     </span>
+
+                    ${isCompleted
+                        ? `
+                            <i
+                                class="bi bi-check-circle-fill gantt-complete-icon"
+                                aria-label="完了"
+                            ></i>
+                        `
+                        : ""
+                    }
 
                 </div>
             `;
