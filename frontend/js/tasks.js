@@ -92,7 +92,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     workType: task.work_type || "-",
                     evidence: task.evidence || "未提出",
                     requestedHours: task.requested_hours ? Number(task.requested_hours) : null, // ★ 追加
-                    hoursReason: task.hours_change_reason || "" // ★ 追加
+                    hoursReason: task.hours_change_reason || "" ,
+                                      // ★ ここを追加
+                    priority: task.priority || "medium",
+                    difficulty: Number(task.difficulty_level || 3),
+                    discomfort: Number(task.discomfort_level || 3),
+                    startDate: task.start_date || ""
 
                 };
             }) : [];
@@ -168,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
        表示対象タスク
     ======================================== */
 
-    function getFilteredTasks() {
+        function getFilteredTasks() {
         const keyword = searchInput.value.trim().toLowerCase();
         const assignee = assigneeFilter.value;
 
@@ -176,12 +181,16 @@ document.addEventListener("DOMContentLoaded", () => {
             let matchesTab = false;
 
             if (activeTab === "pending") {
-                  matchesTab = task.status === "承認待ち" || task.status === "工数変更承認待ち";
+                matchesTab = task.status === "承認待ち" || task.status === "工数変更承認待ち";
             } else if (activeTab === "others") {
                 // ★ 自分以外のタスク（他メンバー ＋ 自分が依頼したタスク）をすべて表示
                 matchesTab = task.category === "others" || task.category === "requested";
+            } else if (activeTab === "mine") {
+                // ★ 「自分のタスク」は進行中と工数変更承認待ちのみ表示する
+                matchesTab = task.category === "mine" &&
+                    (task.status === "進行中" || task.status === "工数変更承認待ち");
             } else {
-                matchesTab = task.category === activeTab; // "mine" や "requested"
+                matchesTab = task.category === activeTab; // "requested" など
             }
 
 
@@ -309,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
     function translateStatus(status) {
         switch (status) {
-            case "assigned": return "未着手";
+            case "assigned": return "進行中";
             case "in_progress": return "進行中";
             case "pending": return "承認待ち";
             case "hours_pending": return "工数変更承認待ち"; // ★ 追加
@@ -361,6 +370,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 approveButton.textContent = "承認する（ポイント付与）";
             }
         }
+         // ★ 差し戻しボタンの表示制御を追加
+        const rejectButton = document.getElementById("rejectTaskButton");
+        if (rejectButton) {
+            const isRequester = task && Number(task.created_by) === Number(currentUserId);
+            const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
+            rejectButton.style.display = (isPendingStatus && isRequester)
+                ? "inline-block"
+                : "none";
+        }
 
         if (!task) {
             const empty = document.createElement("p");
@@ -390,6 +408,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (task.status === "工数変更承認待ち" && task.requestedHours) {
             items.push(["工数変更申請", `${task.requestedHours.toFixed(1)}時間へ変更（理由: ${task.hoursReason || "なし"}）`]);
         }
+                // ★ 差し戻し理由が入っている場合は詳細に表示する
+        if (task.status === "進行中" && task.hoursReason && task.hoursReason.startsWith("【差し戻し】")) {
+            items.push(["前回差し戻し理由", task.hoursReason.replace("【差し戻し】", "")]);
+        }
+
 
         items.forEach(([label, value]) => {
             const item = document.createElement("div");
@@ -447,6 +470,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("hoursTaskName").textContent = task.name;
         document.getElementById("currentHours").value = task.hours;
         document.getElementById("requestedHours").value = task.hours;
+
+         // ★ ここから5行を追加
+        document.getElementById("editPriority").value = task.priority || "medium";
+        document.getElementById("editDifficulty").value = String(task.difficulty || 3);
+        document.getElementById("editDiscomfort").value = String(task.discomfort || 3);
+        document.getElementById("editStartDate").value = task.startDate ? task.startDate.slice(0, 10).replace(/\//g, "-") : "";
+        document.getElementById("editDueDate").value = task.dueDate ? task.dueDate.slice(0, 10).replace(/\//g, "-") : "";
 
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById("workHoursModal")
@@ -646,7 +676,50 @@ const requestData = {
             }
         });
     }
-exit
+        // ★ 差し戻し（理由入力つき）処理を追加
+    const rejectTaskButton = document.getElementById("rejectTaskButton");
+    if (rejectTaskButton) {
+        rejectTaskButton.addEventListener("click", async () => {
+            const task = getSelectedTask();
+            if (!task) return;
+
+            const isHoursApproval = task.status === "工数変更承認待ち";
+            const promptMsg = isHoursApproval
+                ? `「${task.name}」の工数変更申請を差し戻します。\n差し戻し理由を入力してください：`
+                : `「${task.name}」の完了申請を差し戻します。\n差し戻し理由を入力してください：`;
+
+            const rejectReason = prompt(promptMsg);
+            if (rejectReason === null) return;
+            if (rejectReason.trim() === "") {
+                showToast("差し戻し理由を入力してください。");
+                return;
+            }
+
+            try {
+                const response = await fetch('../../backend/api_update_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: task.id,
+                        status: isHoursApproval ? 'reject_hours' : 'reject_complete',
+                        reject_reason: rejectReason.trim()
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showToast(result.message || '差し戻しました。');
+                    await fetchTasks();
+                } else {
+                    showToast(result.message || '差し戻しに失敗しました。');
+                }
+            } catch (error) {
+                console.error('差し戻しエラー:', error);
+                showToast('通信エラーが発生しました。');
+            }
+        });
+    }
+
 
     /* ========================================
        初期化実行
