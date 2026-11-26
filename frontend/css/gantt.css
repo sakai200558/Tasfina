@@ -1,7 +1,6 @@
-
 /* ========================================
    Tasfina ガントチャート
-   週間表示専用
+   週間表示・担当者別色分け対応版
 ======================================== */
 
 /* ========================================
@@ -99,6 +98,68 @@
 
 .gantt-loading {
     color: #0065c8;
+}
+
+
+/* ========================================
+   タスク色分け凡例
+======================================== */
+
+.gantt-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 12px 24px;
+
+    margin-bottom: 16px;
+
+    font-size: 13px;
+    color: #52617d;
+}
+
+.gantt-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gantt-legend-color {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 23px;
+    height: 16px;
+
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    flex-shrink: 0;
+}
+
+/* 完了済み：灰色 */
+
+.legend-completed {
+    background-color: #9ca3af;
+    border-color: #6b7280;
+    color: #ffffff;
+
+    font-size: 12px;
+}
+
+/* 自分のタスク：緑色 */
+
+.legend-mine {
+    background-color: #86d6ae;
+    border-color: #36a574;
+}
+
+/* その他のタスク：青色 */
+
+.legend-other {
+    background-color: #63b1fa;
+    border-color: #3b93e8;
 }
 
 
@@ -305,6 +366,8 @@
 
     z-index: 1;
 
+    cursor: pointer;
+
     transition:
         background-color 0.2s,
         box-shadow 0.2s;
@@ -313,6 +376,12 @@
 .gantt-task-bar:hover {
     background: #459cf0;
     box-shadow: 0 2px 6px rgba(0, 101, 200, 0.2);
+}
+
+.gantt-task-bar:focus-visible {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 2px;
+    z-index: 3;
 }
 
 .gantt-bar-label {
@@ -324,6 +393,72 @@
 
     font-size: 12px;
     font-weight: 600;
+}
+
+
+/* ========================================
+   その他の未完了タスク：青色
+======================================== */
+
+.gantt-task-bar.is-other {
+    background-color: #63b1fa;
+    border-color: #3b93e8;
+    color: #12365a;
+}
+
+.gantt-task-bar.is-other:hover {
+    background-color: #459cf0;
+
+    box-shadow:
+        0 2px 6px rgba(0, 101, 200, 0.2);
+}
+
+
+/* ========================================
+   自分の未完了タスク：緑色
+======================================== */
+
+.gantt-task-bar.is-mine {
+    background-color: #86d6ae;
+    border-color: #36a574;
+    color: #145b3c;
+}
+
+.gantt-task-bar.is-mine:hover {
+    background-color: #63c995;
+
+    box-shadow:
+        0 2px 6px rgba(54, 165, 116, 0.25);
+}
+
+
+/* ========================================
+   完了済みタスク：灰色
+======================================== */
+
+.gantt-task-bar.is-completed {
+    background-color: #9ca3af;
+    border-color: #6b7280;
+    color: #ffffff;
+}
+
+.gantt-task-bar.is-completed:hover {
+    background-color: #858d99;
+
+    box-shadow:
+        0 2px 6px rgba(107, 114, 128, 0.25);
+}
+
+/* 完了チェックアイコン */
+
+.gantt-complete-icon {
+    margin-left: auto;
+    padding-left: 8px;
+
+    font-size: 13px;
+
+    flex-shrink: 0;
+    color: #ffffff;
 }
 
 
@@ -398,6 +533,11 @@
         font-size: 12px;
     }
 
+    .gantt-legend {
+        gap: 8px 16px;
+        font-size: 12px;
+    }
+
 }
 
 @media screen and (max-width: 480px) {
@@ -419,54 +559,8 @@
         min-height: 38px;
     }
 
-}
+    .gantt-legend {
+        gap: 8px 12px;
+    }
 
-/* ========================================
-   完了タスクの色分け
-======================================== */
-
-.gantt-task-bar.is-completed {
-    background-color: #9ca3af;
-    border-color: #6b7280;
-    color: #ffffff;
-}
-
-.gantt-task-bar.is-completed:hover {
-    background-color: #858d99;
-    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.25);
-}
-
-/* 完了チェックアイコン */
-
-.gantt-complete-icon {
-    margin-left: auto;
-    padding-left: 8px;
-    font-size: 13px;
-    flex-shrink: 0;
-    color: #ffffff;
-}
-
-/* ========================================
-   タスク詳細クリック対応
-======================================== */
-
-.gantt-task-bar {
-    cursor: pointer;
-}
-
-.gantt-task-bar:focus-visible {
-    outline: 3px solid #1d4ed8;
-    outline-offset: 2px;
-    z-index: 3;
-}
-
-.gantt-task-bar.is-completed {
-    background-color: #9ca3af;
-    border-color: #6b7280;
-    color: #ffffff;
-}
-
-.gantt-task-bar.is-completed:hover {
-    background-color: #858d99;
-    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.25);
 }

@@ -1,46 +1,56 @@
-
 <?php
 
 /* ========================================
    Tasfina ガントチャートAPI
-   タスク詳細情報対応版
+   タスク詳細・担当者別色分け対応版
 ======================================== */
 
 session_start();
 
 header("Content-Type: application/json; charset=utf-8");
-
-$host = "localhost";
-$dbname = "Tasfina_db";
-$username = "root";
-$password = "password";
-$charset = "utf8mb4";
-
-$dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+header("Cache-Control: no-store");
 
 try {
 
+    /* =====================================
+       ログイン確認
+    ===================================== */
+
     if (!isset($_SESSION["user_id"])) {
+
         http_response_code(401);
+
         throw new Exception("ログインしてください");
     }
 
-    $pdo = new PDO(
-        $dsn,
-        $username,
-        $password,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]
-    );
+    /* =====================================
+       ログイン中のユーザーID取得
+    ===================================== */
+
+    $currentUserId = (int)$_SESSION["user_id"];
+
+    /* =====================================
+       データベース接続
+    ===================================== */
+
+    require_once __DIR__ . "/db.php";
+
+    /* =====================================
+       表示期間取得
+    ===================================== */
 
     $before = $_POST["before"] ?? "";
     $after = $_POST["after"] ?? "";
 
-    $startDate = DateTime::createFromFormat("!Y-m-d", $before);
-    $endDate = DateTime::createFromFormat("!Y-m-d", $after);
+    $startDate = DateTime::createFromFormat(
+        "!Y-m-d",
+        $before
+    );
+
+    $endDate = DateTime::createFromFormat(
+        "!Y-m-d",
+        $after
+    );
 
     if (
         !$startDate ||
@@ -49,15 +59,19 @@ try {
         $endDate->format("Y-m-d") !== $after ||
         $startDate > $endDate
     ) {
+
         http_response_code(400);
+
         throw new Exception("期間の指定が不正です");
     }
 
-    /*
-       現在確認できているtasksテーブルのカラムを使用。
+    /* =====================================
+       タスク情報取得
+    ===================================== */
 
-       priority と start_date は実際の保存カラムが
-       未確認のため、ここでは取得しません。
+    /*
+       priority と start_date は
+       保存カラムが未確認のため取得しません。
 
        開始日は従来どおり created_at を使用します。
     */
@@ -92,14 +106,24 @@ try {
         ":after" => $after
     ]);
 
-    $rows = $stmt->fetchAll();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    /* =====================================
+       JSONレスポンス
+    ===================================== */
 
     echo json_encode(
         [
             "success" => true,
+
+            // ログイン中のユーザーID
+            "current_user_id" => $currentUserId,
+
+            // タスク一覧
             "tasks" => $rows
         ],
-        JSON_UNESCAPED_UNICODE
+        JSON_UNESCAPED_UNICODE |
+        JSON_INVALID_UTF8_SUBSTITUTE
     );
 
 } catch (Throwable $e) {
@@ -109,14 +133,20 @@ try {
         $e->getMessage()
     );
 
-    if (http_response_code() === 200) {
+    $status = http_response_code();
+
+    if (!$status || $status < 400) {
+
         http_response_code(500);
+
     }
 
     echo json_encode(
         [
             "success" => false,
-            "comment" => $e->getMessage()
+            "comment" => http_response_code() === 500
+                ? "タスク情報の取得に失敗しました"
+                : $e->getMessage()
         ],
         JSON_UNESCAPED_UNICODE
     );

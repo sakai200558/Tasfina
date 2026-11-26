@@ -1,8 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -125,6 +125,49 @@
                     role="status"
                     aria-live="polite"
                 ></span>
+
+            </div>
+
+            <!-- タスク色分け凡例 -->
+            <div
+                class="gantt-legend"
+                aria-label="タスクの色分け"
+            >
+
+                <!-- 完了済み -->
+                <div class="gantt-legend-item">
+
+                    <span
+                        class="gantt-legend-color legend-completed"
+                    >
+                        <i class="bi bi-check-lg"></i>
+                    </span>
+
+                    <span>完了済み</span>
+
+                </div>
+
+                <!-- 自分の未完了タスク -->
+                <div class="gantt-legend-item">
+
+                    <span
+                        class="gantt-legend-color legend-mine"
+                    ></span>
+
+                    <span>自分の未完了タスク</span>
+
+                </div>
+
+                <!-- 他の人の未完了タスク -->
+                <div class="gantt-legend-item">
+
+                    <span
+                        class="gantt-legend-color legend-other"
+                    ></span>
+
+                    <span>その他の未完了タスク</span>
+
+                </div>
 
             </div>
 
