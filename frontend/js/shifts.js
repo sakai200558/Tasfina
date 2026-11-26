@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBusyModalBtn = document.getElementById('cancelBusyModalBtn');
     const submitBusyModalBtn = document.getElementById('submitBusyModalBtn');
 
-    const rouletteModal = document.getElementById('rouletteModal');
-    const openRouletteModalBtn = document.getElementById('openRouletteModalBtn');
+   const rouletteModal = document.getElementById('rouletteModal');
+    const openRouletteModalBtns = document.querySelectorAll('#openRouletteModalBtn, .openRouletteModalBtn');
     const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
     const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
     const executeRouletteBtn = document.getElementById('executeRouletteBtn');
@@ -201,9 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => busyModal.classList.add('hidden'));
     });
 
-    if (openRouletteModalBtn) openRouletteModalBtn.addEventListener('click', () => rouletteModal.classList.remove('hidden'));
+   openRouletteModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (rouletteModal) rouletteModal.classList.remove('hidden');
+        });
+    });
     [closeRouletteModalBtn, cancelRouletteModalBtn].forEach(btn => {
-        if (btn) btn.addEventListener('click', () => rouletteModal.classList.add('hidden'));
+        if (btn) btn.addEventListener('click', () => {
+            if (rouletteModal) rouletteModal.classList.add('hidden');
+        });
     });
 
     if (openApplicationHistoryBtn) {
