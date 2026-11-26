@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generalActionButtons = document.getElementById('generalActionButtons');
     const adminActionButtons = document.getElementById('adminActionButtons');
     const SHIFT_API_URL = '../../backend/shifts.php';
+
     // 月切り替え要素
     const prevMonthBtn = document.getElementById('prevMonthBtn');
     const nextMonthBtn = document.getElementById('nextMonthBtn');
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePaidLeaveModalBtn = document.getElementById('closePaidLeaveModalBtn');
     const cancelPaidLeaveModalBtn = document.getElementById('cancelPaidLeaveModalBtn');
     const submitPaidLeaveModalBtn = document.getElementById('submitPaidLeaveModalBtn');
-    
+
     const leaveReasonTextarea = document.getElementById('leaveReason');
     const charCountEl = document.getElementById('charCount');
 
@@ -86,8 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
     const executeRouletteBtn = document.getElementById('executeRouletteBtn');
 
+    // 申請状況・申請履歴モーダル関連
+    const applicationHistoryModal = document.getElementById('applicationHistoryModal');
+    const openApplicationHistoryBtn = document.getElementById('openApplicationHistoryBtn');
+    const closeApplicationHistoryBtn = document.getElementById('closeApplicationHistoryBtn');
+    const closeApplicationHistoryFooterBtn = document.getElementById('closeApplicationHistoryFooterBtn');
+    const recentApplicationsList = document.getElementById('recentApplicationsList');
+    const applicationHistoryList = document.getElementById('applicationHistoryList');
+
     let currentYM = '2024-10';
     const userId = 1;
+    let currentIsAdmin = false;
 
     function changeMonth(offset) {
         let [year, month] = currentYM.split('-').map(Number);
@@ -95,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (month > 12) { month = 1; year++; }
         else if (month < 1) { month = 12; year--; }
         currentYM = `${year}-${String(month).padStart(2, '0')}`;
-        currentYMEl.textContent = currentYM;
+        if (currentYMEl) currentYMEl.textContent = currentYM;
         loadShiftData();
     }
 
@@ -196,27 +206,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => rouletteModal.classList.add('hidden'));
     });
 
-// 権限に応じた画面表示切り替え関数
+    if (openApplicationHistoryBtn) {
+        openApplicationHistoryBtn.addEventListener('click', async () => {
+            await loadApplications();
+            if (applicationHistoryModal) applicationHistoryModal.classList.remove('hidden');
+        });
+    }
+    [closeApplicationHistoryBtn, closeApplicationHistoryFooterBtn].forEach(btn => {
+        if (btn) btn.addEventListener('click', () => {
+            if (applicationHistoryModal) applicationHistoryModal.classList.add('hidden');
+        });
+    });
+
+    // 権限に応じた画面表示切り替え関数
     function applyRoleView(roleCode) {
-        const isAdmin = roleCode === ('3000'||'4000') || roleCode === ('1000'||'2000');
+        const isAdmin = roleCode === ('3000' || '4000') || roleCode === ('1000' || '2000') || roleCode === 'admin';
+        currentIsAdmin = isAdmin;
 
         if (roleSelector) {
             roleSelector.value = isAdmin ? 'admin' : 'general';
         }
 
         if (isAdmin) {
-            pageTitle.textContent = 'シフト管理（管理者）';
-            generalActionButtons.classList.add('hidden');
-            adminActionButtons.classList.remove('hidden');
-            if (adminBusyPeriodPanel) adminBusyPeriodPanel.classList.remove('hidden');
-            if (menuShiftMgmt) menuShiftMgmt.textContent = 'シフト管理（管理者）';
+            if (pageTitle) pageTitle.textContent = 'シフト管理（管理者）';
+            if (generalActionButtons) generalActionButtons.classList.add('hidden');
+            if (adminActionButtons) adminActionButtons.classList.remove('hidden');
         } else {
-            pageTitle.textContent = 'シフト管理';
-            adminActionButtons.classList.add('hidden');
-            generalActionButtons.classList.remove('hidden');
-            if (adminBusyPeriodPanel) adminBusyPeriodPanel.classList.add('hidden');
-            if (menuShiftMgmt) menuShiftMgmt.textContent = 'シフト管理';
+            if (pageTitle) pageTitle.textContent = 'シフト管理';
+            if (adminActionButtons) adminActionButtons.classList.add('hidden');
+            if (generalActionButtons) generalActionButtons.classList.remove('hidden');
         }
+
+        loadApplications();
     }
 
     // --- データ取得 & レンダリング ---
@@ -236,33 +257,181 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadDashboardInfo() {
         try {
             const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('todayDateLabel').textContent = todayStr;
+            const todayLabel = document.getElementById('todayDateLabel');
+            if (todayLabel) todayLabel.textContent = todayStr;
 
             const res = await fetch(`${SHIFT_API_URL}?action=get_dashboard_info&today=${todayStr}&user_id=${userId}`);
             const data = await res.json();
 
             if (data.success) {
-                // DBの権限に合わせて表示を反映
                 if (data.user && data.user.role_code) {
                     applyRoleView(data.user.role_code);
                 }
 
                 const card = document.getElementById('todaysShiftCard');
-                if (data.todays_shift) {
-                    const s = data.todays_shift;
-                    card.innerHTML = `
-                        <div class="text-sm font-bold text-green-700">${s.status}</div>
-                        <div class="text-xs text-green-600 mt-0.5">${s.start_time ? s.start_time.slice(0,5) : '09:00'} ～ ${s.end_time ? s.end_time.slice(0,5) : '18:00'}</div>
-                    `;
-                } else {
-                    card.innerHTML = `<div class="text-sm font-bold text-gray-700">シフト情報なし</div>`;
+                if (card) {
+                    if (data.todays_shift) {
+                        const s = data.todays_shift;
+                        card.innerHTML = `
+                            <div class="text-sm font-bold text-green-700">${s.status}</div>
+                            <div class="text-xs text-green-600 mt-0.5">${s.start_time ? s.start_time.slice(0,5) : '09:00'} ～ ${s.end_time ? s.end_time.slice(0,5) : '18:00'}</div>
+                        `;
+                    } else {
+                        card.innerHTML = `<div class="text-sm font-bold text-gray-700">シフト情報なし</div>`;
+                    }
                 }
             }
         } catch (err) {
             console.error('ダッシュボード情報取得エラー:', err);
         }
     }
-    
+
+    function getStatusBadgeClass(status) {
+        if (status === '承認待ち') return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+        return 'bg-green-50 text-green-700 border border-green-200';
+    }
+
+    function formatShortDate(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : dateStr;
+    }
+
+    async function loadApplications() {
+        try {
+            const res = await fetch(`${SHIFT_API_URL}?action=get_applications&user_id=${userId}&is_admin=${currentIsAdmin ? '1' : '0'}`);
+            const data = await res.json();
+            if (!data.success) return;
+
+            const applications = data.applications || [];
+            renderRecentApplications(applications.slice(0, 3));
+            renderApplicationHistoryModal(applications);
+        } catch (err) {
+            console.error('申請履歴取得エラー:', err);
+        }
+    }
+
+    function renderRecentApplications(list) {
+        if (!recentApplicationsList) return;
+        if (!list.length) {
+            recentApplicationsList.innerHTML = `<div class="text-gray-400 text-center py-2">申請履歴はありません</div>`;
+            return;
+        }
+
+        recentApplicationsList.innerHTML = list.map(app => `
+            <div class="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-b-0">
+                <span class="font-medium text-gray-800">${app.app_type}</span>
+                <span class="text-gray-500">${formatShortDate(app.applied_at ? app.applied_at.slice(0, 10) : app.start_date)}</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-medium ${getStatusBadgeClass(app.approval_status)}">${app.approval_status}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderApplicationHistoryModal(list) {
+        if (!applicationHistoryList) return;
+        if (!list.length) {
+            applicationHistoryList.innerHTML = `<div class="text-gray-400 text-center py-6">申請履歴はありません</div>`;
+            return;
+        }
+
+        applicationHistoryList.innerHTML = list.map(app => {
+            const periodText = (!app.start_date || !app.end_date || app.start_date === app.end_date)
+                ? (app.start_date || '')
+                : `${app.start_date} ～ ${app.end_date}`;
+            const canAct = currentIsAdmin && app.approval_status === '承認待ち';
+
+            return `
+                <div class="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
+                    <div class="flex items-center justify-between ${canAct ? 'cursor-pointer' : ''}" data-app-row="${app.application_id}">
+                        <div class="space-y-0.5">
+                            <div class="font-bold text-gray-800">
+                                ${app.app_type}（${app.status_type || app.status || ''}）
+                                <span class="text-gray-500 font-normal ml-2">${periodText}</span>
+                            </div>
+                            <div class="text-[11px] text-gray-500">
+                                申請日: ${app.applied_at ? app.applied_at.slice(0, 10) : ''}
+                                ${app.reason ? ` / 理由・備考: ${app.reason}` : ''}
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded text-[11px] font-semibold ${getStatusBadgeClass(app.approval_status)}">
+                            ${app.approval_status}
+                        </span>
+                    </div>
+
+                    ${canAct ? `
+                        <div id="appActions_${app.application_id}" class="hidden pt-2 border-t border-gray-100 flex justify-end gap-2">
+                            <button type="button" data-reject-id="${app.application_id}" class="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700">
+                                承認を拒否
+                            </button>
+                            <button type="button" data-approve-id="${app.application_id}" class="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700">
+                                承認
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
+        applicationHistoryList.querySelectorAll('[data-app-row]').forEach(rowEl => {
+            rowEl.addEventListener('click', () => {
+                const id = rowEl.getAttribute('data-app-row');
+                const actionBox = document.getElementById(`appActions_${id}`);
+                if (actionBox) {
+                    actionBox.classList.toggle('hidden');
+                }
+            });
+        });
+
+        applicationHistoryList.querySelectorAll('[data-approve-id]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const appId = btn.getAttribute('data-approve-id');
+                try {
+                    const res = await fetch(`${SHIFT_API_URL}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'approve_application', application_id: appId })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert(result.message || '承認しました。');
+                        await loadApplications();
+                        await loadShiftData();
+                        await loadDashboardInfo();
+                    } else {
+                        alert('エラー: ' + (result.error || '承認に失敗しました。'));
+                    }
+                } catch (err) {
+                    console.error('承認処理エラー:', err);
+                    alert('通信に失敗しました。');
+                }
+            });
+        });
+
+        applicationHistoryList.querySelectorAll('[data-reject-id]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const appId = btn.getAttribute('data-reject-id');
+                try {
+                    const res = await fetch(`${SHIFT_API_URL}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'reject_application', application_id: appId })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert(result.message || '申請を拒否し、履歴から削除しました。');
+                        await loadApplications();
+                    } else {
+                        alert('エラー: ' + (result.error || '拒否処理に失敗しました。'));
+                    }
+                } catch (err) {
+                    console.error('拒否処理エラー:', err);
+                    alert('通信に失敗しました。');
+                }
+            });
+        });
+    }
 
     function renderCalendar(ym, shifts, busyDays) {
         const grid = document.getElementById('calendarGrid');
@@ -320,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.getElementById('shiftSummaryList');
         if (!list) return;
         list.innerHTML = '';
-        
+
         const types = ['通常出勤', '在宅勤務', '午前休', '有給休暇', '休日'];
         types.forEach(type => {
             const found = summary.find(s => s.status_type === type);
@@ -336,7 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (roleSelector) {
         roleSelector.addEventListener('change', (e) => {
-            if (e.target.value === 'admin') {
+            const isAdmin = e.target.value === 'admin';
+            currentIsAdmin = isAdmin;
+            if (isAdmin) {
                 pageTitle.textContent = 'シフト管理（管理者）';
                 generalActionButtons.classList.add('hidden');
                 adminActionButtons.classList.remove('hidden');
@@ -345,10 +516,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 adminActionButtons.classList.add('hidden');
                 generalActionButtons.classList.remove('hidden');
             }
+            loadApplications();
         });
     }
 
-    // --- 希望シフト提出処理（複数日一括送信対応） ---
+    // --- 希望シフト提出処理（複数日一括送信・承認待ち登録） ---
     if (submitPreferredModalBtn) {
         submitPreferredModalBtn.addEventListener('click', async () => {
             const selects = document.querySelectorAll('.shift-req-select');
@@ -386,14 +558,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(body)
                 });
                 const result = await res.json();
-                
+
                 if (result.success) {
-                    alert(result.message || `${items.length}日分の希望シフトを登録しました。`);
+                    alert(result.message || `${items.length}日分の希望シフトを申請しました。`);
                     preferredModal.classList.add('hidden');
-                    loadShiftData();
-                    loadDashboardInfo();
+                    await loadApplications();
                 } else {
-                    alert('エラー: ' + (result.error || '登録に失敗しました。'));
+                    alert('エラー: ' + (result.error || '申請に失敗しました。'));
                 }
             } catch (err) {
                 console.error('通信エラー:', err);
@@ -402,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 有休申請の送信処理（期間一括送信対応） ---
+    // --- 有休申請の送信処理（期間一括送信・承認待ち登録） ---
     if (submitPaidLeaveModalBtn) {
         submitPaidLeaveModalBtn.addEventListener('click', async () => {
             const startDate = document.getElementById('leaveStartDate').value;
@@ -440,12 +611,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(body)
                 });
                 const result = await res.json();
-                
+
                 if (result.success) {
                     alert(result.message || '有休申請を送信しました。');
                     paidLeaveModal.classList.add('hidden');
-                    loadShiftData();
-                    loadDashboardInfo();
+                    await loadApplications();
                 } else {
                     alert('エラー: ' + (result.error || '申請に失敗しました。'));
                 }
@@ -459,16 +629,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 繁忙期設定保存処理（期間一括送信対応） ---
     if (submitBusyModalBtn) {
         submitBusyModalBtn.addEventListener('click', async () => {
-            const name = document.getElementById('busyPeriodName').value;
-            const startDate = document.getElementById('busyStartDate').value;
-            const endDate = document.getElementById('busyEndDate').value;
-            const bonusPt = document.getElementById('busyBonusPt').value;
-            const note = document.getElementById('busyNote').value;
+            const startDateInput = document.getElementById('busyStartDate');
+            const endDateInput = document.getElementById('busyEndDate');
+            const dateInput = document.getElementById('busyDate');
+            const reqPeopleInput = document.getElementById('busyRequiredPeople');
+            const bonusPtInput = document.getElementById('busyBonusPt');
 
-            if (!name.trim()) {
-                alert('名称を入力してください。');
-                return;
-            }
+            const startDate = startDateInput ? startDateInput.value : (dateInput ? dateInput.value : '');
+            const endDate = endDateInput ? endDateInput.value : startDate;
+            const requiredPeople = reqPeopleInput ? reqPeopleInput.value : 5;
+            const bonusPt = bonusPtInput ? bonusPtInput.value : 2.0;
+
             if (!startDate || !endDate) {
                 alert('期間（開始日・終了日）を選択してください。');
                 return;
@@ -480,11 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const body = {
                 action: 'save_busy_period',
-                name: name,
                 start_date: startDate,
                 end_date: endDate,
-                bonus_pt: bonusPt,
-                note: note
+                required_people: requiredPeople,
+                bonus_pt: bonusPt
             };
 
             try {
@@ -545,4 +715,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadShiftData();
     loadDashboardInfo();
+    loadApplications();
 });
