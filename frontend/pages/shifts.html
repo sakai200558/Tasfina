@@ -405,18 +405,14 @@
                                         <span>特定のメンバーを選択</span>
                                     </label>
                                     <select id="rouletteTargetUserId" class="hidden w-full p-1.5 border border-gray-300 rounded bg-white">
-                                        <option value="1">ユーザーID: 1</option>
-                                        <option value="2">ユーザーID: 2</option>
-                                        <option value="3">ユーザーID: 3</option>
+                                         <option value="">読み込み中...</option>
                                     </select>
-
                                     <label class="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" name="targetMember" value="dept" class="text-blue-600">
                                         <span>特定の部署を選択</span>
                                     </label>
                                     <select id="rouletteTargetDeptId" class="hidden w-full p-1.5 border border-gray-300 rounded bg-white">
-                                        <option value="1">部署ID: 1</option>
-                                        <option value="2">部署ID: 2</option>
+                                         <option value="">読み込み中...</option>
                                     </select>
                                 </div>
                             </div>
@@ -479,41 +475,31 @@
                                             <th class="py-1 font-medium text-right">当選確率</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-100 text-gray-700">
-                                        <tr><td class="py-1.5">鈴木 一郎</td><td class="py-1.5">1.2</td><td class="py-1.5 text-right font-semibold">18%</td></tr>
-                                        <tr><td class="py-1.5">佐藤 花子</td><td class="py-1.5">1.5</td><td class="py-1.5 text-right font-semibold">16%</td></tr>
-                                        <tr><td class="py-1.5">高橋 健</td><td class="py-1.5">1.8</td><td class="py-1.5 text-right font-semibold">14%</td></tr>
-                                        <tr><td class="py-1.5">田中 美咲</td><td class="py-1.5">2.1</td><td class="py-1.5 text-right font-semibold">11%</td></tr>
-                                        <tr><td class="py-1.5">伊藤 翔</td><td class="py-1.5">2.3</td><td class="py-1.5 text-right font-semibold">9%</td></tr>
-                                        <tr><td class="py-1.5">渡辺 直樹</td><td class="py-1.5">2.5</td><td class="py-1.5 text-right font-semibold">8%</td></tr>
-                                        <tr><td class="py-1.5">中村 優香</td><td class="py-1.5">2.8</td><td class="py-1.5 text-right font-semibold">7%</td></tr>
-                                        <tr><td class="py-1.5">山口 大輔</td><td class="py-1.5">3.1</td><td class="py-1.5 text-right font-semibold">6%</td></tr>
+                                    <tbody id="rouletteProbTableBody" class="divide-y divide-gray-100 text-gray-700">
+                                         <tr><td colspan="3" class="py-2 text-center text-gray-400">読み込み中...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
                         <!-- ルーレットプレビュー -->
+                        <!-- ルーレットプレビュー -->
                         <div class="border border-gray-200 rounded-lg p-4 space-y-3">
                             <div class="font-bold text-gray-800">ルーレットプレビュー</div>
-                            <div class="flex items-center justify-around bg-gray-50 p-3 rounded-lg">
-                                <div class="relative w-28 h-28 rounded-full border-4 border-blue-500 flex items-center justify-center bg-gradient-to-tr from-blue-100 to-blue-300 shadow-inner">
-                                    <div class="text-center">
-                                        <div class="text-[10px] text-gray-500">当選確率</div>
-                                        <div class="text-lg font-bold text-blue-700">18%</div>
+                            <div class="flex items-center justify-around bg-gray-50 p-3 rounded-lg gap-4">
+                                <div id="rouletteWheelGauge" class="relative w-28 h-28 rounded-full flex items-center justify-center shadow-inner shrink-0" style="background: conic-gradient(#3b82f6 0% 100%, #e5e7eb 100% 100%);">
+                                    <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-[10px] text-gray-500">当選確率</div>
+                                            <div id="rouletteTopProbText" class="text-lg font-bold text-blue-700">-</div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="space-y-1 text-[11px] text-gray-600">
-                                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full"></span> 鈴木 一郎 (18%)</div>
-                                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-indigo-400 rounded-full"></span> 佐藤 花子 (16%)</div>
-                                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-blue-300 rounded-full"></span> 高橋 健 (14%)</div>
-                                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-gray-300 rounded-full"></span> その他 (27名) (32%)</div>
+                                <div id="rouletteLegendList" class="space-y-1 text-[11px] text-gray-600">
+                                    <!-- JSで動的描画 -->
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
             <!-- モーダルフッター -->
             <div class="flex justify-end gap-2 px-6 py-3 border-t border-gray-200 bg-gray-50">
                 <button id="cancelRouletteModalBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-100">キャンセル</button>

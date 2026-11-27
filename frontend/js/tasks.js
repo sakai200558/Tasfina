@@ -146,6 +146,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("doneCount")
             .textContent = `${doneCount}件`;
+
+          const approvalNeededCount = tasks.filter(
+            task => Number(task.created_by) === Number(currentUserId) &&
+                (task.status === "承認待ち" || task.status === "工数変更承認待ち")
+        ).length;
+
+        const pendingTab = document.querySelector('.task-tab[data-tab="pending"]');
+        if (pendingTab) {
+            let badge = pendingTab.querySelector(".tab-badge");
+            if (approvalNeededCount > 0) {
+                if (!badge) {
+                    badge = document.createElement("span");
+                    badge.className = "tab-badge";
+                    pendingTab.appendChild(badge);
+                }
+                badge.textContent = approvalNeededCount;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
     }
 
 
@@ -178,32 +198,44 @@ document.addEventListener("DOMContentLoaded", () => {
         const assignee = assigneeFilter.value;
 
         return tasks.filter(task => {
-            let matchesTab = false;
+                let matchesTab = false;
 
-            if (activeTab === "pending") {
-                matchesTab = task.status === "承認待ち" || task.status === "工数変更承認待ち";
-            } else if (activeTab === "others") {
-                // ★ 自分以外のタスク（他メンバー ＋ 自分が依頼したタスク）をすべて表示
-                matchesTab = task.category === "others" || task.category === "requested";
-            } else if (activeTab === "mine") {
-                // ★ 「自分のタスク」は進行中と工数変更承認待ちのみ表示する
-                matchesTab = task.category === "mine" &&
-                    (task.status === "進行中" || task.status === "工数変更承認待ち");
-            } else {
-                matchesTab = task.category === activeTab; // "requested" など
-            }
+                if (activeTab === "pending") {
+                    matchesTab = task.status === "承認待ち" || task.status === "工数変更承認待ち";
+                } else if (activeTab === "completed") {
+                    // ★ 上の「完了 〇件」カードと同じく、自分が担当して完了したタスクのみ表示
+                    matchesTab = task.category === "mine" && task.status === "完了";
+                } else if (activeTab === "others") {
+                    // ★ 未完了の他メンバー・依頼タスクを表示
+                    matchesTab = (task.category === "others" || task.category === "requested") &&
+                        task.status !== "完了";
+                } else if (activeTab === "mine") {
+                    // ★ 「自分のタスク」は進行中と工数変更承認待ちのみ表示
+                    matchesTab = task.category === "mine" &&
+                        (task.status === "進行中" || task.status === "工数変更承認待ち");
+                } else {
+                    matchesTab = task.category === activeTab && task.status !== "完了";
+                }
 
+                const taskName = (task.name || "").toLowerCase();
+                const matchesKeyword = taskName.includes(keyword);
 
-            const taskName = (task.name || "").toLowerCase();
-            const matchesKeyword = taskName.includes(keyword);
+                const matchesAssignee =
+                    !assignee || task.assignee === assignee;
 
-            const matchesAssignee =
-                !assignee || task.assignee === assignee;
+                return matchesTab &&
+                    matchesKeyword &&
+                    matchesAssignee;
+            })
+            .sort((a, b) => {
+                // 期限が未設定のものは一番下へ配置
+                if (!a.dueDate && !b.dueDate) return 0;
+                if (!a.dueDate) return 1;
+                if (!b.dueDate) return -1;
 
-            return matchesTab &&
-                matchesKeyword &&
-                matchesAssignee;
-        });
+                // 期限が近い（早い）順に並び替え
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
     }
 
     /* ========================================
@@ -241,12 +273,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     task.status
                 ];
 
-                cells.forEach((value, index) => {
+                   cells.forEach((value, index) => {
                     const cell = document.createElement("td");
-                    cell.textContent = value || "";
 
                     if (index === 0) {
                         cell.classList.add("task-name");
+                        cell.textContent = value || "";
+                    } else if (index === 2) {
+                        // ★ 期限列（index === 2）の色分け判定
+                        cell.textContent = value || "";
+                        const dueClass = getDueDateClass(task.dueDate, task.status);
+                        if (dueClass) {
+                            cell.classList.add(dueClass);
+                        }
+                    } else if (index === 3) {
+                        const badge = document.createElement("span");
+                        badge.className = `status-badge ${getStatusBadgeClass(value)}`;
+                        badge.textContent = value || "";
+                        cell.appendChild(badge);
+                    } else {
+                        cell.textContent = value || "";
                     }
 
                     row.appendChild(cell);
@@ -266,6 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tableBody.appendChild(row);
             });
         }
+
 
         document.getElementById("taskResultCount")
             .textContent = `${filteredTasks.length}件を表示中`;
@@ -329,6 +376,39 @@ document.addEventListener("DOMContentLoaded", () => {
             default: return status || "未着手";
         }
     }
+     function getStatusBadgeClass(statusText) {
+        switch (statusText) {
+            case "進行中": return "status-progress";
+            case "承認待ち":
+            case "工数変更承認待ち":
+                return "status-pending";
+            case "完了": return "status-done";
+            default: return "status-default";
+        }
+    }
+
+        // ★ 期限切れ・間近（3日以内）のクラス判定
+    function getDueDateClass(dueDateStr, statusText) {
+        if (!dueDateStr || statusText === "完了") return "";
+
+        const due = new Date(dueDateStr);
+        if (isNaN(due.getTime())) return "";
+
+        // 時刻を 00:00:00 に揃えて日数差を計算
+        due.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const diffDays = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) {
+            return "due-overdue"; // 期限切れ
+        } else if (diffDays <= 3) {
+            return "due-soon"; // 3日以内
+        }
+        return "";
+    }
+
 
 
     /* ========================================
@@ -358,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ★ 「承認待ち」または「工数変更承認待ち」かつ「依頼者本人」のときだけ承認ボタンを表示
         const approveButton = document.getElementById("approveTaskButton");
         if (approveButton) {
-            const isRequester = task && Number(task.created_by) === Number(currentUserId);
+            const isRequester = activeTab !== "others" && task && Number(task.created_by) === Number(currentUserId);
             const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
             approveButton.style.display = (isPendingStatus && isRequester)
                 ? "inline-block"
@@ -370,10 +450,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 approveButton.textContent = "承認する（ポイント付与）";
             }
         }
-         // ★ 差し戻しボタンの表示制御を追加
+
+        // ★ 差し戻しボタンの表示制御を追加（他メンバータブは除外）
         const rejectButton = document.getElementById("rejectTaskButton");
         if (rejectButton) {
-            const isRequester = task && Number(task.created_by) === Number(currentUserId);
+            const isRequester = activeTab !== "others" && task && Number(task.created_by) === Number(currentUserId);
             const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
             rejectButton.style.display = (isPendingStatus && isRequester)
                 ? "inline-block"
@@ -431,6 +512,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const item = document.createElement("div");
             item.className = "task-detail-item";
 
+             if (label === "完了報告" || label === "工数変更申請") {
+                item.classList.add("is-wide");
+            } else if (label === "前回差し戻し理由") {
+                item.classList.add("is-wide", "is-reject");
+            }
+
             const labelElement = document.createElement("p");
             labelElement.textContent = label;
 
@@ -459,9 +546,18 @@ document.addEventListener("DOMContentLoaded", () => {
        タブ切り替え
     ======================================== */
 
+       // ★ 「完了 3件」のカード全体（.task-summary-card）を確実に取得する
+    const doneCountEl = document.getElementById("doneCount");
+    const doneCard = doneCountEl ? doneCountEl.closest(".task-summary-card") : null;
+
+
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
             activeTab = tab.dataset.tab;
+
+            if (doneCard) {
+                doneCard.classList.remove("active");
+            }
 
             tabs.forEach(item => {
                 const active = item === tab;
@@ -472,6 +568,22 @@ document.addEventListener("DOMContentLoaded", () => {
             renderTasks();
         });
     });
+
+    if (doneCard) {
+        doneCard.classList.add("is-clickable");
+        doneCard.title = "クリックして完了済みタスクを表示";
+        doneCard.addEventListener("click", () => {
+            tabs.forEach(t => {
+                t.classList.remove("active");
+                t.setAttribute("aria-selected", "false");
+            });
+            doneCard.classList.add("active");
+            activeTab = "completed";
+            selectedTaskId = null;
+            renderTasks();
+        });
+    }
+
 
     /* ========================================
        検索・絞り込み
