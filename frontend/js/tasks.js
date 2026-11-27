@@ -435,10 +435,10 @@ document.addEventListener("DOMContentLoaded", () => {
             !task || !isAssignee || task.status === "完了" ||
             task.status === "承認待ち" || task.status === "工数変更承認待ち";
 
-        // ★ 「承認待ち」または「工数変更承認待ち」かつ「依頼者本人」のときだけ承認ボタンを表示
+        // ★ 「承認待ち」タブを開いていて、かつ「承認待ち・工数変更承認待ち」＆「承認者本人」のときだけ承認ボタンを表示
         const approveButton = document.getElementById("approveTaskButton");
         if (approveButton) {
-            const isRequester = activeTab !== "others" && task && Number(task.created_by) === Number(currentUserId);
+            const isRequester = activeTab === "pending" && task && Number(task.created_by) === Number(currentUserId);
             const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
             approveButton.style.display = (isPendingStatus && isRequester)
                 ? "inline-block"
@@ -451,10 +451,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // ★ 差し戻しボタンの表示制御を追加（他メンバータブは除外）
+        // ★ 差し戻しボタンの表示制御（「承認待ち」タブの時だけ表示）
         const rejectButton = document.getElementById("rejectTaskButton");
         if (rejectButton) {
-            const isRequester = activeTab !== "others" && task && Number(task.created_by) === Number(currentUserId);
+            const isRequester = activeTab === "pending" && task && Number(task.created_by) === Number(currentUserId);
             const isPendingStatus = task && (task.status === "承認待ち" || task.status === "工数変更承認待ち");
             rejectButton.style.display = (isPendingStatus && isRequester)
                 ? "inline-block"

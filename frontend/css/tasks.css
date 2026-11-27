@@ -612,3 +612,135 @@
     background: #f4f9ff;
 }
 
+/* ========================================
+   目が悪い人にも見やすい大きめサイズ・高コントラスト調整
+======================================== */
+
+.task-summary-card p {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+}
+
+.task-tab {
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    padding: 13px 22px !important;
+}
+
+.task-search input,
+.task-filters .form-select {
+    font-size: 16px !important;
+    color: #0f172a !important;
+}
+
+.task-table thead th {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.task-table tbody td,
+.task-table .task-name {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+}
+
+.status-badge {
+    font-size: 14px !important;
+    padding: 6px 14px !important;
+}
+
+.task-panel-footer {
+    font-size: 15px !important;
+    color: #334155 !important;
+}
+
+.task-panel-footer a {
+    font-size: 16px !important;
+}
+
+.task-detail-panel h2 {
+    font-size: 22px !important;
+    color: #0f172a !important;
+}
+
+.task-detail-name {
+    font-size: 22px !important;
+    color: #0f172a !important;
+}
+
+.task-detail-item p {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+}
+
+.task-detail-item strong {
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.task-detail-actions .btn {
+    font-size: 16px !important;
+    min-height: 48px !important;
+    padding: 10px 22px !important;
+}
+
+.task-modal .form-label {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.task-modal .form-control {
+    font-size: 16px !important;
+    color: #0f172a !important;
+}
+
+/* ========================================
+   状態バッジ（承認待ち・進行中・完了）の視認性強化
+======================================== */
+
+.status-badge {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    display: inline-block !important;
+}
+
+/* 承認待ち（オレンジ系：文字を濃い茶オレンジにしてくっきり表示） */
+.status-pending,
+.status-waiting,
+.badge-pending,
+.status-badge[data-status="pending"] {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #f59e0b !important;
+}
+
+/* 進行中（青系） */
+.status-assigned,
+.status-in-progress,
+.badge-progress {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    border: 1px solid #3b82f6 !important;
+}
+
+/* 完了（緑系） */
+.status-completed,
+.status-done,
+.badge-completed {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #22c55e !important;
+}
+
+

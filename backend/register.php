@@ -192,15 +192,17 @@ try {
 
 
 
-    $sql = "INSERT INTO system_settings
-            (id)
+    $sql = "INSERT IGNORE INTO settings
+            (group_id, shift_types, work_types)
             VALUES
-            (:user_id)";
+            (:group_id, :shift_types, :work_types)";
 
     $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
-        ':user_id' => $new_user_id
+        ':group_id' => $new_group_id,
+        ':shift_types' => json_encode(['通常出勤', '在宅勤務', '午前休', '有給休暇', '休日'], JSON_UNESCAPED_UNICODE),
+        ':work_types' => json_encode(['通常勤務', 'リモート'], JSON_UNESCAPED_UNICODE)
     ]);
 
     /*
