@@ -1,37 +1,25 @@
 /* ========================================
    Tasfina ガントチャート
-   週間表示・PHP連携・タスク詳細
-   担当者別3色色分け対応版
+   週間表示・担当者別色分け・絞り込み対応版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    "use strict";
+
     /* =====================================
-       API設定
+       API・モーダルの設定
     ===================================== */
 
     const API_URL = "../../backend/natume_api.php";
+
     const USERS_API_URL = "../../backend/api_users.php";
+
     const MODAL_URL = "../modals/gantt-task-detail.html";
 
-    /* =====================================
-       状態管理
-    ===================================== */
-
-    let currentDate = new Date();
-
-    let tasks = [];
-    let users = [];
-
-    // ログイン中のユーザーID
-    let currentUserId = null;
-
-    let requestId = 0;
-    let isLoading = false;
-    let errorMessage = "";
 
     /* =====================================
-       HTML要素取得
+       HTML要素の取得
     ===================================== */
 
     const chart =
@@ -39,15 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const periodLabel =
         document.getElementById("currentPeriod");
-
-    const taskCount =
-        document.getElementById("ganttTaskCount");
-
-    const loadingLabel =
-        document.getElementById("ganttLoading");
-
-    const errorArea =
-        document.getElementById("ganttError");
 
     const prevButton =
         document.getElementById("prevPeriod");
@@ -58,26 +37,98 @@ document.addEventListener("DOMContentLoaded", () => {
     const todayButton =
         document.getElementById("todayButton");
 
+    const taskCount =
+        document.getElementById("ganttTaskCount");
+
+    const loadingLabel =
+        document.getElementById("ganttLoading");
+
+    const errorArea =
+        document.getElementById("ganttError");
+
     const modalContainer =
         document.getElementById("ganttTaskDetailContainer");
 
-    if (!chart || !periodLabel) {
+
+    /* =====================================
+       絞り込み関連のHTML要素
+    ===================================== */
+
+    const assigneeFilter =
+        document.getElementById("assigneeFilter");
+
+    const assigneeUserOptions =
+        document.getElementById("assigneeUserOptions");
+
+    const statusFilter =
+        document.getElementById("statusFilter");
+
+    const resetFiltersButton =
+        document.getElementById("resetFiltersButton");
+
+    const filterMessage =
+        document.getElementById("ganttFilterMessage");
+
+
+    /* =====================================
+       必須要素の確認
+    ===================================== */
+
+    if (
+        !chart ||
+        !periodLabel ||
+        !assigneeFilter ||
+        !assigneeUserOptions ||
+        !statusFilter ||
+        !resetFiltersButton
+    ) {
 
         console.error(
-            "ガントチャートの要素が見つかりません。"
+            "ガントチャートに必要なHTML要素がありません。"
         );
 
         return;
+
     }
 
 
     /* =====================================
-       日付解析
+       状態管理
+    ===================================== */
+
+    let currentDate = new Date();
+
+    let tasks = [];
+
+    let users = [];
+
+    let currentUserId = null;
+
+    let requestId = 0;
+
+    let isLoading = false;
+
+    let errorMessage = "";
+
+    let modalLoadingPromise = null;
+
+
+    /* =====================================
+       絞り込み条件
+    ===================================== */
+
+    let selectedAssignee = "all";
+
+    let selectedStatus = "all";
+
+
+    /* =====================================
+       日付変換
     ===================================== */
 
     function parseDate(value) {
 
-        if (value === null || value === undefined) {
+        if (!value) {
             return null;
         }
 
@@ -87,17 +138,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 return null;
             }
 
-            return new Date(
-                value.getFullYear(),
-                value.getMonth(),
-                value.getDate()
-            );
+            const date = new Date(value);
+
+            date.setHours(0, 0, 0, 0);
+
+            return date;
+
         }
 
         const text = String(value).trim();
 
         const match = text.match(
-            /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/
+            /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:$|[T\s])/
         );
 
         if (!match) {
@@ -105,7 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const year = Number(match[1]);
+
         const month = Number(match[2]);
+
         const day = Number(match[3]);
 
         const date = new Date(
@@ -119,46 +173,65 @@ document.addEventListener("DOMContentLoaded", () => {
             date.getMonth() !== month - 1 ||
             date.getDate() !== day
         ) {
+
             return null;
+
         }
 
+        date.setHours(0, 0, 0, 0);
+
         return date;
+
     }
 
 
     /* =====================================
-       日付操作
+       日付の加算
     ===================================== */
 
-    function addDays(date, amount) {
+    function addDays(date, days) {
 
         const result = new Date(date);
 
         result.setDate(
-            result.getDate() + amount
+            result.getDate() + days
         );
 
+        result.setHours(0, 0, 0, 0);
+
         return result;
+
     }
 
-    function dayDiff(first, second) {
+
+    /* =====================================
+       日付の差分
+    ===================================== */
+
+    function dayDiff(start, end) {
 
         const a = Date.UTC(
-            first.getFullYear(),
-            first.getMonth(),
-            first.getDate()
+            start.getFullYear(),
+            start.getMonth(),
+            start.getDate()
         );
 
         const b = Date.UTC(
-            second.getFullYear(),
-            second.getMonth(),
-            second.getDate()
+            end.getFullYear(),
+            end.getMonth(),
+            end.getDate()
         );
 
         return Math.round(
             (b - a) / 86400000
         );
+
     }
+
+
+    /* =====================================
+       日付の表示形式
+    ===================================== */
 
     function formatDate(date) {
 
@@ -167,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         return [
+
             date.getFullYear(),
 
             String(
@@ -178,22 +252,19 @@ document.addEventListener("DOMContentLoaded", () => {
             ).padStart(2, "0")
 
         ].join("/");
+
     }
+
+
+    /* =====================================
+       API送信用の日付形式
+    ===================================== */
 
     function formatDateForAPI(date) {
 
-        return [
-            date.getFullYear(),
+        return formatDate(date)
+            .replaceAll("/", "-");
 
-            String(
-                date.getMonth() + 1
-            ).padStart(2, "0"),
-
-            String(
-                date.getDate()
-            ).padStart(2, "0")
-
-        ].join("-");
     }
 
 
@@ -204,16 +275,25 @@ document.addEventListener("DOMContentLoaded", () => {
     function escapeHTML(value) {
 
         return String(value ?? "").replace(
+
             /[&<>"']/g,
 
             char => ({
+
                 "&": "&amp;",
+
                 "<": "&lt;",
+
                 ">": "&gt;",
+
                 '"': "&quot;",
+
                 "'": "&#39;"
+
             })[char]
+
         );
+
     }
 
 
@@ -223,7 +303,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getWeekRange() {
 
-        // 時刻を00:00:00に統一
         const baseDate = parseDate(currentDate);
 
         const mondayOffset =
@@ -235,16 +314,54 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         return {
+
             start,
+
             end: addDays(start, 6),
+
             count: 7,
+
             width: 120
+
         };
+
     }
 
 
     /* =====================================
-       タスクデータ変換
+       ユーザーIDの正規化
+    ===================================== */
+
+    function normalizeUserId(value) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            String(value).trim() === ""
+        ) {
+
+            return null;
+
+        }
+
+        const id = Number(value);
+
+        if (
+            !Number.isSafeInteger(id) ||
+            id <= 0
+        ) {
+
+            return null;
+
+        }
+
+        return String(id);
+
+    }
+
+
+    /* =====================================
+       タスクデータの変換
     ===================================== */
 
     function normalizeTask(task, index) {
@@ -257,17 +374,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 index + 1,
 
             name: String(
+
                 task.title ??
                 task.task_name ??
                 task.name ??
                 `タスク ${index + 1}`
+
             ),
 
             description:
                 task.description ?? "",
 
             assignedUserId:
-                task.assigned_user_id ?? null,
+                normalizeUserId(
+                    task.assigned_user_id
+                ),
 
             priority:
                 task.priority ?? null,
@@ -285,15 +406,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 task.calculated_burden_pts ?? null,
 
             start: parseDate(
+
                 task.start_date ??
                 task.created_at ??
                 task.start
+
             ),
 
             end: parseDate(
+
                 task.end_date ??
                 task.due_date ??
                 task.end
+
             ),
 
             status: String(
@@ -301,59 +426,98 @@ document.addEventListener("DOMContentLoaded", () => {
             ).trim()
 
         };
+
     }
 
 
     /* =====================================
-       完了判定
+       完了済みタスクの判定
     ===================================== */
 
     function isCompletedTask(task) {
 
-        const status =
-            String(task.status ?? "")
-                .trim()
-                .toLowerCase();
+        const status = String(
+            task.status ?? ""
+        ).trim().toLowerCase();
 
         return [
+
             "completed",
+
             "done",
+
             "closed",
-            "完了"
+
+            "完了",
+
+            "完了済み"
+
         ].includes(status);
+
     }
 
 
     /* =====================================
-       自分のタスクかどうか判定
+       自分のタスクの判定
     ===================================== */
 
     function isMyTask(task) {
 
         if (
             currentUserId === null ||
-            currentUserId === undefined ||
-            task.assignedUserId === null ||
-            task.assignedUserId === undefined ||
-            task.assignedUserId === ""
+            task.assignedUserId === null
         ) {
+
             return false;
+
         }
 
         return (
             String(task.assignedUserId) ===
             String(currentUserId)
         );
+
     }
 
 
     /* =====================================
-       タスクの色分け判定
+       担当者未設定の判定
+    ===================================== */
+
+    function isUnassignedTask(task) {
+
+        return task.assignedUserId === null;
+
+    }
+
+
+    /* =====================================
+       他の人のタスクの判定
+    ===================================== */
+
+    function isOtherTask(task) {
+
+        return (
+
+            currentUserId !== null &&
+
+            !isUnassignedTask(task) &&
+
+            !isMyTask(task)
+
+        );
+
+    }
+
+
+    /* =====================================
+       タスクの色分け
     ===================================== */
 
     function getTaskColorClass(task) {
 
-        // 最優先：完了済み
+        // 完了済みを最優先
+
         if (isCompletedTask(task)) {
 
             return "is-completed";
@@ -361,6 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // 自分の未完了タスク
+
         if (isMyTask(task)) {
 
             return "is-mine";
@@ -368,12 +533,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // その他の未完了タスク
+
         return "is-other";
+
     }
 
 
     /* =====================================
-       色分けの説明取得
+       タスク色分けの説明
     ===================================== */
 
     function getTaskColorLabel(task) {
@@ -390,43 +557,329 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        if (
-            task.assignedUserId === null ||
-            task.assignedUserId === undefined ||
-            task.assignedUserId === ""
-        ) {
+        if (isUnassignedTask(task)) {
 
             return "担当者未設定の未完了タスク";
 
         }
 
         return "他の人の未完了タスク";
+
     }
 
 
     /* =====================================
-       表示期間との重複判定
+       ステータスの表示形式
     ===================================== */
 
-    function isTaskInRange(task, range) {
+    function formatStatus(status) {
 
-        if (!task.start || !task.end) {
-            return false;
-        }
+        const value = String(
+            status ?? ""
+        ).trim().toLowerCase();
 
-        if (task.start > task.end) {
-            return false;
-        }
+        const statusMap = {
 
-        return (
-            task.start <= range.end &&
-            task.end >= range.start
-        );
+            assigned: "未着手",
+
+            not_started: "未着手",
+
+            todo: "未着手",
+
+            in_progress: "進行中",
+
+            pending: "承認待ち",
+
+            pending_approval: "承認待ち",
+
+            completed: "完了済み",
+
+            done: "完了済み",
+
+            closed: "完了済み",
+
+            rejected: "差し戻し",
+
+            "完了": "完了済み"
+
+        };
+
+        return Object.hasOwn(
+            statusMap,
+            value
+        )
+
+            ? statusMap[value]
+
+            : (status || "未設定");
+
     }
 
 
     /* =====================================
-       担当者一覧取得
+       優先度の表示形式
+    ===================================== */
+
+    function formatPriority(priority) {
+
+        if (
+            priority === null ||
+            priority === undefined ||
+            priority === ""
+        ) {
+
+            return "未設定";
+
+        }
+
+        const value = String(
+            priority
+        ).trim().toLowerCase();
+
+        const priorityMap = {
+
+            high: "高",
+
+            medium: "中",
+
+            normal: "中",
+
+            low: "低"
+
+        };
+
+        return Object.hasOwn(
+            priorityMap,
+            value
+        )
+
+            ? priorityMap[value]
+
+            : String(priority);
+
+    }
+
+
+    /* =====================================
+       担当者名の取得
+    ===================================== */
+
+    function getAssigneeName(userId) {
+
+        const id = normalizeUserId(userId);
+
+        if (id === null) {
+
+            return "担当者未設定";
+
+        }
+
+        const user = users.find(
+            item => item.id === id
+        );
+
+        if (user) {
+
+            return user.name;
+
+        }
+
+        if (
+            currentUserId !== null &&
+            id === String(currentUserId)
+        ) {
+
+            return "自分";
+
+        }
+
+        return `ユーザーID：${id}`;
+
+    }
+
+
+    /* =====================================
+       担当者名の表示
+    ===================================== */
+
+    function getAssigneeDisplayName(task) {
+
+        const name = getAssigneeName(
+            task.assignedUserId
+        );
+
+        if (
+            isMyTask(task) &&
+            name !== "自分"
+        ) {
+
+            return `${name}（自分）`;
+
+        }
+
+        return name;
+
+    }
+
+
+    /* =====================================
+       フィルターメッセージ
+    ===================================== */
+
+    function showFilterMessage(message = "") {
+
+        if (!filterMessage) {
+            return;
+        }
+
+        filterMessage.textContent = message;
+
+        filterMessage.hidden = !message;
+
+    }
+
+
+    /* =====================================
+       担当者フィルターの選択肢生成
+    ===================================== */
+
+    function renderAssigneeOptions() {
+
+        const previousValue = selectedAssignee;
+
+        const userMap = new Map();
+
+
+        /* APIから取得した担当者 */
+
+        users.forEach(user => {
+
+            userMap.set(
+                user.id,
+                user.name
+            );
+
+        });
+
+
+        /*
+         * タスクに担当者IDが存在する場合、
+         * ユーザー一覧にない担当者も補完する。
+         */
+
+        tasks.forEach(task => {
+
+            const id = task.assignedUserId;
+
+            if (
+                id !== null &&
+                !userMap.has(id)
+            ) {
+
+                userMap.set(
+                    id,
+                    getAssigneeName(id)
+                );
+
+            }
+
+        });
+
+
+        /*
+         * 選択中の担当者が別の週に存在しなくても
+         * 絞り込み条件を維持する。
+         */
+
+        if (previousValue.startsWith("user:")) {
+
+            const id = normalizeUserId(
+                previousValue.slice(5)
+            );
+
+            if (
+                id !== null &&
+                !userMap.has(id)
+            ) {
+
+                userMap.set(
+                    id,
+                    getAssigneeName(id)
+                );
+
+            }
+
+        }
+
+
+        /* 選択肢の初期化 */
+
+        assigneeUserOptions.replaceChildren();
+
+
+        /* 名前順に並び替え */
+
+        const sortedUsers = Array.from(
+            userMap.entries()
+        ).sort((a, b) =>
+
+            a[1].localeCompare(
+                b[1],
+                "ja",
+                { numeric: true }
+            ) ||
+
+            Number(a[0]) - Number(b[0])
+
+        );
+
+
+        /* 選択肢の追加 */
+
+        sortedUsers.forEach(([id, name]) => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = `user:${id}`;
+
+            const isCurrentUser =
+                currentUserId !== null &&
+                id === String(currentUserId);
+
+            option.textContent =
+                isCurrentUser && name !== "自分"
+
+                    ? `${name}（自分）`
+
+                    : name;
+
+            assigneeUserOptions.appendChild(
+                option
+            );
+
+        });
+
+
+        /* 絞り込み条件を復元 */
+
+        assigneeFilter.value = previousValue;
+
+        if (
+            assigneeFilter.value !== previousValue
+        ) {
+
+            selectedAssignee = "all";
+
+            assigneeFilter.value = "all";
+
+        }
+
+    }
+
+
+    /* =====================================
+       担当者一覧の取得
     ===================================== */
 
     async function loadUsers() {
@@ -434,371 +887,394 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             const response = await fetch(
+
                 USERS_API_URL,
+
                 {
+
+                    method: "GET",
+
                     credentials: "same-origin",
-                    cache: "no-store"
+
+                    cache: "no-store",
+
+                    headers: {
+
+                        "Accept": "application/json"
+
+                    }
+
                 }
+
             );
 
             if (!response.ok) {
 
                 throw new Error(
-                    "担当者一覧の取得に失敗しました"
+                    `担当者取得エラー：${response.status}`
                 );
+
             }
 
-            const result =
-                await response.json();
+            const result = await response.json();
 
-            users = Array.isArray(result)
-                ? result
-                : Array.isArray(result.users)
-                    ? result.users
-                    : [];
+            if (!Array.isArray(result.users)) {
+
+                throw new Error(
+                    "担当者データの形式が正しくありません。"
+                );
+
+            }
+
+
+            /* ユーザーデータの変換 */
+
+            users = result.users.map(user => ({
+
+                id: normalizeUserId(
+                    user.id ?? user.user_id
+                ),
+
+                name: String(
+
+                    user.name ??
+                    user.display_name ??
+                    "名前未設定"
+
+                )
+
+            })).filter(user =>
+
+                user.id !== null
+
+            );
+
+
+            /* 担当者選択欄の更新 */
+
+            renderAssigneeOptions();
+
+            showFilterMessage("");
+
+            renderChart();
 
         } catch (error) {
 
             console.error(
-                "担当者取得エラー:",
+                "担当者一覧の取得エラー：",
                 error
             );
 
-            users = [];
+            showFilterMessage(
+
+                "担当者一覧を取得できませんでした。" +
+
+                "取得済みのタスクから担当者IDを表示します。"
+
+            );
+
+            renderAssigneeOptions();
+
+            renderChart();
+
         }
+
     }
 
 
     /* =====================================
-       担当者名取得
+       タスクが表示期間内にあるか判定
     ===================================== */
 
-    function getAssigneeName(userId) {
+    function isTaskInRange(task, range) {
 
         if (
-            userId === null ||
-            userId === undefined ||
-            userId === ""
+            !task.start ||
+            !task.end
         ) {
-            return "未設定";
+
+            return false;
+
         }
 
-        const user = users.find(
-            item =>
-                String(item.id ?? item.user_id) ===
-                String(userId)
-        );
+        if (task.start > task.end) {
+
+            return false;
+
+        }
 
         return (
-            user?.name ??
-            user?.display_name ??
-            "担当者情報を取得できません"
+
+            task.start <= range.end &&
+
+            task.end >= range.start
+
         );
+
     }
 
 
     /* =====================================
-       難易度・不快度の表示
+       担当者フィルターの判定
     ===================================== */
 
-    function formatLevel(value) {
+    function matchesAssigneeFilter(task) {
 
-        if (
-            value === null ||
-            value === undefined ||
-            value === ""
-        ) {
-            return "未設定";
+        switch (selectedAssignee) {
+
+            /* すべての担当者 */
+
+            case "all":
+
+                return true;
+
+
+            /* 自分のタスクのみ */
+
+            case "mine":
+
+                return isMyTask(task);
+
+
+            /* 他の人のタスクのみ */
+
+            case "others":
+
+                return isOtherTask(task);
+
+
+            /* 担当者未設定 */
+
+            case "unassigned":
+
+                return isUnassignedTask(task);
+
+
+            /* 特定の担当者 */
+
+            default:
+
+                if (
+                    selectedAssignee.startsWith("user:")
+                ) {
+
+                    const userId = normalizeUserId(
+
+                        selectedAssignee.slice(5)
+
+                    );
+
+                    return (
+
+                        userId !== null &&
+
+                        task.assignedUserId === userId
+
+                    );
+
+                }
+
+                return true;
+
         }
 
-        const number = Number(value);
-
-        if (!Number.isFinite(number)) {
-            return String(value);
-        }
-
-        const labels = {
-            1: "低",
-            2: "やや低",
-            3: "中",
-            4: "やや高",
-            5: "高"
-        };
-
-        const label = labels[number];
-
-        return label
-            ? `${number}（${label}）`
-            : String(value);
     }
 
 
     /* =====================================
-       ステータス表示
+       タスク状態フィルターの判定
     ===================================== */
 
-    function formatStatus(status) {
+    function matchesStatusFilter(task) {
 
-        const statuses = {
+        switch (selectedStatus) {
 
-            assigned: "未着手",
+            /* すべての状態 */
 
-            not_started: "未着手",
+            case "all":
 
-            in_progress: "進行中",
+                return true;
 
-            pending: "承認待ち",
 
-            completed: "完了",
+            /* 未完了のみ */
 
-            done: "完了",
+            case "incomplete":
 
-            closed: "完了",
+                return !isCompletedTask(task);
 
-            rejected: "差し戻し"
 
-        };
+            /* 完了済みのみ */
 
-        const normalized =
-            String(status ?? "")
-                .trim()
-                .toLowerCase();
+            case "completed":
+
+                return isCompletedTask(task);
+
+
+            default:
+
+                return true;
+
+        }
+
+    }
+
+
+    /* =====================================
+       絞り込み条件を組み合わせる
+    ===================================== */
+
+    function matchesFilters(task) {
 
         return (
-            statuses[normalized] ||
-            status ||
-            "未設定"
+
+            matchesAssigneeFilter(task) &&
+
+            matchesStatusFilter(task)
+
         );
+
     }
 
 
     /* =====================================
-       モーダルHTML読み込み
+       絞り込みが有効か判定
     ===================================== */
 
-    async function loadDetailModal() {
+    function hasActiveFilters() {
 
-        if (!modalContainer) {
+        return (
 
-            throw new Error(
-                "モーダルの配置先がありません"
-            );
-        }
+            selectedAssignee !== "all" ||
 
-        const response = await fetch(
-            MODAL_URL,
-            {
-                credentials: "same-origin"
-            }
+            selectedStatus !== "all"
+
         );
 
-        if (!response.ok) {
-
-            throw new Error(
-                `モーダルの読み込みに失敗しました: ${response.status}`
-            );
-        }
-
-        modalContainer.innerHTML =
-            await response.text();
-
-        if (
-            !document.getElementById(
-                "ganttTaskDetailModal"
-            )
-        ) {
-
-            throw new Error(
-                "モーダルのHTMLが正しくありません"
-            );
-        }
     }
 
 
     /* =====================================
-       モーダル内の値を設定
+       絞り込み解除ボタンの状態
     ===================================== */
 
-    function setDetailText(id, value) {
+    function updateFilterControls() {
 
-        const element =
-            document.getElementById(id);
+        resetFiltersButton.disabled =
+            !hasActiveFilters();
 
-        if (!element) {
-            return;
-        }
-
-        element.textContent =
-            value === null ||
-            value === undefined ||
-            value === ""
-                ? "未設定"
-                : String(value);
     }
 
 
     /* =====================================
-       タスク詳細モーダル表示
+       担当者フィルターの変更
     ===================================== */
 
-    function openTaskDetail(task) {
+    assigneeFilter.addEventListener(
 
-        const modalElement =
-            document.getElementById(
-                "ganttTaskDetailModal"
-            );
+        "change",
 
-        if (
-            !modalElement ||
-            !window.bootstrap?.Modal
-        ) {
+        () => {
 
-            console.error(
-                "タスク詳細モーダルが利用できません"
-            );
+            selectedAssignee =
+                assigneeFilter.value;
 
-            return;
+            updateFilterControls();
+
+            renderChart();
+
         }
 
-        setDetailText(
-            "detailTaskTitle",
-            task.name
-        );
+    );
 
-        setDetailText(
-            "detailTaskDescription",
-            task.description ||
-            "説明は登録されていません"
-        );
 
-        setDetailText(
-            "detailTaskAssignee",
-            getAssigneeName(task.assignedUserId)
-        );
+    /* =====================================
+       タスク状態フィルターの変更
+    ===================================== */
 
-        setDetailText(
-            "detailTaskPriority",
-            task.priority ?? "未設定"
-        );
+    statusFilter.addEventListener(
 
-        setDetailText(
-            "detailTaskStatus",
-            formatStatus(task.status)
-        );
+        "change",
 
-        setDetailText(
-            "detailTaskDifficulty",
-            formatLevel(task.difficultyLevel)
-        );
+        () => {
 
-        setDetailText(
-            "detailTaskDiscomfort",
-            formatLevel(task.discomfortLevel)
-        );
+            selectedStatus =
+                statusFilter.value;
 
-        setDetailText(
-            "detailTaskStartDate",
-            formatDate(task.start)
-        );
+            updateFilterControls();
 
-        setDetailText(
-            "detailTaskDueDate",
-            formatDate(task.end)
-        );
+            renderChart();
 
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
+        }
 
-        modal.show();
+    );
+
+
+    /* =====================================
+       絞り込み解除
+    ===================================== */
+
+    function resetFilters() {
+
+        selectedAssignee = "all";
+
+        selectedStatus = "all";
+
+        assigneeFilter.value = "all";
+
+        statusFilter.value = "all";
+
+        updateFilterControls();
+
+        renderChart();
+
     }
 
 
     /* =====================================
-       タスクバークリック
+       絞り込み解除ボタン
     ===================================== */
 
-    chart.addEventListener("click", event => {
+    resetFiltersButton.addEventListener(
 
-        const bar =
-            event.target.closest(".gantt-task-bar");
+        "click",
 
-        if (!bar || !chart.contains(bar)) {
-            return;
-        }
+        resetFilters
 
-        const taskId = bar.dataset.taskId;
-
-        const task = tasks.find(
-            item =>
-                String(item.id) === String(taskId)
-        );
-
-        if (!task) {
-
-            console.error(
-                "対象タスクが見つかりません:",
-                taskId
-            );
-
-            return;
-        }
-
-        openTaskDetail(task);
-    });
+    );
 
 
     /* =====================================
-       キーボード操作
-    ===================================== */
-
-    chart.addEventListener("keydown", event => {
-
-        if (
-            event.key !== "Enter" &&
-            event.key !== " "
-        ) {
-            return;
-        }
-
-        const bar =
-            event.target.closest(".gantt-task-bar");
-
-        if (!bar) {
-            return;
-        }
-
-        event.preventDefault();
-
-        bar.click();
-    });
-
-
-    /* =====================================
-       PHPからタスク取得
+       タスク情報の取得
     ===================================== */
 
     async function fetchTasks() {
 
-        const currentRequestId = ++requestId;
-
         const range = getWeekRange();
 
-        const before =
-            formatDateForAPI(range.start);
+        const currentRequestId = ++requestId;
 
-        const after =
-            formatDateForAPI(range.end);
 
-        const requestData =
-            new URLSearchParams({
-                before,
-                after
-            });
+        /* APIへ送信する期間 */
+
+        const requestData = new URLSearchParams({
+
+            before: formatDateForAPI(
+                range.start
+            ),
+
+            after: formatDateForAPI(
+                range.end
+            )
+
+        });
+
+
+        /* 読み込み状態 */
 
         isLoading = true;
+
         errorMessage = "";
+
         tasks = [];
 
         renderChart();
@@ -806,8 +1282,11 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             const response = await fetch(
+
                 API_URL,
+
                 {
+
                     method: "POST",
 
                     credentials: "same-origin",
@@ -821,24 +1300,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         "Accept":
                             "application/json"
+
                     },
 
                     body: requestData.toString()
+
                 }
+
             );
 
+
+            /* 古い通信結果を無視する */
+
             if (currentRequestId !== requestId) {
+
                 return;
+
             }
 
-            /* 未ログイン */
+
+            /* 未ログインの場合 */
 
             if (response.status === 401) {
 
                 window.location.href = "login.html";
 
                 return;
+
             }
+
+
+            /* JSONレスポンス取得 */
 
             const responseText =
                 await response.text();
@@ -852,14 +1344,27 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
 
                 console.error(
-                    "PHPレスポンス:",
+                    "PHPレスポンス：",
                     responseText
                 );
 
                 throw new Error(
-                    "PHPから正しいJSON形式の応答がありません"
+                    "PHPから正しいJSON形式の応答がありません。"
                 );
+
             }
+
+
+            /* 古い通信結果を無視する */
+
+            if (currentRequestId !== requestId) {
+
+                return;
+
+            }
+
+
+            /* APIエラーチェック */
 
             if (
                 !response.ok ||
@@ -867,83 +1372,112 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 throw new Error(
+
                     result.comment ||
+
                     result.message ||
-                    `タスク取得エラー: ${response.status}`
+
+                    `タスク取得エラー：${response.status}`
+
                 );
+
             }
+
+
+            /* タスクデータ形式の確認 */
 
             if (!Array.isArray(result.tasks)) {
 
                 throw new Error(
-                    "タスクデータが配列ではありません"
+                    "タスクデータが配列ではありません。"
                 );
-            }
 
-            if (currentRequestId !== requestId) {
-                return;
             }
 
 
-            /* =================================
-               ログイン中のユーザーID取得
-            ================================= */
+            /* ログイン中のユーザーID取得 */
 
-            const userId =
-                Number(result.current_user_id);
+            const userId = normalizeUserId(
+                result.current_user_id
+            );
 
-            if (
-                !Number.isSafeInteger(userId) ||
-                userId <= 0
-            ) {
+            if (userId === null) {
 
                 throw new Error(
-                    "ログイン中のユーザーIDを取得できませんでした"
+                    "ログイン中のユーザーIDを取得できませんでした。"
                 );
+
             }
 
             currentUserId = userId;
 
 
-            /* =================================
-               タスクデータ取得
-            ================================= */
+            /* タスクデータの取得 */
 
-            tasks = result.tasks.map(normalizeTask);
-
-            console.log(
-                "ガントチャート取得成功:",
-                {
-                    currentUserId: currentUserId,
-                    totalTasks: tasks.length,
-                    completedTasks:
-                        tasks.filter(isCompletedTask).length,
-                    myActiveTasks:
-                        tasks.filter(task =>
-                            !isCompletedTask(task) &&
-                            isMyTask(task)
-                        ).length,
-                    otherActiveTasks:
-                        tasks.filter(task =>
-                            !isCompletedTask(task) &&
-                            !isMyTask(task)
-                        ).length
-                }
+            tasks = result.tasks.map(
+                normalizeTask
             );
+
+
+            /* 担当者選択欄の更新 */
+
+            renderAssigneeOptions();
+
+
+            /* 読み込み完了 */
 
             isLoading = false;
 
             renderChart();
 
+            console.log(
+
+                "ガントチャート取得成功：",
+
+                {
+
+                    currentUserId,
+
+                    totalTasks: tasks.length,
+
+                    completedTasks:
+                        tasks.filter(
+                            isCompletedTask
+                        ).length,
+
+                    myTasks:
+                        tasks.filter(
+                            isMyTask
+                        ).length,
+
+                    otherTasks:
+                        tasks.filter(
+                            isOtherTask
+                        ).length,
+
+                    unassignedTasks:
+                        tasks.filter(
+                            isUnassignedTask
+                        ).length
+
+                }
+
+            );
+
         } catch (error) {
 
             if (currentRequestId !== requestId) {
+
                 return;
+
             }
 
             console.error(
-                "ガントチャート取得エラー:",
+
+                "ガントチャート取得エラー：",
+
                 error
+
             );
 
             tasks = [];
@@ -953,16 +1487,20 @@ document.addEventListener("DOMContentLoaded", () => {
             isLoading = false;
 
             errorMessage =
+
                 error.message ||
-                "タスク取得に失敗しました";
+
+                "タスク取得に失敗しました。";
 
             renderChart();
+
         }
+
     }
 
 
     /* =====================================
-       ガントチャート描画
+       ガントチャートの描画
     ===================================== */
 
     function renderChart() {
@@ -972,158 +1510,296 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalWidth =
             range.count * range.width;
 
+
+        /* CSS変数の設定 */
+
         chart.style.setProperty(
+
             "--timeline-width",
+
             `${totalWidth}px`
+
         );
 
         chart.style.setProperty(
+
             "--column-width",
+
             `${range.width}px`
+
         );
+
+
+        /* 表示期間 */
 
         periodLabel.textContent =
-            `${formatDate(range.start)} ～ ${formatDate(range.end)}`;
+
+            `${formatDate(range.start)} ～ ` +
+
+            `${formatDate(range.end)}`;
+
+
+        /* エラー表示 */
 
         if (errorArea) {
 
             errorArea.hidden = !errorMessage;
 
             errorArea.textContent = errorMessage;
+
         }
+
+
+        /* 読み込み表示 */
 
         if (loadingLabel) {
 
             loadingLabel.textContent =
-                isLoading ? "読み込み中..." : "";
+
+                isLoading
+
+                    ? "読み込み中..."
+
+                    : "";
+
         }
 
-        const visibleTasks = tasks.filter(
-            task => isTaskInRange(task, range)
+
+        /* =================================
+           表示期間内の全タスク
+        ================================= */
+
+        const rangeTasks = tasks.filter(
+
+            task => isTaskInRange(
+                task,
+                range
+            )
+
         );
+
+
+        /* =================================
+           絞り込み後のタスク
+        ================================= */
+
+        const visibleTasks = rangeTasks.filter(
+
+            matchesFilters
+
+        );
+
+
+        /* =================================
+           表示件数の更新
+        ================================= */
 
         if (taskCount) {
 
-            taskCount.textContent = isLoading
+            if (isLoading) {
 
-                ? "タスクを読み込み中..."
+                taskCount.textContent =
+                    "タスクを読み込み中...";
 
-                : errorMessage
+            } else if (errorMessage) {
 
-                    ? "タスク取得失敗"
+                taskCount.textContent =
+                    "タスク取得失敗";
 
-                    : `表示中のタスク：${visibleTasks.length}件`;
+            } else {
+
+                taskCount.textContent =
+
+                    `表示中のタスク：${visibleTasks.length}件` +
+
+                    ` / 全${rangeTasks.length}件`;
+
+            }
+
         }
 
+
+        /* =================================
+           曜日
+        ================================= */
+
         const weekdays = [
-            "日", "月", "火", "水",
-            "木", "金", "土"
+
+            "日",
+
+            "月",
+
+            "火",
+
+            "水",
+
+            "木",
+
+            "金",
+
+            "土"
+
         ];
 
+
+        /* =================================
+           ガントチャートヘッダー
+        ================================= */
+
         let html = `
+
             <div class="gantt-row gantt-header">
 
                 <div class="gantt-cell">
-                    タスク名
+
+                    タスク名 / 担当者
+
                 </div>
 
                 <div class="gantt-dates">
+
         `;
 
 
         /* =================================
-           日付ヘッダー
+           日付ヘッダーの生成
         ================================= */
 
-        for (let i = 0; i < range.count; i++) {
+        for (
+            let i = 0;
+            i < range.count;
+            i++
+        ) {
 
-            const date =
-                addDays(range.start, i);
+            const date = addDays(
+                range.start,
+                i
+            );
 
             const day = date.getDay();
 
             const dayClass =
-                day === 0 ? "sunday" :
-                day === 6 ? "saturday" : "";
+
+                day === 0
+
+                    ? "sunday"
+
+                    : day === 6
+
+                        ? "saturday"
+
+                        : "";
 
             const isToday =
-                dayDiff(date, new Date()) === 0;
+
+                dayDiff(
+                    date,
+                    new Date()
+                ) === 0;
 
             html += `
-                <div class="gantt-date ${dayClass} ${isToday ? "today" : ""}">
 
-                    ${date.getMonth() + 1}/${date.getDate()}
+                <div
+                    class="gantt-date ${dayClass} ${isToday ? "today" : ""}"
+                >
 
                     <div>
+
+                        ${date.getMonth() + 1}/${date.getDate()}
+
+                    </div>
+
+                    <div>
+
                         (${weekdays[day]})
+
                     </div>
 
                 </div>
+
             `;
+
         }
 
         html += `
+
                 </div>
+
             </div>
+
         `;
 
 
         /* =================================
-           タスク行
+           タスク行の生成
         ================================= */
 
         visibleTasks.forEach(task => {
 
-            const start = task.start;
+            /* 表示期間に合わせて開始日を調整 */
 
-            const end = task.end;
+            const displayStart =
 
-            if (!start || !end) {
-                return;
-            }
+                task.start < range.start
 
-            const visibleStartDate =
-                start > range.start
-                    ? start
-                    : range.start;
+                    ? range.start
 
-            const visibleEndDate =
-                end < range.end
-                    ? end
-                    : range.end;
+                    : task.start;
 
-            const startOffset =
+
+            /* 表示期間に合わせて終了日を調整 */
+
+            const displayEnd =
+
+                task.end > range.end
+
+                    ? range.end
+
+                    : task.end;
+
+
+            /* バーの開始位置 */
+
+            const startOffset = dayDiff(
+
+                range.start,
+
+                displayStart
+
+            );
+
+
+            /* バーの表示日数 */
+
+            const duration =
+
                 dayDiff(
-                    range.start,
-                    visibleStartDate
-                );
-
-            const visibleDays =
-                dayDiff(
-                    visibleStartDate,
-                    visibleEndDate
+                    displayStart,
+                    displayEnd
                 ) + 1;
 
+
+            /* バーの位置と横幅 */
+
             const left =
-                startOffset * range.width + 6;
+
+                startOffset * range.width + 5;
 
             const width = Math.max(
-                12,
-                visibleDays * range.width - 12
+
+                1,
+
+                duration * range.width - 10
+
             );
 
 
             /* =================================
-               完了判定
+               タスクの状態・色分け
             ================================= */
 
             const isCompleted =
                 isCompletedTask(task);
-
-
-            /* =================================
-               3色の色分け判定
-            ================================= */
 
             const statusClass =
                 getTaskColorClass(task);
@@ -1131,22 +1807,27 @@ document.addEventListener("DOMContentLoaded", () => {
             const colorLabel =
                 getTaskColorLabel(task);
 
+            const assigneeName =
+                getAssigneeDisplayName(task);
+
 
             /* =================================
                ツールチップ
             ================================= */
 
-            const tooltip =
+            const tooltip = [
 
-                `${task.name}\n` +
+                `タスク名：${task.name}`,
 
-                `開始日：${formatDate(start)}\n` +
+                `担当者：${assigneeName}`,
 
-                `終了日：${formatDate(end)}\n` +
+                `状態：${formatStatus(task.status)}`,
 
-                `ステータス：${formatStatus(task.status)}\n` +
+                `開始日：${formatDate(task.start)}`,
 
-                `分類：${colorLabel}`;
+                `終了日：${formatDate(task.end)}`
+
+            ].join("\n");
 
 
             /* =================================
@@ -1156,21 +1837,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const barHTML = `
 
                 <div
-
                     class="gantt-task-bar ${statusClass}"
-
                     data-task-id="${escapeHTML(task.id)}"
-
                     role="button"
-
                     tabindex="0"
-
                     aria-label="${escapeHTML(task.name)}、${escapeHTML(colorLabel)}の詳細を表示"
-
                     style="left:${left}px;width:${width}px;"
-
                     title="${escapeHTML(tooltip)}"
-
                 >
 
                     <span class="gantt-bar-label">
@@ -1189,6 +1862,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ` : ""}
 
                 </div>
+
             `;
 
 
@@ -1202,14 +1876,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <div
                         class="gantt-cell gantt-name"
-                        title="${escapeHTML(task.name)}"
+                        title="${escapeHTML(tooltip)}"
                     >
 
-                        <i class="bi bi-list-task"></i>
+                        <i
+                            class="bi bi-list-task"
+                            aria-hidden="true"
+                        ></i>
 
-                        <span>
-                            ${escapeHTML(task.name)}
-                        </span>
+                        <div class="gantt-name-content">
+
+                            <span class="gantt-task-name">
+
+                                ${escapeHTML(task.name)}
+
+                            </span>
+
+                            <span class="gantt-assignee-name">
+
+                                ${escapeHTML(assigneeName)}
+
+                            </span>
+
+                        </div>
 
                     </div>
 
@@ -1222,33 +1911,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
             `;
+
         });
-
-
-        /* =================================
-           タスクなし
-        ================================= */
-
-        if (
-            visibleTasks.length === 0 &&
-            !isLoading &&
-            !errorMessage
-        ) {
-
-            html += `
-
-                <div class="gantt-empty">
-
-                    <i class="bi bi-calendar-x"></i>
-
-                    <p>
-                        この期間にタスクはありません。
-                    </p>
-
-                </div>
-
-            `;
-        }
 
 
         /* =================================
@@ -1267,99 +1931,714 @@ document.addEventListener("DOMContentLoaded", () => {
                     >
 
                         <span class="visually-hidden">
+
                             読み込み中
+
                         </span>
 
                     </div>
 
                     <p>
+
                         タスクを読み込んでいます...
+
                     </p>
 
                 </div>
 
             `;
+
         }
 
+
+        /* =================================
+           タスク取得失敗
+        ================================= */
+
+        else if (errorMessage) {
+
+            html += `
+
+                <div class="gantt-empty">
+
+                    <i
+                        class="bi bi-exclamation-circle"
+                        aria-hidden="true"
+                    ></i>
+
+                    <p>
+
+                        タスク情報を取得できませんでした。
+
+                    </p>
+
+                    <span class="gantt-empty-description">
+
+                        ページを再読み込みしてください。
+
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =================================
+           この期間にタスクがない場合
+        ================================= */
+
+        else if (rangeTasks.length === 0) {
+
+            html += `
+
+                <div class="gantt-empty">
+
+                    <i
+                        class="bi bi-calendar-x"
+                        aria-hidden="true"
+                    ></i>
+
+                    <p>
+
+                        この期間にタスクはありません。
+
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =================================
+           絞り込み結果が0件の場合
+        ================================= */
+
+        else if (visibleTasks.length === 0) {
+
+            html += `
+
+                <div class="gantt-empty is-filtered">
+
+                    <i
+                        class="bi bi-funnel"
+                        aria-hidden="true"
+                    ></i>
+
+                    <p>
+
+                        絞り込み条件に一致するタスクがありません。
+
+                    </p>
+
+                    <span class="gantt-empty-description">
+
+                        担当者またはタスクの状態を変更してください。
+
+                    </span>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        data-action="reset-filters"
+                    >
+
+                        <i class="bi bi-arrow-counterclockwise"></i>
+
+                        絞り込み解除
+
+                    </button>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =================================
+           HTMLを画面に反映
+        ================================= */
+
         chart.innerHTML = html;
+
+        updateFilterControls();
+
     }
 
 
     /* =====================================
-       画面更新
+       タスク詳細モーダルの読み込み
     ===================================== */
 
-    function updateGantt() {
+    async function loadDetailModal() {
 
-        fetchTasks();
-    }
+        if (!modalContainer) {
 
+            throw new Error(
+                "タスク詳細モーダルの読み込み先がありません。"
+            );
 
-    /* =====================================
-       前週
-    ===================================== */
+        }
 
-    prevButton?.addEventListener("click", () => {
+        const existingModal =
+            document.getElementById(
+                "ganttTaskDetailModal"
+            );
 
-        currentDate = addDays(
-            currentDate,
-            -7
-        );
+        if (existingModal) {
 
-        updateGantt();
-    });
+            return existingModal;
 
-
-    /* =====================================
-       翌週
-    ===================================== */
-
-    nextButton?.addEventListener("click", () => {
-
-        currentDate = addDays(
-            currentDate,
-            7
-        );
-
-        updateGantt();
-    });
+        }
 
 
-    /* =====================================
-       今週
-    ===================================== */
+        /* 重複読み込み防止 */
 
-    todayButton?.addEventListener("click", () => {
+        if (modalLoadingPromise) {
 
-        currentDate = new Date();
+            return modalLoadingPromise;
 
-        updateGantt();
-    });
+        }
 
+        modalLoadingPromise = (async () => {
 
-    /* =====================================
-       初期処理
-    ===================================== */
+            const response = await fetch(
 
-    async function initialize() {
+                MODAL_URL,
+
+                {
+
+                    credentials: "same-origin",
+
+                    cache: "no-store"
+
+                }
+
+            );
+
+            if (!response.ok) {
+
+                throw new Error(
+
+                    `モーダル取得エラー：${response.status}`
+
+                );
+
+            }
+
+            modalContainer.innerHTML =
+                await response.text();
+
+            const modalElement =
+                document.getElementById(
+                    "ganttTaskDetailModal"
+                );
+
+            if (!modalElement) {
+
+                throw new Error(
+                    "タスク詳細モーダルが見つかりません。"
+                );
+
+            }
+
+            return modalElement;
+
+        })();
 
         try {
 
-            await loadDetailModal();
+            return await modalLoadingPromise;
+
+        } finally {
+
+            modalLoadingPromise = null;
+
+        }
+
+    }
+
+
+    /* =====================================
+       モーダル内のテキスト設定
+    ===================================== */
+
+    function setDetailText(id, value) {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) {
+            return;
+        }
+
+        element.textContent =
+
+            value === null ||
+
+            value === undefined ||
+
+            String(value).trim() === ""
+
+                ? "未設定"
+
+                : String(value);
+
+    }
+
+
+    /* =====================================
+       タスク詳細モーダルを開く
+    ===================================== */
+
+    async function openTaskDetail(taskId) {
+
+        const task = tasks.find(
+
+            item => String(item.id) === String(taskId)
+
+        );
+
+        if (!task) {
+
+            alert(
+                "タスク情報が見つかりませんでした。"
+            );
+
+            return;
+
+        }
+
+        try {
+
+            const modalElement =
+                await loadDetailModal();
+
+
+            /* Bootstrapの確認 */
+
+            if (!window.bootstrap?.Modal) {
+
+                throw new Error(
+                    "Bootstrapが読み込まれていません。"
+                );
+
+            }
+
+
+            /* タスク名 */
+
+            setDetailText(
+
+                "detailTaskTitle",
+
+                task.name
+
+            );
+
+
+            /* タスク説明 */
+
+            setDetailText(
+
+                "detailTaskDescription",
+
+                task.description || "説明なし"
+
+            );
+
+
+            /* 担当者 */
+
+            setDetailText(
+
+                "detailTaskAssignee",
+
+                getAssigneeDisplayName(task)
+
+            );
+
+
+            /* 優先度 */
+
+            setDetailText(
+
+                "detailTaskPriority",
+
+                formatPriority(task.priority)
+
+            );
+
+
+            /* ステータス */
+
+            setDetailText(
+
+                "detailTaskStatus",
+
+                formatStatus(task.status)
+
+            );
+
+
+            /* 難易度 */
+
+            setDetailText(
+
+                "detailTaskDifficulty",
+
+                task.difficultyLevel
+
+            );
+
+
+            /* 不快度 */
+
+            setDetailText(
+
+                "detailTaskDiscomfort",
+
+                task.discomfortLevel
+
+            );
+
+
+            /* 開始日 */
+
+            setDetailText(
+
+                "detailTaskStartDate",
+
+                formatDate(task.start)
+
+            );
+
+
+            /* 終了日 */
+
+            setDetailText(
+
+                "detailTaskDueDate",
+
+                formatDate(task.end)
+
+            );
+
+
+            /* 予定工数：対応する要素がある場合 */
+
+            setDetailText(
+
+                "detailTaskEstimatedHours",
+
+                task.estimatedHours === null
+
+                    ? "未設定"
+
+                    : `${task.estimatedHours} 時間`
+
+            );
+
+
+            /* 負担スコア：対応する要素がある場合 */
+
+            setDetailText(
+
+                "detailTaskBurdenPoints",
+
+                task.burdenPoints === null
+
+                    ? "未設定"
+
+                    : `${task.burdenPoints} pt`
+
+            );
+
+
+            /* モーダル表示 */
+
+            const modal =
+                bootstrap.Modal.getOrCreateInstance(
+
+                    modalElement
+
+                );
+
+            modal.show();
 
         } catch (error) {
 
             console.error(
-                "モーダル読み込みエラー:",
+
+                "タスク詳細表示エラー：",
+
                 error
+
             );
+
+            alert(
+
+                error.message ||
+
+                "タスク詳細を表示できませんでした。"
+
+            );
+
         }
 
-        await Promise.all([
-            loadUsers(),
-            fetchTasks()
-        ]);
     }
+
+
+    /* =====================================
+       ガントチャートのクリック処理
+    ===================================== */
+
+    chart.addEventListener(
+
+        "click",
+
+        event => {
+
+            /* 空表示の絞り込み解除ボタン */
+
+            const resetButton = event.target.closest(
+
+                '[data-action="reset-filters"]'
+
+            );
+
+            if (resetButton) {
+
+                resetFilters();
+
+                return;
+
+            }
+
+
+            /* タスク期間バー */
+
+            const taskBar = event.target.closest(
+
+                ".gantt-task-bar[data-task-id]"
+
+            );
+
+            if (!taskBar) {
+
+                return;
+
+            }
+
+            openTaskDetail(
+
+                taskBar.dataset.taskId
+
+            );
+
+        }
+
+    );
+
+
+    /* =====================================
+       キーボードによるタスク詳細表示
+    ===================================== */
+
+    chart.addEventListener(
+
+        "keydown",
+
+        event => {
+
+            if (
+                event.key !== "Enter" &&
+                event.key !== " "
+            ) {
+
+                return;
+
+            }
+
+            const taskBar = event.target.closest(
+
+                ".gantt-task-bar[data-task-id]"
+
+            );
+
+            if (!taskBar) {
+
+                return;
+
+            }
+
+            event.preventDefault();
+
+            openTaskDetail(
+
+                taskBar.dataset.taskId
+
+            );
+
+        }
+
+    );
+
+
+    /* =====================================
+       ガントチャートの更新
+    ===================================== */
+
+    function updateGantt() {
+
+        /*
+         * 絞り込み条件は変更しない。
+         * 表示期間のタスクだけ再取得する。
+         */
+
+        fetchTasks();
+
+    }
+
+
+    /* =====================================
+       前週へ移動
+    ===================================== */
+
+    prevButton?.addEventListener(
+
+        "click",
+
+        () => {
+
+            currentDate = addDays(
+
+                currentDate,
+
+                -7
+
+            );
+
+            updateGantt();
+
+        }
+
+    );
+
+
+    /* =====================================
+       翌週へ移動
+    ===================================== */
+
+    nextButton?.addEventListener(
+
+        "click",
+
+        () => {
+
+            currentDate = addDays(
+
+                currentDate,
+
+                7
+
+            );
+
+            updateGantt();
+
+        }
+
+    );
+
+
+    /* =====================================
+       今週へ移動
+    ===================================== */
+
+    todayButton?.addEventListener(
+
+        "click",
+
+        () => {
+
+            currentDate = new Date();
+
+            updateGantt();
+
+        }
+
+    );
+
+
+    /* =====================================
+       初期化処理
+    ===================================== */
+
+    async function initialize() {
+
+        /* 初期フィルター設定 */
+
+        selectedAssignee = "all";
+
+        selectedStatus = "all";
+
+        assigneeFilter.value = "all";
+
+        statusFilter.value = "all";
+
+
+        /* ボタンの状態更新 */
+
+        updateFilterControls();
+
+        showFilterMessage("");
+
+
+        /* タスク・担当者・モーダルの読み込み */
+
+        await Promise.all([
+
+            fetchTasks(),
+
+            loadUsers(),
+
+            loadDetailModal().catch(error => {
+
+                console.error(
+
+                    "モーダル読み込みエラー：",
+
+                    error
+
+                );
+
+            })
+
+        ]);
+
+
+        /* 最終描画 */
+
+        renderAssigneeOptions();
+
+        renderChart();
+
+        console.log(
+
+            "Tasfina：ガントチャートの初期化が完了しました。"
+
+        );
+
+    }
+
+
+    /* =====================================
+       初期化実行
+    ===================================== */
 
     initialize();
 

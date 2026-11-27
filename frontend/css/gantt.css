@@ -1,7 +1,8 @@
 /* ========================================
    Tasfina ガントチャート
-   週間表示・担当者別色分け対応版
+   週間表示・担当者別色分け・絞り込み対応版
 ======================================== */
+
 
 /* ========================================
    ページ全体
@@ -37,7 +38,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px;
+
+    margin-bottom: 16px;
 }
 
 .gantt-month-control {
@@ -60,6 +62,8 @@
     padding: 0 17px;
 
     font-weight: 600;
+
+    transition: background-color 0.2s;
 }
 
 .gantt-month-control button:hover {
@@ -68,15 +72,322 @@
 
 .gantt-month-control span {
     min-width: 270px;
+
     text-align: center;
     font-weight: 600;
+
     padding: 0 10px;
 }
 
 .gantt-today-button {
     min-height: 46px;
+
     font-size: 14px;
     font-weight: 600;
+}
+
+
+/* ========================================
+   タスク絞り込みエリア
+======================================== */
+
+.gantt-filter-area {
+    padding: 18px 20px;
+
+    margin-bottom: 16px;
+
+    background-color: #f8fafc;
+
+    border: 1px solid #dce3ed;
+    border-radius: 9px;
+}
+
+
+/* ========================================
+   絞り込み見出し
+======================================== */
+
+.gantt-filter-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 16px;
+
+    color: #35415a;
+}
+
+.gantt-filter-heading > i {
+    font-size: 18px;
+    color: #0065c8;
+}
+
+.gantt-filter-heading h2 {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* ========================================
+   フィルター操作欄
+======================================== */
+
+.gantt-filter-controls {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+
+    gap: 16px;
+}
+
+
+/* ========================================
+   フィルターグループ
+======================================== */
+
+.gantt-filter-group {
+    display: flex;
+    flex-direction: column;
+
+    flex: 1 1 200px;
+
+    min-width: 0;
+    max-width: 340px;
+
+    gap: 7px;
+}
+
+
+/* ========================================
+   フィルターラベル
+======================================== */
+
+.gantt-filter-group label {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin: 0;
+
+    color: #35415a;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.gantt-filter-group label i {
+    font-size: 15px;
+    color: #64748b;
+}
+
+
+/* ========================================
+   フィルター選択欄
+======================================== */
+
+.gantt-filter-select {
+    width: 100%;
+    min-width: 0;
+
+    min-height: 42px;
+
+    padding: 9px 36px 9px 12px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #cfd8e5;
+    border-radius: 6px;
+
+    color: #17213a;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s,
+        background-color 0.2s;
+}
+
+.gantt-filter-select:hover {
+    border-color: #94b5d8;
+}
+
+.gantt-filter-select:focus {
+    background-color: #ffffff;
+
+    border-color: #5085c5;
+
+    box-shadow:
+        0 0 0 3px rgba(80, 133, 197, 0.15);
+
+    outline: none;
+}
+
+.gantt-filter-select:disabled {
+    background-color: #edf1f5;
+    color: #94a3b8;
+
+    cursor: not-allowed;
+}
+
+
+/* ========================================
+   フィルター選択肢
+======================================== */
+
+.gantt-filter-select option {
+    background-color: #ffffff;
+    color: #17213a;
+
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.gantt-filter-select optgroup {
+    background-color: #ffffff;
+    color: #52617d;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+
+/* ========================================
+   絞り込み解除ボタン配置
+======================================== */
+
+.gantt-filter-actions {
+    display: flex;
+    align-items: flex-end;
+
+    flex-shrink: 0;
+}
+
+
+/* ========================================
+   絞り込み解除ボタン
+======================================== */
+
+.gantt-filter-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 42px;
+
+    padding: 8px 16px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #cfd8e5;
+    border-radius: 6px;
+
+    color: #52617d;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    transition:
+        background-color 0.2s,
+        border-color 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
+}
+
+.gantt-filter-reset i {
+    font-size: 16px;
+}
+
+.gantt-filter-reset:hover {
+    background-color: #edf5ff;
+
+    border-color: #5085c5;
+
+    color: #0065c8;
+}
+
+.gantt-filter-reset:focus-visible {
+    background-color: #edf5ff;
+
+    border-color: #5085c5;
+
+    color: #0065c8;
+
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px rgba(80, 133, 197, 0.15);
+}
+
+.gantt-filter-reset:active {
+    background-color: #dbeafe !important;
+
+    border-color: #5085c5 !important;
+
+    color: #0055b5 !important;
+}
+
+.gantt-filter-reset:disabled {
+    background-color: #edf1f5;
+
+    border-color: #dce3ed;
+
+    color: #94a3b8;
+
+    cursor: not-allowed;
+
+    opacity: 0.7;
+}
+
+
+/* ========================================
+   フィルター補足説明
+======================================== */
+
+.gantt-filter-help {
+    margin: 12px 0 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* ========================================
+   フィルターメッセージ
+======================================== */
+
+.gantt-filter-message {
+    margin: 12px 0 0;
+
+    padding: 9px 12px;
+
+    background-color: #fff8e6;
+
+    border: 1px solid #f0d58c;
+    border-radius: 5px;
+
+    color: #856404;
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    overflow-wrap: anywhere;
+}
+
+.gantt-filter-message[hidden] {
+    display: none;
 }
 
 
@@ -87,13 +398,21 @@
 .gantt-status-area {
     display: flex;
     align-items: center;
-    gap: 14px;
+    flex-wrap: wrap;
+
+    gap: 8px 14px;
 
     min-height: 28px;
+
     margin-bottom: 10px;
 
     color: #52617d;
+
     font-size: 13px;
+}
+
+#ganttTaskCount {
+    font-weight: 600;
 }
 
 .gantt-loading {
@@ -121,6 +440,7 @@
 .gantt-legend-item {
     display: flex;
     align-items: center;
+
     gap: 8px;
 }
 
@@ -138,15 +458,18 @@
     flex-shrink: 0;
 }
 
+
 /* 完了済み：灰色 */
 
 .legend-completed {
     background-color: #9ca3af;
     border-color: #6b7280;
+
     color: #ffffff;
 
     font-size: 12px;
 }
+
 
 /* 自分のタスク：緑色 */
 
@@ -154,6 +477,7 @@
     background-color: #86d6ae;
     border-color: #36a574;
 }
+
 
 /* その他のタスク：青色 */
 
@@ -169,7 +493,10 @@
 
 .gantt-error {
     margin-bottom: 14px;
+
     font-size: 14px;
+
+    overflow-wrap: anywhere;
 }
 
 .gantt-error[hidden] {
@@ -186,11 +513,13 @@
     border-radius: 9px;
 
     overflow: hidden;
+
     background: #ffffff;
 }
 
 .gantt-scroll {
     width: 100%;
+
     overflow-x: auto;
 }
 
@@ -224,32 +553,88 @@
 }
 
 .gantt-cell {
-    padding: 10px 12px;
-    border-right: 1px solid #e3e8ef;
-
     display: flex;
     align-items: center;
 
     min-width: 0;
+
+    padding: 10px 12px;
+
+    border-right: 1px solid #e3e8ef;
+
     font-size: 14px;
 }
 
+
+/* ========================================
+   タスク名
+======================================== */
+
 .gantt-name {
     gap: 9px;
+
     padding-left: 18px;
+
     font-weight: 500;
 }
 
 .gantt-name i {
     flex-shrink: 0;
+
     color: #0065c8;
+
     font-size: 16px;
 }
 
 .gantt-name span {
     overflow: hidden;
+
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+
+/* ========================================
+   タスク名・担当者名の表示
+======================================== */
+
+.gantt-name-content {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+.gantt-name .gantt-task-name {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #17213a;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.gantt-name .gantt-assignee-name {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #64748b;
+
+    font-size: 11px;
+    font-weight: 400;
 }
 
 
@@ -259,7 +644,9 @@
 
 .gantt-header {
     min-height: 65px;
+
     background: #f8fafc;
+
     font-weight: 600;
 }
 
@@ -269,16 +656,20 @@
 
 .gantt-dates {
     display: flex;
+
     padding: 0;
+
     border-right: none;
 }
 
 .gantt-date {
     width: var(--column-width);
     min-width: var(--column-width);
+
     flex-shrink: 0;
 
     text-align: center;
+
     padding: 9px 0;
 
     border-right: 1px solid #e3e8ef;
@@ -289,17 +680,21 @@
 
 .gantt-date.saturday {
     color: #0066cc;
+
     background: #eaf4ff;
 }
 
 .gantt-date.sunday {
     color: #e33445;
+
     background: #fff0f1;
 }
 
 .gantt-date.today {
     background: #dbeafe;
+
     color: #0055b5;
+
     font-weight: 700;
 }
 
@@ -375,19 +770,25 @@
 
 .gantt-task-bar:hover {
     background: #459cf0;
-    box-shadow: 0 2px 6px rgba(0, 101, 200, 0.2);
+
+    box-shadow:
+        0 2px 6px rgba(0, 101, 200, 0.2);
 }
 
 .gantt-task-bar:focus-visible {
     outline: 3px solid #1d4ed8;
     outline-offset: 2px;
+
     z-index: 3;
 }
 
 .gantt-bar-label {
     display: block;
 
+    min-width: 0;
+
     overflow: hidden;
+
     white-space: nowrap;
     text-overflow: ellipsis;
 
@@ -402,7 +803,9 @@
 
 .gantt-task-bar.is-other {
     background-color: #63b1fa;
+
     border-color: #3b93e8;
+
     color: #12365a;
 }
 
@@ -420,7 +823,9 @@
 
 .gantt-task-bar.is-mine {
     background-color: #86d6ae;
+
     border-color: #36a574;
+
     color: #145b3c;
 }
 
@@ -438,7 +843,9 @@
 
 .gantt-task-bar.is-completed {
     background-color: #9ca3af;
+
     border-color: #6b7280;
+
     color: #ffffff;
 }
 
@@ -449,15 +856,20 @@
         0 2px 6px rgba(107, 114, 128, 0.25);
 }
 
-/* 完了チェックアイコン */
+
+/* ========================================
+   完了チェックアイコン
+======================================== */
 
 .gantt-complete-icon {
     margin-left: auto;
+
     padding-left: 8px;
 
     font-size: 13px;
 
     flex-shrink: 0;
+
     color: #ffffff;
 }
 
@@ -475,32 +887,66 @@
     justify-content: center;
 
     gap: 10px;
+
     padding: 25px;
 
     color: #64748b;
+
     text-align: center;
 }
 
 .gantt-empty > i {
     font-size: 30px;
+
     color: #94a3b8;
 }
 
 .gantt-empty p {
     margin: 0;
+
     font-size: 14px;
+    line-height: 1.6;
 }
 
 
 /* ========================================
-   レスポンシブ
+   絞り込み結果なし
+======================================== */
+
+.gantt-empty.is-filtered > i {
+    color: #94a3b8;
+
+    font-size: 32px;
+}
+
+.gantt-empty.is-filtered p {
+    color: #52617d;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.gantt-empty-description {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ========================================
+   レスポンシブ：タブレット
 ======================================== */
 
 @media screen and (max-width: 768px) {
 
+    /* ページタイトル */
+
     .gantt-title {
         font-size: 26px;
     }
+
+
+    /* 期間操作 */
 
     .gantt-toolbar {
         flex-wrap: wrap;
@@ -512,12 +958,59 @@
 
     .gantt-month-control span {
         min-width: 0;
+
         font-size: 12px;
     }
 
     .gantt-month-control button {
         padding: 0 12px;
     }
+
+
+    /* 絞り込みエリア */
+
+    .gantt-filter-area {
+        padding: 15px;
+    }
+
+    .gantt-filter-heading {
+        margin-bottom: 12px;
+    }
+
+    .gantt-filter-heading h2 {
+        font-size: 15px;
+    }
+
+    .gantt-filter-controls {
+        gap: 12px;
+    }
+
+    .gantt-filter-group {
+        flex: 1 1 160px;
+
+        max-width: none;
+    }
+
+    .gantt-filter-select {
+        min-height: 40px;
+
+        font-size: 13px;
+    }
+
+    .gantt-filter-reset {
+        min-height: 40px;
+
+        padding: 8px 12px;
+
+        font-size: 12px;
+    }
+
+    .gantt-filter-help {
+        font-size: 11px;
+    }
+
+
+    /* ガントチャート */
 
     .gantt-row {
         grid-template-columns:
@@ -533,14 +1026,33 @@
         font-size: 12px;
     }
 
+    .gantt-name .gantt-task-name {
+        font-size: 12px;
+    }
+
+    .gantt-name .gantt-assignee-name {
+        font-size: 10px;
+    }
+
+
+    /* 凡例 */
+
     .gantt-legend {
         gap: 8px 16px;
+
         font-size: 12px;
     }
 
 }
 
+
+/* ========================================
+   レスポンシブ：スマートフォン
+======================================== */
+
 @media screen and (max-width: 480px) {
+
+    /* 期間操作 */
 
     .gantt-toolbar {
         gap: 8px;
@@ -548,6 +1060,7 @@
 
     .gantt-month-control {
         width: 100%;
+
         justify-content: space-between;
     }
 
@@ -559,8 +1072,106 @@
         min-height: 38px;
     }
 
+
+    /* 絞り込みエリア */
+
+    .gantt-filter-area {
+        padding: 12px;
+
+        margin-bottom: 12px;
+    }
+
+    .gantt-filter-heading {
+        gap: 7px;
+    }
+
+    .gantt-filter-heading > i {
+        font-size: 16px;
+    }
+
+    .gantt-filter-heading h2 {
+        font-size: 14px;
+    }
+
+
+    /* フィルターを縦並びにする */
+
+    .gantt-filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 12px;
+    }
+
+    .gantt-filter-group {
+        flex: none;
+
+        width: 100%;
+        max-width: none;
+
+        gap: 6px;
+    }
+
+    .gantt-filter-group label {
+        font-size: 12px;
+    }
+
+    .gantt-filter-select {
+        width: 100%;
+
+        min-height: 40px;
+    }
+
+
+    /* 絞り込み解除ボタン */
+
+    .gantt-filter-actions {
+        width: 100%;
+    }
+
+    .gantt-filter-reset {
+        width: 100%;
+
+        min-height: 38px;
+    }
+
+    .gantt-filter-help {
+        margin-top: 10px;
+    }
+
+
+    /* タスク件数 */
+
+    .gantt-status-area {
+        font-size: 12px;
+    }
+
+
+    /* 凡例 */
+
     .gantt-legend {
         gap: 8px 12px;
+    }
+
+    .gantt-legend-color {
+        width: 20px;
+        height: 14px;
+    }
+
+}
+
+
+/* ========================================
+   アニメーション軽減設定
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .gantt-month-control button,
+    .gantt-filter-select,
+    .gantt-filter-reset,
+    .gantt-task-bar {
+        transition: none;
     }
 
 }

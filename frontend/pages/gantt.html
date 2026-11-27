@@ -25,10 +25,16 @@
     >
 
     <!-- 共通CSS -->
-    <link rel="stylesheet" href="../css/common.css">
+    <link
+        rel="stylesheet"
+        href="../css/common.css"
+    >
 
     <!-- ガントチャートCSS -->
-    <link rel="stylesheet" href="../css/gantt.css">
+    <link
+        rel="stylesheet"
+        href="../css/gantt.css"
+    >
 
     <!-- タスク詳細モーダルCSS -->
     <link
@@ -43,10 +49,16 @@
     ></script>
 
     <!-- 共通JavaScript -->
-    <script src="../js/common.js" defer></script>
+    <script
+        src="../js/common.js"
+        defer
+    ></script>
 
     <!-- ガントチャートJavaScript -->
-    <script src="../js/gantt.js" defer></script>
+    <script
+        src="../js/gantt.js"
+        defer
+    ></script>
 
 </head>
 
@@ -63,6 +75,10 @@
         <!-- メインコンテンツ -->
         <main class="main-content gantt-page">
 
+            <!-- ========================================
+                 ページ見出し
+            ========================================= -->
+
             <div class="gantt-page-heading">
 
                 <h1 class="gantt-title">
@@ -76,47 +92,257 @@
 
             </div>
 
-            <!-- 期間操作 -->
-            <section class="gantt-toolbar">
+
+            <!-- ========================================
+                 期間操作
+            ========================================= -->
+
+            <section
+                class="gantt-toolbar"
+                aria-label="表示期間の変更"
+            >
 
                 <div class="gantt-month-control">
 
+                    <!-- 前週 -->
                     <button
                         type="button"
                         id="prevPeriod"
                         aria-label="前週"
                     >
+
                         <i class="bi bi-chevron-left"></i>
+
                     </button>
 
+
+                    <!-- 現在の表示期間 -->
                     <span id="currentPeriod"></span>
 
+
+                    <!-- 翌週 -->
                     <button
                         type="button"
                         id="nextPeriod"
                         aria-label="翌週"
                     >
+
                         <i class="bi bi-chevron-right"></i>
+
                     </button>
 
                 </div>
 
+
+                <!-- 今週へ移動 -->
                 <button
                     type="button"
                     id="todayButton"
                     class="btn btn-outline-primary gantt-today-button"
                 >
+
                     <i class="bi bi-calendar-event"></i>
+
                     今週
+
                 </button>
 
             </section>
 
-            <!-- 表示情報 -->
+
+            <!-- ========================================
+                 タスク絞り込み
+            ========================================= -->
+
+            <section
+                class="gantt-filter-area"
+                aria-label="タスクの絞り込み"
+            >
+
+                <!-- 絞り込み見出し -->
+                <div class="gantt-filter-heading">
+
+                    <i
+                        class="bi bi-funnel"
+                        aria-hidden="true"
+                    ></i>
+
+                    <h2>
+                        タスクの絞り込み
+                    </h2>
+
+                </div>
+
+
+                <!-- フィルター操作 -->
+                <div class="gantt-filter-controls">
+
+                    <!-- ========================================
+                         担当者フィルター
+                    ========================================= -->
+
+                    <div class="gantt-filter-group">
+
+                        <label for="assigneeFilter">
+
+                            <i
+                                class="bi bi-person"
+                                aria-hidden="true"
+                            ></i>
+
+                            担当者
+
+                        </label>
+
+                        <select
+                            class="form-select gantt-filter-select"
+                            id="assigneeFilter"
+                        >
+
+                            <!-- 全員 -->
+                            <option value="all" selected>
+                                すべての担当者
+                            </option>
+
+
+                            <!-- 自分のみ -->
+                            <option value="mine">
+                                自分のタスクのみ
+                            </option>
+
+
+                            <!-- 他人のみ -->
+                            <option value="others">
+                                他の人のタスクのみ
+                            </option>
+
+
+                            <!-- 担当者未設定 -->
+                            <option value="unassigned">
+                                担当者未設定
+                            </option>
+
+
+                            <!--
+                                特定の担当者一覧
+
+                                api_users.phpから取得した
+                                ユーザーをJavaScriptで追加する
+                            -->
+                            <optgroup
+                                label="特定の担当者"
+                                id="assigneeUserOptions"
+                            ></optgroup>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         タスク状態フィルター
+                    ========================================= -->
+
+                    <div class="gantt-filter-group">
+
+                        <label for="statusFilter">
+
+                            <i
+                                class="bi bi-list-check"
+                                aria-hidden="true"
+                            ></i>
+
+                            タスクの状態
+
+                        </label>
+
+                        <select
+                            class="form-select gantt-filter-select"
+                            id="statusFilter"
+                        >
+
+                            <!-- すべて -->
+                            <option value="all" selected>
+                                すべての状態
+                            </option>
+
+
+                            <!-- 未完了のみ -->
+                            <option value="incomplete">
+                                未完了のみ
+                            </option>
+
+
+                            <!-- 完了済みのみ -->
+                            <option value="completed">
+                                完了済みのみ
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ========================================
+                         絞り込み解除ボタン
+                    ========================================= -->
+
+                    <div class="gantt-filter-actions">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary gantt-filter-reset"
+                            id="resetFiltersButton"
+                        >
+
+                            <i
+                                class="bi bi-arrow-counterclockwise"
+                                aria-hidden="true"
+                            ></i>
+
+                            絞り込み解除
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- フィルター補足説明 -->
+                <p class="gantt-filter-help">
+
+                    担当者とタスクの状態を組み合わせて
+                    表示するタスクを絞り込めます。
+
+                </p>
+
+
+                <!-- 担当者取得エラーなどの表示 -->
+                <p
+                    class="gantt-filter-message"
+                    id="ganttFilterMessage"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
+            </section>
+
+
+            <!-- ========================================
+                 タスク件数・読み込み表示
+            ========================================= -->
+
             <div class="gantt-status-area">
 
-                <span id="ganttTaskCount">
+                <span
+                    id="ganttTaskCount"
+                    aria-live="polite"
+                >
+
                     タスクを読み込み中...
+
                 </span>
 
                 <span
@@ -128,7 +354,11 @@
 
             </div>
 
-            <!-- タスク色分け凡例 -->
+
+            <!-- ========================================
+                 タスク色分け凡例
+            ========================================= -->
+
             <div
                 class="gantt-legend"
                 aria-label="タスクの色分け"
@@ -140,12 +370,17 @@
                     <span
                         class="gantt-legend-color legend-completed"
                     >
+
                         <i class="bi bi-check-lg"></i>
+
                     </span>
 
-                    <span>完了済み</span>
+                    <span>
+                        完了済み
+                    </span>
 
                 </div>
+
 
                 <!-- 自分の未完了タスク -->
                 <div class="gantt-legend-item">
@@ -154,9 +389,12 @@
                         class="gantt-legend-color legend-mine"
                     ></span>
 
-                    <span>自分の未完了タスク</span>
+                    <span>
+                        自分の未完了タスク
+                    </span>
 
                 </div>
+
 
                 <!-- 他の人の未完了タスク -->
                 <div class="gantt-legend-item">
@@ -165,13 +403,19 @@
                         class="gantt-legend-color legend-other"
                     ></span>
 
-                    <span>その他の未完了タスク</span>
+                    <span>
+                        その他の未完了タスク
+                    </span>
 
                 </div>
 
             </div>
 
-            <!-- エラー -->
+
+            <!-- ========================================
+                 エラー表示
+            ========================================= -->
+
             <div
                 id="ganttError"
                 class="alert alert-danger gantt-error"
@@ -179,7 +423,11 @@
                 hidden
             ></div>
 
-            <!-- ガントチャート -->
+
+            <!-- ========================================
+                 ガントチャート
+            ========================================= -->
+
             <section
                 class="gantt-chart-section"
                 aria-label="タスクの週間スケジュール"
@@ -200,7 +448,11 @@
 
     </div>
 
-    <!-- タスク詳細モーダルの読み込み先 -->
+
+    <!-- ========================================
+         タスク詳細モーダルの読み込み先
+    ========================================= -->
+
     <div id="ganttTaskDetailContainer"></div>
 
 </body>
