@@ -48,7 +48,7 @@ if ($method === 'GET') {
             $stmt_busy->execute([$year_month]);
             $busy_days = $stmt_busy->fetchAll(PDO::FETCH_ASSOC);
 
-           $stmt_summary = $pdo->prepare("
+            $stmt_summary = $pdo->prepare("
                 SELECT 
                     COALESCE(status, '未設定') as status_type, 
                     COUNT(*) as count 
@@ -68,6 +68,41 @@ if ($method === 'GET') {
                 'shifts' => $shifts,
                 'busy_days' => $busy_days,
                 'summary' => $summary
+            ]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // --- シフトルーレット用 メンバー・部署・負担スコア取得 ---
+    if ($action === 'get_roulette_options') {
+        try {
+            $stmtUsers = $pdo->query("
+                SELECT
+                    u.user_id,
+                    COALESCE(NULLIF(TRIM(u.display_name), ''), CONCAT('ユーザーID:', u.user_id)) AS display_name,
+                    COALESCE(SUM(ws.total_score), 0) AS burden_score
+                FROM users u
+                LEFT JOIN workload_scores ws ON u.user_id = ws.user_id
+                GROUP BY u.user_id, u.display_name
+                ORDER BY u.user_id ASC
+            ");
+            $users = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtDepts = $pdo->query("
+                SELECT
+                    d.dept_id,
+                    COALESCE(NULLIF(TRIM(d.dept_name), ''), CONCAT('部署ID:', d.dept_id)) AS dept_name
+                FROM departments d
+                ORDER BY d.dept_id ASC
+            ");
+            $departments = $stmtDepts->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode([
+                'success' => true,
+                'users' => $users,
+                'departments' => $departments
             ]);
         } catch (PDOException $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -494,7 +529,7 @@ if ($method === 'POST') {
         exit;
     }
 
-   // --- シフトルーレットの実行・割り当て処理 ---
+    // --- シフトルーレットの実行・割り当て処理 ---
     if ($action === 'execute_roulette') {
         $target_date = $input['target_date'] ?? '';
         $shift_type = $input['shift_type'] ?? '在宅勤務';
@@ -516,7 +551,7 @@ if ($method === 'POST') {
         }
 
         try {
-          // 1. 対象メンバー一覧を取得（最新DBスキーマ対応）
+            // 1. 対象メンバー一覧を取得（最新DBスキーマ対応）
             if ($target_member_type === 'member' && !empty($target_user_id)) {
                 $stmtUsers = $pdo->prepare("SELECT user_id, group_id FROM users WHERE user_id = ?");
                 $stmtUsers->execute([intval($target_user_id)]);
@@ -590,7 +625,7 @@ if ($method === 'POST') {
                     }
                 }
 
-               // 重み算出（workload_scores の total_score が低いほど当選しやすい）
+                // 重み算出（workload_scores の total_score が低いほど当選しやすい）
                 $weight = 10.0;
                 if ($use_burden_score) {
                     $stmtBurden = $pdo->prepare("
@@ -602,6 +637,7 @@ if ($method === 'POST') {
                     $burdenScore = floatval($stmtBurden->fetchColumn());
                     $weight = max(1.0, 500.0 - $burdenScore);
                 }
+
                 // 条件: 希望シフトを優先する
                 if ($prefer_shift) {
                     $stmtPref = $pdo->prepare("
@@ -624,7 +660,7 @@ if ($method === 'POST') {
 
                 $weightedPool[] = [
                     'user_id' => $uid,
-                    'dept_id' => $cand['dept_id'],
+                    'group_id' => $cand['group_id'] ?? null,
                     'weight' => $weight
                 ];
             }
@@ -664,7 +700,7 @@ if ($method === 'POST') {
                   AND work_date IS NOT NULL
                   AND DATE(work_date) = ?
             ");
-           $insStmt = $pdo->prepare("
+            $insStmt = $pdo->prepare("
                 INSERT INTO shifts (
                     user_id, group_id, work_date, start_time, end_time,
                     status, approval_status, bonus_pt, created_at
@@ -707,7 +743,5 @@ if ($method === 'POST') {
         exit;
     }
 
-
-
-echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
+    echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
 }

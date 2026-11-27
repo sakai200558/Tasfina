@@ -81,11 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBusyModalBtn = document.getElementById('cancelBusyModalBtn');
     const submitBusyModalBtn = document.getElementById('submitBusyModalBtn');
 
-   const rouletteModal = document.getElementById('rouletteModal');
+    const rouletteModal = document.getElementById('rouletteModal');
     const openRouletteModalBtns = document.querySelectorAll('#openRouletteModalBtn, .openRouletteModalBtn');
     const closeRouletteModalBtn = document.getElementById('closeRouletteModalBtn');
     const cancelRouletteModalBtn = document.getElementById('cancelRouletteModalBtn');
     const executeRouletteBtn = document.getElementById('executeRouletteBtn');
+    const rouletteProbTableBody = document.getElementById('rouletteProbTableBody');
+    const rouletteTopProbText = document.getElementById('rouletteTopProbText');
+    const rouletteLegendList = document.getElementById('rouletteLegendList');
+    const rouletteWheelGauge = document.getElementById('rouletteWheelGauge');
 
     // 申請状況・申請履歴モーダル関連
     const applicationHistoryModal = document.getElementById('applicationHistoryModal');
@@ -201,8 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => busyModal.classList.add('hidden'));
     });
 
-   openRouletteModalBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+    openRouletteModalBtns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            await loadRouletteOptions();
             if (rouletteModal) rouletteModal.classList.remove('hidden');
         });
     });
@@ -289,6 +294,106 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             console.error('ダッシュボード情報取得エラー:', err);
+        }
+    }
+
+    async function loadRouletteOptions() {
+        try {
+            const res = await fetch(`${SHIFT_API_URL}?action=get_roulette_options`);
+            const data = await res.json();
+            if (!data.success) return;
+
+            const users = data.users || [];
+            const departments = data.departments || [];
+
+            const userSel = document.getElementById('rouletteTargetUserId');
+            if (userSel) {
+                userSel.innerHTML = users.length
+                    ? users.map(u => `<option value="${u.user_id}">${u.display_name}（ID:${u.user_id}）</option>`).join('')
+                    : `<option value="">登録メンバーなし</option>`;
+            }
+
+            const deptSel = document.getElementById('rouletteTargetDeptId');
+            if (deptSel) {
+                deptSel.innerHTML = departments.length
+                    ? departments.map(d => `<option value="${d.dept_id}">${d.dept_name}（ID:${d.dept_id}）</option>`).join('')
+                    : `<option value="">登録部署なし</option>`;
+            }
+
+            // 負担スコアから当選確率を算出してテーブル・プレビューへ反映
+           if (rouletteProbTableBody && users.length) {
+                const weights = users.map(u => Math.max(1, 500 - parseFloat(u.burden_score || 0)));
+                const totalW = weights.reduce((a, b) => a + b, 0);
+
+                const rowsWithProb = users.map((u, idx) => ({
+                    ...u,
+                    score: parseFloat(u.burden_score || 0).toFixed(1),
+                    prob: totalW > 0 ? Math.round((weights[idx] / totalW) * 100) : 0
+                }));
+
+                rouletteProbTableBody.innerHTML = rowsWithProb.map(r => `
+                    <tr>
+                        <td class="py-1.5">${r.display_name}</td>
+                        <td class="py-1.5">${r.score}</td>
+                        <td class="py-1.5 text-right font-semibold">${r.prob}%</td>
+                    </tr>
+                `).join('');
+
+                if (rouletteTopProbText) {
+                    rouletteTopProbText.textContent = `${rowsWithProb[0].prob}%`;
+                }
+
+                // 円形プレビューのグラデーションをDB算出の確率に合わせて更新
+                if (rouletteWheelGauge) {
+                    const hexColors = ['#3b82f6', '#818cf8', '#93c5fd', '#d1d5db'];
+                    const topThree = rowsWithProb.slice(0, 3);
+                    const restProb = Math.max(0, 100 - topThree.reduce((sum, r) => sum + r.prob, 0));
+
+                    const segments = topThree.map((r, i) => ({
+                        prob: r.prob,
+                        color: hexColors[i]
+                    }));
+                    if (rowsWithProb.length > 3) {
+                        segments.push({ prob: restProb, color: hexColors[3] });
+                    }
+
+                    let currentDeg = 0;
+                    const stops = segments.map(seg => {
+                        const startDeg = currentDeg;
+                        const endDeg = currentDeg + (seg.prob / 100) * 360;
+                        currentDeg = endDeg;
+                        return `${seg.color} ${startDeg.toFixed(1)}deg ${endDeg.toFixed(1)}deg`;
+                    });
+
+                    rouletteWheelGauge.style.background = `conic-gradient(${stops.join(', ')})`;
+                }
+
+                if (rouletteLegendList) {
+                    const colors = ['bg-blue-500', 'bg-indigo-400', 'bg-blue-300', 'bg-gray-300'];
+                    const topThree = rowsWithProb.slice(0, 3);
+                    const rest = rowsWithProb.slice(3);
+                    const restProb = rest.reduce((sum, r) => sum + r.prob, 0);
+
+                    let legendHtml = topThree.map((r, i) => `
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 ${colors[i]} rounded-full"></span>
+                            ${r.display_name} (${r.prob}%)
+                        </div>
+                    `).join('');
+
+                    if (rest.length > 0) {
+                        legendHtml += `
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 ${colors[3]} rounded-full"></span>
+                                その他 (${rest.length}名) (${restProb}%)
+                            </div>
+                        `;
+                    }
+                    rouletteLegendList.innerHTML = legendHtml;
+                }
+            }
+        } catch (err) {
+            console.error('ルーレット選択肢取得エラー:', err);
         }
     }
 
@@ -695,7 +800,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-   if (executeRouletteBtn) {
+    // --- ルーレット実行処理 ---
+    if (executeRouletteBtn) {
         executeRouletteBtn.addEventListener('click', async () => {
             const targetDate = document.getElementById('rouletteDate')?.value || '';
             const shiftType = document.getElementById('rouletteShiftType')?.value || '在宅勤務';
@@ -703,6 +809,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetUserId = document.getElementById('rouletteTargetUserId')?.value || null;
             const targetDeptId = document.getElementById('rouletteTargetDeptId')?.value || null;
             const winnerCount = parseInt(document.getElementById('rouletteWinnerCount')?.value || '1', 10);
+
+            if (!targetDate) {
+                alert('対象日を選択してください。');
+                return;
+            }
 
             const conditions = {
                 prefer_shift: Boolean(document.getElementById('condPreferShift')?.checked),
