@@ -3,7 +3,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-$host = 'localhost';
+$host = '127.0.0.1';
 $dbname = 'Tasfina_db';
 $username = 'root';
 $password = 'password';

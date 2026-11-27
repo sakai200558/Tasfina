@@ -7,61 +7,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     "use strict";
 
+
     /* ========================================
        共通設定
     ======================================== */
 
     const SHIFT_STORAGE_KEY = "tasfina_shift_settings_v1";
+
     const SCORE_STORAGE_KEY = "tasfina_score_settings_v1";
+
     const WORK_TYPE_STORAGE_KEY = "tasfina_work_types_v1";
 
     const get = id => document.getElementById(id);
 
     const clone = value => JSON.parse(JSON.stringify(value));
-
-
-    /* ========================================
-       初期データ：繁忙期
-    ======================================== */
-
-    const defaultBusyPeriods = [
-        {
-            id: 1,
-            name: "年末年始",
-            start: "2024-12-20",
-            end: "2025-01-05",
-            level: "very-high",
-            score: 2.0,
-            description: "年末年始対応のため"
-        },
-        {
-            id: 2,
-            name: "夏季繁忙期",
-            start: "2024-08-01",
-            end: "2024-08-20",
-            level: "high",
-            score: 1.5,
-            description: "夏休み期間の対応"
-        },
-        {
-            id: 3,
-            name: "年度末",
-            start: "2024-03-01",
-            end: "2024-03-15",
-            level: "medium-high",
-            score: 1.0,
-            description: "決算対応のため"
-        },
-        {
-            id: 4,
-            name: "新年度",
-            start: "2024-04-01",
-            end: "2024-04-10",
-            level: "medium-high",
-            score: 1.0,
-            description: "新メンバー対応のため"
-        }
-    ];
 
 
     /* ========================================
@@ -93,21 +52,21 @@ document.addEventListener("DOMContentLoaded", () => {
             id: 3,
             name: "午前休",
             color: "#ffca62",
-            start: "09:00",
-            end: "13:00",
+            start: "13:00",
+            end: "18:00",
             breakMinutes: 0,
             score: 0.5,
-            description: "午前のみの勤務"
+            description: "午前休暇・午後勤務"
         },
         {
             id: 4,
             name: "午後休",
             color: "#ffd49b",
-            start: "13:00",
-            end: "18:00",
+            start: "09:00",
+            end: "13:00",
             breakMinutes: 0,
             score: 0.5,
-            description: "午後のみの勤務"
+            description: "午後休暇・午前勤務"
         },
         {
             id: 5,
@@ -148,7 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ======================================== */
 
     const defaultScoreSettings = {
+
         aggregationPeriod: "4",
+
         resetTiming: "monthly",
 
         shiftScores: {
@@ -166,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             early: 0.5,
             weeklyOver: 1.0
         }
+
     };
 
 
@@ -205,8 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
        状態管理
     ======================================== */
 
-    let busyPeriods = clone(defaultBusyPeriods);
-
     let shiftTypes = clone(defaultShiftTypes);
 
     let rules = clone(defaultRules);
@@ -215,11 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let workTypes = clone(defaultWorkTypes);
 
-    let selectedBusyId = null;
-
     let selectedShiftTypeId = null;
-
-    let editorMode = "busy";
 
     let workTypeModal = null;
 
@@ -228,11 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
        HTML要素の取得
     ======================================== */
 
-    const busyTable = get("busyPeriodTableBody");
-
     const shiftTable = get("shiftTypeTableBody");
-
-    const busyForm = get("busyPeriodForm");
 
     const shiftForm = get("shiftTypeForm");
 
@@ -265,21 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#39;");
-
-    }
-
-
-    /* ========================================
-       共通処理：日付表示
-    ======================================== */
-
-    function formatDate(date) {
-
-        if (!date) {
-            return "-";
-        }
-
-        return String(date).replaceAll("-", "/");
 
     }
 
@@ -362,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       共通処理：メッセージ表示
+       共通処理：シフト設定メッセージ
     ======================================== */
 
     function showShiftMessage(message, isError = false) {
@@ -377,6 +314,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    /* ========================================
+       共通処理：負担スコアメッセージ
+    ======================================== */
+
     function showScoreMessage(message, isError = false) {
 
         scoreMessage.textContent = message;
@@ -388,6 +329,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    /* ========================================
+       共通処理：業務タイプエラー
+    ======================================== */
 
     function showWorkTypeError(message = "") {
 
@@ -473,15 +418,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (Array.isArray(saved.busyPeriods)) {
-
-            busyPeriods = saved.busyPeriods.map(item => ({
-                ...item,
-                id: Number(item.id)
-            }));
-
-        }
-
         if (Array.isArray(saved.shiftTypes)) {
 
             shiftTypes = saved.shiftTypes.map(item => ({
@@ -519,7 +455,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (saved && typeof saved === "object") {
 
             scoreSettings = {
+
                 ...clone(defaultScoreSettings),
+
                 ...saved,
 
                 conditions: {
@@ -531,6 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ...defaultScoreSettings.shiftScores,
                     ...saved.shiftScores
                 }
+
             };
 
         }
@@ -551,7 +490,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         const items = Array.isArray(saved)
+
             ? saved
+
             : saved?.workTypes;
 
         if (!Array.isArray(items)) {
@@ -603,13 +544,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function saveShiftSettings() {
 
+        /*
+         * 既存の保存データを取得する。
+         *
+         * シフト種別と自動調整ルール以外の
+         * データを消さないようにする。
+         */
+
+        let previousData;
+
+        try {
+
+            const raw = localStorage.getItem(
+                SHIFT_STORAGE_KEY
+            );
+
+            previousData = raw === null
+
+                ? {}
+
+                : JSON.parse(raw);
+
+            if (
+                !previousData ||
+                typeof previousData !== "object" ||
+                Array.isArray(previousData)
+            ) {
+
+                throw new Error(
+                    "保存済みデータの形式が正しくありません。"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            showShiftMessage(
+                "既存の設定を読み込めないため、保存を中止しました。",
+                true
+            );
+
+            return false;
+
+        }
+
+
+        /* 既存データを維持したまま更新 */
+
         const success = writeStorage(
 
             SHIFT_STORAGE_KEY,
 
             {
-                busyPeriods,
+                ...previousData,
+
                 shiftTypes,
+
                 rules
             }
 
@@ -626,12 +618,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        synchronizeShiftScores();
 
-        /*
-         * 保存済みの負担スコア設定がある場合、
-         * シフト種別の基本スコアだけを同期する。
-         */
+        /* 負担スコアとの同期 */
+
+        synchronizeShiftScores();
 
         const savedScores = readStorage(
             SCORE_STORAGE_KEY
@@ -639,7 +629,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
             savedScores &&
-            typeof savedScores === "object"
+            typeof savedScores === "object" &&
+            !Array.isArray(savedScores)
         ) {
 
             const synced = writeStorage(
@@ -659,142 +650,30 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!synced) {
 
                 console.warn(
-                    "負担スコア設定との保存データ同期に失敗しました。"
+                    "負担スコア設定との同期に失敗しました。"
                 );
 
             }
 
         }
 
+
+        /* 計算例を更新 */
+
         updateCalculationExample();
 
+
+        /* 更新イベント */
+
         document.dispatchEvent(
+
             new Event(
                 "tasfina:shift-settings-updated"
             )
+
         );
 
         return true;
-
-    }
-
-
-    /* ========================================
-       繁忙期：忙しさレベルの表示名
-    ======================================== */
-
-    const levelLabels = {
-        "very-high": "非常に高い",
-        "high": "高い",
-        "medium-high": "やや高い",
-        "normal": "通常"
-    };
-
-
-    /* ========================================
-       繁忙期：一覧表示
-    ======================================== */
-
-    function renderBusyPeriods() {
-
-        if (busyPeriods.length === 0) {
-
-            busyTable.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-4">
-                        繁忙期が登録されていません。
-                    </td>
-                </tr>
-            `;
-
-            return;
-
-        }
-
-        busyTable.innerHTML = busyPeriods.map(item => {
-
-            const selected =
-                item.id === selectedBusyId;
-
-            const level =
-                Object.hasOwn(levelLabels, item.level)
-                    ? item.level
-                    : "normal";
-
-            return `
-
-                <tr
-                    data-busy-id="${escapeHtml(item.id)}"
-                    class="${selected ? "selected-row" : ""}"
-                >
-
-                    <td>
-                        ${escapeHtml(formatDate(item.start))}
-                        ～
-                        ${escapeHtml(formatDate(item.end))}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(item.name)}
-                    </td>
-
-                    <td>
-
-                        <span class="busy-level ${level}">
-
-                            ${levelLabels[level]}
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <span class="busy-score">
-
-                            +${formatScore(item.score)}
-
-                        </span>
-
-                    </td>
-
-                    <td>
-                        ${escapeHtml(item.description)}
-                    </td>
-
-                    <td>
-
-                        <div class="shift-table-actions">
-
-                            <button
-                                type="button"
-                                class="shift-action-button edit-busy"
-                                data-id="${escapeHtml(item.id)}"
-                                aria-label="${escapeHtml(item.name)}を編集"
-                                title="編集"
-                            >
-                                <i class="bi bi-pencil-fill"></i>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="shift-action-button delete delete-busy"
-                                data-id="${escapeHtml(item.id)}"
-                                aria-label="${escapeHtml(item.name)}を削除"
-                                title="削除"
-                            >
-                                <i class="bi bi-trash3"></i>
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }).join("");
 
     }
 
@@ -808,11 +687,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (shiftTypes.length === 0) {
 
             shiftTable.innerHTML = `
+
                 <tr>
+
                     <td colspan="7" class="text-center py-4">
+
                         シフト種別が登録されていません。
+
                     </td>
+
                 </tr>
+
             `;
 
             return;
@@ -839,7 +724,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 >
 
                     <td>
+
                         ${escapeHtml(item.name)}
+
                     </td>
 
                     <td>
@@ -852,19 +739,27 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
 
                     <td>
+
                         ${escapeHtml(workingHours)}
+
                     </td>
 
                     <td>
+
                         ${escapeHtml(formatBreak(item.breakMinutes))}
+
                     </td>
 
                     <td>
+
                         ${formatScore(item.score)}
+
                     </td>
 
                     <td>
+
                         ${escapeHtml(item.description)}
+
                     </td>
 
                     <td>
@@ -878,7 +773,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 aria-label="${escapeHtml(item.name)}を編集"
                                 title="編集"
                             >
+
                                 <i class="bi bi-pencil-fill"></i>
+
                             </button>
 
                             <button
@@ -888,7 +785,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 aria-label="${escapeHtml(item.name)}を削除"
                                 title="削除"
                             >
+
                                 <i class="bi bi-trash3"></i>
+
                             </button>
 
                         </div>
@@ -927,338 +826,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       編集フォームの切り替え
-    ======================================== */
-
-    function switchEditor(mode) {
-
-        editorMode = mode;
-
-        const busyMode = mode === "busy";
-
-        busyForm.hidden = !busyMode;
-
-        shiftForm.hidden = busyMode;
-
-        editorHeading.textContent = busyMode
-
-            ? "繁忙期の詳細設定"
-
-            : "シフト種別の詳細設定";
-
-    }
-
-
-    /* ========================================
-       繁忙期：文字数カウント
-    ======================================== */
-
-    function updateBusyCounts() {
-
-        get("busyNameCount").textContent =
-            `${get("busyName").value.length} / 50`;
-
-        get("busyDescriptionCount").textContent =
-            `${get("busyDescription").value.length} / 300`;
-
-    }
-
-
-    /* ========================================
-       繁忙期：新規追加
-    ======================================== */
-
-    function addBusyPeriod(focus = true) {
-
-        selectedBusyId = null;
-
-        selectedShiftTypeId = null;
-
-        switchEditor("busy");
-
-        busyForm.reset();
-
-        get("busyLevel").value = "normal";
-
-        get("busyScore").value = "0";
-
-        editorHeading.textContent =
-            "繁忙期の新規追加";
-
-        updateBusyCounts();
-
-        renderBusyPeriods();
-
-        renderShiftTypes();
-
-        showShiftMessage("");
-
-        if (focus) {
-
-            get("busyName").focus();
-
-        }
-
-    }
-
-
-    /* ========================================
-       繁忙期：編集
-    ======================================== */
-
-    function editBusyPeriod(id) {
-
-        const item = busyPeriods.find(
-            period => period.id === id
-        );
-
-        if (!item) {
-            return;
-        }
-
-        selectedBusyId = id;
-
-        selectedShiftTypeId = null;
-
-        switchEditor("busy");
-
-        get("busyName").value = item.name;
-
-        get("busyStartDate").value = item.start;
-
-        get("busyEndDate").value = item.end;
-
-        get("busyLevel").value = item.level;
-
-        get("busyScore").value = item.score;
-
-        get("busyDescription").value =
-            item.description ?? "";
-
-        updateBusyCounts();
-
-        renderBusyPeriods();
-
-        renderShiftTypes();
-
-        showShiftMessage("");
-
-    }
-
-
-    /* ========================================
-       繁忙期：削除
-    ======================================== */
-
-    function deleteBusyPeriod(id) {
-
-        const item = busyPeriods.find(
-            period => period.id === id
-        );
-
-        if (!item) {
-            return;
-        }
-
-        const confirmed = confirm(
-            `「${item.name}」を削除しますか？`
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        const previous = clone(busyPeriods);
-
-        busyPeriods = busyPeriods.filter(
-            period => period.id !== id
-        );
-
-        if (!saveShiftSettings()) {
-
-            busyPeriods = previous;
-
-            return;
-
-        }
-
-        if (selectedBusyId === id) {
-
-            addBusyPeriod(false);
-
-        } else {
-
-            renderBusyPeriods();
-
-        }
-
-        showShiftMessage(
-            "繁忙期を削除しました。"
-        );
-
-    }
-
-
-    /* ========================================
-       繁忙期：保存処理
-    ======================================== */
-
-    busyForm.addEventListener("submit", event => {
-
-        event.preventDefault();
-
-        const name =
-            get("busyName").value.trim();
-
-        const start =
-            get("busyStartDate").value;
-
-        const end =
-            get("busyEndDate").value;
-
-        const level =
-            get("busyLevel").value;
-
-        const rawScore =
-            get("busyScore").value;
-
-        const description =
-            get("busyDescription").value.trim();
-
-
-        /* 必須項目チェック */
-
-        if (!name || !start || !end) {
-
-            showShiftMessage(
-                "必須項目を入力してください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 文字数チェック */
-
-        if (
-            name.length > 50 ||
-            description.length > 300
-        ) {
-
-            showShiftMessage(
-                "入力可能な文字数を超えています。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 日付チェック */
-
-        if (start > end) {
-
-            showShiftMessage(
-                "終了日は開始日以降にしてください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 忙しさレベルチェック */
-
-        if (!Object.hasOwn(levelLabels, level)) {
-
-            showShiftMessage(
-                "忙しさレベルを選択してください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 負担スコアチェック */
-
-        if (!isValidNumber(rawScore, 0, 10)) {
-
-            showShiftMessage(
-                "負担スコア補正は0～10で入力してください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 保存するデータ */
-
-        const id =
-            selectedBusyId ?? nextId(busyPeriods);
-
-        const item = {
-            id,
-            name,
-            start,
-            end,
-            level,
-            score: Number(rawScore),
-            description
-        };
-
-        const previous = clone(busyPeriods);
-
-        const index = busyPeriods.findIndex(
-            period => period.id === id
-        );
-
-
-        /* 新規追加または更新 */
-
-        if (index >= 0) {
-
-            busyPeriods[index] = item;
-
-        } else {
-
-            busyPeriods.push(item);
-
-        }
-
-
-        /* 保存 */
-
-        if (!saveShiftSettings()) {
-
-            busyPeriods = previous;
-
-            return;
-
-        }
-
-        selectedBusyId = id;
-
-        editorHeading.textContent =
-            "繁忙期の詳細設定";
-
-        renderBusyPeriods();
-
-        showShiftMessage(
-            "繁忙期の設定を保存しました。"
-        );
-
-    });
-
-
-    /* ========================================
        シフト種別：新規追加
     ======================================== */
 
@@ -1266,20 +833,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         selectedShiftTypeId = null;
 
-        selectedBusyId = null;
-
-        switchEditor("shift");
-
         shiftForm.reset();
 
         get("shiftTypeColor").value = "#409eff";
 
         get("shiftTypeScore").value = "1.0";
 
+        get("shiftBreakMinutes").value = "0";
+
         editorHeading.textContent =
             "シフト種別の新規追加";
-
-        renderBusyPeriods();
 
         renderShiftTypes();
 
@@ -1310,9 +873,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         selectedShiftTypeId = id;
 
-        selectedBusyId = null;
-
-        switchEditor("shift");
+        editorHeading.textContent =
+            "シフト種別の詳細設定";
 
         get("shiftTypeName").value =
             item.name;
@@ -1334,8 +896,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         get("shiftTypeDescription").value =
             item.description ?? "";
-
-        renderBusyPeriods();
 
         renderShiftTypes();
 
@@ -1380,9 +940,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+
+        /* 削除したシフトが編集中だった場合 */
+
         if (selectedShiftTypeId === id) {
 
-            addShiftType(false);
+            if (shiftTypes.length > 0) {
+
+                editShiftType(
+                    shiftTypes[0].id
+                );
+
+            } else {
+
+                addShiftType(false);
+
+            }
 
         } else {
 
@@ -1398,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       勤務時間の計算
+       勤務時間：分単位への変換
     ======================================== */
 
     function timeToMinutes(time) {
@@ -1410,6 +983,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    /* ========================================
+       勤務時間の計算
+    ======================================== */
 
     function calculateWorkingMinutes(start, end) {
 
@@ -1424,7 +1001,7 @@ document.addEventListener("DOMContentLoaded", () => {
             timeToMinutes(end);
 
 
-        /* 日付をまたぐ勤務にも対応 */
+        /* 日付をまたぐ勤務に対応 */
 
         if (endMinutes < startMinutes) {
 
@@ -1591,11 +1168,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* 重複チェック */
+        /* シフト種別名の重複チェック */
 
         const duplicate = shiftTypes.some(item =>
 
-            item.name.trim() === name &&
+            String(item.name).trim() === name &&
 
             item.id !== selectedShiftTypeId
 
@@ -1619,14 +1196,23 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedShiftTypeId ?? nextId(shiftTypes);
 
         const item = {
+
             id,
+
             name,
+
             color,
+
             start,
+
             end,
+
             breakMinutes,
+
             score: Number(rawScore),
+
             description
+
         };
 
         const previous = clone(shiftTypes);
@@ -1669,52 +1255,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showShiftMessage(
             "シフト種別の設定を保存しました。"
         );
-
-    });
-
-
-    /* ========================================
-       繁忙期：一覧のクリック処理
-    ======================================== */
-
-    busyTable.addEventListener("click", event => {
-
-        const deleteButton =
-            event.target.closest(".delete-busy");
-
-        if (deleteButton) {
-
-            deleteBusyPeriod(
-                Number(deleteButton.dataset.id)
-            );
-
-            return;
-
-        }
-
-        const editButton =
-            event.target.closest(".edit-busy");
-
-        if (editButton) {
-
-            editBusyPeriod(
-                Number(editButton.dataset.id)
-            );
-
-            return;
-
-        }
-
-        const row =
-            event.target.closest("[data-busy-id]");
-
-        if (row) {
-
-            editBusyPeriod(
-                Number(row.dataset.busyId)
-            );
-
-        }
 
     });
 
@@ -1766,16 +1306,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       繁忙期・シフト種別：追加ボタン
+       シフト種別：追加ボタン
     ======================================== */
-
-    get("addBusyPeriodButton")
-        .addEventListener("click", () => {
-
-            addBusyPeriod();
-
-        });
-
 
     get("addShiftTypeButton")
         .addEventListener("click", () => {
@@ -1786,31 +1318,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       繁忙期：キャンセル
-    ======================================== */
-
-    get("cancelBusyPeriodButton")
-        .addEventListener("click", () => {
-
-            if (selectedBusyId !== null) {
-
-                editBusyPeriod(selectedBusyId);
-
-            } else {
-
-                addBusyPeriod(false);
-
-            }
-
-            showShiftMessage(
-                "編集内容を元に戻しました。"
-            );
-
-        });
-
-
-    /* ========================================
-       シフト種別：キャンセル
+       シフト種別：キャンセルボタン
     ======================================== */
 
     get("cancelShiftTypeButton")
@@ -1831,23 +1339,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
         });
-
-
-    /* ========================================
-       繁忙期：文字数カウントイベント
-    ======================================== */
-
-    get("busyName")
-        .addEventListener(
-            "input",
-            updateBusyCounts
-        );
-
-    get("busyDescription")
-        .addEventListener(
-            "input",
-            updateBusyCounts
-        );
 
 
     /* ========================================
@@ -1938,7 +1429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* 優先度チェック */
+        /* 希望シフトの優先度チェック */
 
         if (
             !["high", "medium", "low"]
@@ -2042,8 +1533,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             return {
+
                 success: false,
-                message: "集計期間を選択してください。"
+
+                message:
+                    "集計期間を選択してください。"
+
             };
 
         }
@@ -2061,8 +1556,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             return {
+
                 success: false,
-                message: "リセットタイミングを選択してください。"
+
+                message:
+                    "リセットタイミングを選択してください。"
+
             };
 
         }
@@ -2071,10 +1570,15 @@ document.addEventListener("DOMContentLoaded", () => {
         /* 追加スコアチェック */
 
         const values = [
+
             consecutive,
+
             night,
+
             early,
+
             weeklyOver
+
         ];
 
         if (
@@ -2084,8 +1588,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             return {
+
                 success: false,
-                message: "追加スコアは0～100で入力してください。"
+
+                message:
+                    "追加スコアは0～100で入力してください。"
+
             };
 
         }
@@ -2141,12 +1649,19 @@ document.addEventListener("DOMContentLoaded", () => {
     function calculateScore(data, config) {
 
         const baseScore = Number(
-            config.shiftScores[String(data.shiftTypeId)] ?? 0
+
+            config.shiftScores[
+                String(data.shiftTypeId)
+            ] ?? 0
+
         );
 
         const consecutiveDays = Math.max(
+
             0,
+
             Number(data.consecutiveDays) || 0
+
         );
 
         const consecutiveScore =
@@ -2157,19 +1672,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const nightScore =
 
-            (Number(data.nightCount) || 0) *
+            Math.max(0, Number(data.nightCount) || 0) *
 
             Number(config.conditions.night);
 
         const earlyScore =
 
-            (Number(data.earlyCount) || 0) *
+            Math.max(0, Number(data.earlyCount) || 0) *
 
             Number(config.conditions.early);
 
         const weeklyOverScore =
 
-            (Number(data.weeklyOverDays) || 0) *
+            Math.max(0, Number(data.weeklyOverDays) || 0) *
 
             Number(config.conditions.weeklyOver);
 
@@ -2213,7 +1728,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = readScoreForm();
 
         if (!result.success) {
+
             return;
+
         }
 
         const config = result.data;
@@ -2249,7 +1766,12 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         const exampleShift =
-            normalShift ?? shiftTypes[0] ?? null;
+
+            normalShift ??
+
+            shiftTypes[0] ??
+
+            null;
 
 
         /* 計算例のデータ */
@@ -2269,6 +1791,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         };
 
+
+        /* 負担スコアを計算 */
+
         const calculated = calculateScore(
 
             exampleData,
@@ -2278,7 +1803,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /* 計算例：基本スコア */
+        /* 基本スコア */
 
         get("exampleBase").textContent =
             formatScore(
@@ -2286,7 +1811,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        /* 計算例：連続勤務 */
+        /* 連続勤務 */
 
         get("exampleConsecutive").textContent =
             formatScore(
@@ -2294,7 +1819,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        /* 計算例：夜間勤務 */
+        /* 夜間勤務 */
 
         get("exampleNight").textContent =
             formatScore(
@@ -2302,7 +1827,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        /* 計算例：合計 */
+        /* 合計スコア */
 
         get("exampleTotal").textContent =
             formatScore(
@@ -2310,7 +1835,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        /* 計算例のシフト名を更新 */
+        /* 計算例のシフト種別名を更新 */
 
         const exampleBaseCell =
             get("exampleBase");
@@ -2322,6 +1847,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 .textContent =
 
                 exampleShift?.name ??
+
                 "シフト種別なし";
 
         }
@@ -2340,8 +1866,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!result.success) {
 
             showScoreMessage(
+
                 result.message,
+
                 true
+
             );
 
             return;
@@ -2375,10 +1904,15 @@ document.addEventListener("DOMContentLoaded", () => {
             "負担スコア設定を保存しました。"
         );
 
+
+        /* 更新イベント */
+
         document.dispatchEvent(
+
             new Event(
                 "tasfina:score-settings-updated"
             )
+
         );
 
     }
@@ -2421,6 +1955,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             );
 
+
+        /* 保存 */
+
         if (
             !writeStorage(
                 SCORE_STORAGE_KEY,
@@ -2445,10 +1982,15 @@ document.addEventListener("DOMContentLoaded", () => {
             "負担スコア設定を初期値に戻しました。"
         );
 
+
+        /* 更新イベント */
+
         document.dispatchEvent(
+
             new Event(
                 "tasfina:score-settings-updated"
             )
+
         );
 
     }
@@ -2487,13 +2029,19 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         element.addEventListener(
+
             "input",
+
             update
+
         );
 
         element.addEventListener(
+
             "change",
+
             update
+
         );
 
     });
@@ -2505,8 +2053,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get("saveScoresButton")
         .addEventListener(
+
             "click",
+
             saveScoreSettings
+
         );
 
 
@@ -2516,8 +2067,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get("resetScoresButton")
         .addEventListener(
+
             "click",
+
             resetScoreSettings
+
         );
 
 
@@ -2563,7 +2117,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     >
 
                     <span class="input-group-text">
+
                         倍
+
                     </span>
 
                 </div>
@@ -2639,7 +2195,9 @@ document.addEventListener("DOMContentLoaded", () => {
         workTypes.forEach(item => {
 
             workTypeRows.appendChild(
+
                 createWorkTypeRow(item)
+
             );
 
         });
@@ -2662,9 +2220,11 @@ document.addEventListener("DOMContentLoaded", () => {
             ),
 
             ...Array.from(
+
                 workTypeRows.querySelectorAll(
                     "[data-work-type-id]"
                 )
+
             ).map(row =>
                 Number(row.dataset.workTypeId) || 0
             )
@@ -2672,8 +2232,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ];
 
         const id = Math.max(
+
             0,
+
             ...existingIds
+
         ) + 1;
 
         const item = {
@@ -2814,7 +2377,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
 
-            /* 重複チェック */
+            /* 業務タイプ名の重複チェック */
 
             const normalizedName =
                 name.toLowerCase();
@@ -2946,10 +2509,15 @@ document.addEventListener("DOMContentLoaded", () => {
             "業務タイプ・倍率設定を保存しました。"
         );
 
+
+        /* 更新イベント */
+
         document.dispatchEvent(
+
             new Event(
                 "tasfina:work-types-updated"
             )
+
         );
 
     });
@@ -2961,8 +2529,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get("addWorkTypeButton")
         .addEventListener(
+
             "click",
+
             addWorkType
+
         );
 
 
@@ -3017,8 +2588,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get("openWorkTypeEditButton")
         .addEventListener(
+
             "click",
+
             openWorkTypeModal
+
         );
 
 
@@ -3101,9 +2675,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadWorkTypes();
 
 
-        /* 一覧表示 */
-
-        renderBusyPeriods();
+        /* シフト種別の一覧表示 */
 
         renderShiftTypes();
 
@@ -3120,15 +2692,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         /* 初期編集フォーム */
 
-        if (busyPeriods.length > 0) {
+        if (shiftTypes.length > 0) {
 
-            editBusyPeriod(
-                busyPeriods[0].id
+            editShiftType(
+                shiftTypes[0].id
             );
 
         } else {
 
-            addBusyPeriod(false);
+            addShiftType(false);
 
         }
 

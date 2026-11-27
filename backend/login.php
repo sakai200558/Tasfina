@@ -5,7 +5,7 @@ session_start();
 
 header("Content-Type: application/json; charset=utf-8");
 
-$host = "localhost";
+$host = "127.0.0.1";
 $dbname = "Tasfina_db";
 $dbUsername = "root";
 $dbPassword = "password";

@@ -65,10 +65,12 @@
                 <!-- シフト設定見出し -->
                 <div class="shift-page-heading">
 
-                    <h2 id="heading-shifts">シフト設定</h2>
+                    <h2 id="heading-shifts">
+                        シフト設定
+                    </h2>
 
                     <p>
-                        繁忙期の設定、シフト種別、負担スコアの設定を管理します。
+                        シフト種別と自動調整ルールを管理します。
                     </p>
 
                 </div>
@@ -79,63 +81,6 @@
 
                     <!-- 左カラム -->
                     <div class="shift-settings-left">
-
-
-                        <!-- ========================================
-                             繁忙期設定
-                        ========================================= -->
-
-                        <section class="shift-card">
-
-                            <div class="shift-card-heading">
-
-                                <div>
-
-                                    <h2>繁忙期設定</h2>
-
-                                    <p>
-                                        期間ごとに忙しさのレベルを設定し、
-                                        シフトの負担スコアに反映します。
-                                    </p>
-
-                                </div>
-
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-primary shift-add-button"
-                                    id="addBusyPeriodButton"
-                                >
-                                    <i class="bi bi-plus-lg"></i>
-                                    繁忙期を追加
-                                </button>
-
-                            </div>
-
-                            <div class="table-responsive">
-
-                                <table class="table shift-table">
-
-                                    <thead>
-
-                                        <tr>
-                                            <th>期間</th>
-                                            <th>名称</th>
-                                            <th>忙しさレベル</th>
-                                            <th>負担スコア補正</th>
-                                            <th>説明</th>
-                                            <th>操作</th>
-                                        </tr>
-
-                                    </thead>
-
-                                    <tbody id="busyPeriodTableBody"></tbody>
-
-                                </table>
-
-                            </div>
-
-                        </section>
-
 
                         <!-- ========================================
                              シフト種別設定
@@ -160,8 +105,11 @@
                                     class="btn btn-outline-primary shift-add-button"
                                     id="addShiftTypeButton"
                                 >
+
                                     <i class="bi bi-plus-lg"></i>
+
                                     シフト種別を追加
+
                                 </button>
 
                             </div>
@@ -173,13 +121,21 @@
                                     <thead>
 
                                         <tr>
+
                                             <th>シフト種別</th>
+
                                             <th>表示色</th>
+
                                             <th>勤務時間</th>
+
                                             <th>休憩時間</th>
+
                                             <th>負担スコア</th>
+
                                             <th>説明</th>
+
                                             <th>操作</th>
+
                                         </tr>
 
                                     </thead>
@@ -196,7 +152,7 @@
 
 
                     <!-- ========================================
-                         右カラム：詳細編集フォーム
+                         右カラム：シフト種別編集フォーム
                     ========================================= -->
 
                     <aside class="shift-settings-right">
@@ -204,194 +160,23 @@
                         <section class="shift-card shift-editor-card">
 
                             <h2 id="editorHeading">
-                                繁忙期の詳細設定
+                                シフト種別の詳細設定
                             </h2>
-
-
-                            <!-- 繁忙期編集フォーム -->
-                            <form id="busyPeriodForm" novalidate>
-
-                                <!-- 名称 -->
-                                <div class="shift-form-group">
-
-                                    <label for="busyName">
-                                        名称
-                                        <span class="shift-required">*</span>
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="busyName"
-                                        maxlength="50"
-                                        required
-                                    >
-
-                                    <p
-                                        class="shift-character-count"
-                                        id="busyNameCount"
-                                    >
-                                        0 / 50
-                                    </p>
-
-                                </div>
-
-
-                                <!-- 期間 -->
-                                <div class="shift-form-group">
-
-                                    <label for="busyStartDate">
-                                        期間
-                                        <span class="shift-required">*</span>
-                                    </label>
-
-                                    <div class="shift-date-range">
-
-                                        <input
-                                            type="date"
-                                            class="form-control"
-                                            id="busyStartDate"
-                                            required
-                                        >
-
-                                        <span>～</span>
-
-                                        <input
-                                            type="date"
-                                            class="form-control"
-                                            id="busyEndDate"
-                                            required
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
-                                <!-- 忙しさレベル -->
-                                <div class="shift-form-group">
-
-                                    <label for="busyLevel">
-                                        忙しさレベル
-                                        <span class="shift-required">*</span>
-                                    </label>
-
-                                    <select
-                                        class="form-select"
-                                        id="busyLevel"
-                                        required
-                                    >
-
-                                        <option value="very-high">
-                                            非常に高い
-                                        </option>
-
-                                        <option value="high">
-                                            高い
-                                        </option>
-
-                                        <option value="medium-high">
-                                            やや高い
-                                        </option>
-
-                                        <option value="normal">
-                                            通常
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-
-                                <!-- 負担スコア補正 -->
-                                <div class="shift-form-group">
-
-                                    <label for="busyScore">
-                                        負担スコア補正
-                                        <span class="shift-required">*</span>
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        class="form-control"
-                                        id="busyScore"
-                                        min="0"
-                                        max="10"
-                                        step="0.1"
-                                        required
-                                    >
-
-                                    <p class="shift-help">
-                                        通常時の負担スコアに加算されます。
-                                    </p>
-
-                                </div>
-
-
-                                <!-- 説明 -->
-                                <div class="shift-form-group">
-
-                                    <label for="busyDescription">
-                                        説明
-                                    </label>
-
-                                    <textarea
-                                        class="form-control"
-                                        id="busyDescription"
-                                        rows="3"
-                                        maxlength="300"
-                                    ></textarea>
-
-                                    <p
-                                        class="shift-character-count"
-                                        id="busyDescriptionCount"
-                                    >
-                                        0 / 300
-                                    </p>
-
-                                </div>
-
-
-                                <!-- 操作ボタン -->
-                                <div class="shift-form-actions">
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-secondary"
-                                        id="cancelBusyPeriodButton"
-                                    >
-                                        キャンセル
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        class="btn btn-primary"
-                                    >
-                                        <i class="bi bi-floppy"></i>
-                                        保存
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-
-                            <!-- ========================================
-                                 シフト種別編集フォーム
-                            ========================================= -->
 
                             <form
                                 id="shiftTypeForm"
                                 novalidate
-                                hidden
                             >
 
                                 <!-- シフト種別名 -->
                                 <div class="shift-form-group">
 
                                     <label for="shiftTypeName">
+
                                         シフト種別名
+
                                         <span class="shift-required">*</span>
+
                                     </label>
 
                                     <input
@@ -425,7 +210,9 @@
                                 <!-- 勤務時間 -->
                                 <div class="shift-form-group">
 
-                                    <label>勤務時間</label>
+                                    <label>
+                                        勤務時間
+                                    </label>
 
                                     <div class="shift-date-range">
 
@@ -433,6 +220,7 @@
                                             type="time"
                                             class="form-control"
                                             id="shiftStartTime"
+                                            aria-label="勤務開始時刻"
                                         >
 
                                         <span>～</span>
@@ -441,6 +229,7 @@
                                             type="time"
                                             class="form-control"
                                             id="shiftEndTime"
+                                            aria-label="勤務終了時刻"
                                         >
 
                                     </div>
@@ -460,11 +249,25 @@
                                         id="shiftBreakMinutes"
                                     >
 
-                                        <option value="0">なし</option>
-                                        <option value="30">30分</option>
-                                        <option value="45">45分</option>
-                                        <option value="60">1時間</option>
-                                        <option value="90">1時間30分</option>
+                                        <option value="0">
+                                            なし
+                                        </option>
+
+                                        <option value="30">
+                                            30分
+                                        </option>
+
+                                        <option value="45">
+                                            45分
+                                        </option>
+
+                                        <option value="60">
+                                            1時間
+                                        </option>
+
+                                        <option value="90">
+                                            1時間30分
+                                        </option>
 
                                     </select>
 
@@ -475,8 +278,11 @@
                                 <div class="shift-form-group">
 
                                     <label for="shiftTypeScore">
+
                                         負担スコア
+
                                         <span class="shift-required">*</span>
+
                                     </label>
 
                                     <input
@@ -517,15 +323,20 @@
                                         class="btn btn-outline-secondary"
                                         id="cancelShiftTypeButton"
                                     >
+
                                         キャンセル
+
                                     </button>
 
                                     <button
                                         type="submit"
                                         class="btn btn-primary"
                                     >
+
                                         <i class="bi bi-floppy"></i>
+
                                         保存
+
                                     </button>
 
                                 </div>
@@ -620,9 +431,17 @@
                                 id="requestPriority"
                             >
 
-                                <option value="high">高</option>
-                                <option value="medium">中</option>
-                                <option value="low">低</option>
+                                <option value="high">
+                                    高
+                                </option>
+
+                                <option value="medium">
+                                    中
+                                </option>
+
+                                <option value="low">
+                                    低
+                                </option>
 
                             </select>
 
@@ -634,8 +453,11 @@
                             type="submit"
                             class="btn btn-primary shift-rules-save"
                         >
+
                             <i class="bi bi-floppy"></i>
+
                             保存
+
                         </button>
 
                     </form>
@@ -668,6 +490,7 @@
                     シフト種別の基本スコアは「シフト設定」で変更できます。
                 </p>
 
+
                 <!-- 負担スコア設定見出し -->
                 <div class="score-page-heading">
 
@@ -689,7 +512,6 @@
                     <!-- 左カラム -->
                     <div class="score-left-column">
 
-
                         <!-- ========================================
                              スコア計算の基本設定
                         ========================================= -->
@@ -698,7 +520,9 @@
 
                             <div class="score-card-heading">
 
-                                <h2>スコア計算の基本設定</h2>
+                                <h2>
+                                    スコア計算の基本設定
+                                </h2>
 
                                 <p>
                                     シフトごとの負担度や連続勤務などを考慮して、
@@ -803,7 +627,9 @@
 
                             <div class="score-card-heading">
 
-                                <h2>業務タイプ・倍率設定</h2>
+                                <h2>
+                                    業務タイプ・倍率設定
+                                </h2>
 
                                 <p>
                                     業務内容の負荷に応じた倍率を設定します。
@@ -817,8 +643,11 @@
                                 class="btn btn-outline-primary"
                                 id="openWorkTypeEditButton"
                             >
+
                                 <i class="bi bi-sliders"></i>
+
                                 業務タイプを編集
+
                             </button>
 
                         </section>
@@ -832,7 +661,9 @@
 
                             <div class="score-card-heading">
 
-                                <h2>追加条件のスコア設定</h2>
+                                <h2>
+                                    追加条件のスコア設定
+                                </h2>
 
                                 <p>
                                     シフトの連続勤務や時間帯などの条件による
@@ -848,15 +679,18 @@
                                     <thead>
 
                                         <tr>
+
                                             <th>条件</th>
+
                                             <th>加算スコア</th>
+
                                             <th>説明</th>
+
                                         </tr>
 
                                     </thead>
 
                                     <tbody>
-
 
                                         <!-- 連続勤務 -->
                                         <tr>
@@ -872,7 +706,9 @@
                                                     title="2日以上の連続勤務で、2日目以降の勤務日数に応じて加算します。"
                                                     aria-label="連続勤務の説明"
                                                 >
+
                                                     <i class="bi bi-question-circle"></i>
+
                                                 </button>
 
                                             </td>
@@ -919,7 +755,9 @@
                                                     title="勤務時間が22時以降にかかるシフトに加算します。"
                                                     aria-label="夜間シフトの説明"
                                                 >
+
                                                     <i class="bi bi-question-circle"></i>
+
                                                 </button>
 
                                             </td>
@@ -960,7 +798,9 @@
                                                     title="勤務開始時刻が6時以前のシフトに加算します。"
                                                     aria-label="早朝シフトの説明"
                                                 >
+
                                                     <i class="bi bi-question-circle"></i>
+
                                                 </button>
 
                                             </td>
@@ -987,7 +827,7 @@
                                         </tr>
 
 
-                                        <!-- 勤務日数上限超過 -->
+                                        <!-- 週の勤務日数上限超過 -->
                                         <tr>
 
                                             <td>
@@ -1001,7 +841,9 @@
                                                     title="シフト設定で指定した連続勤務の上限日数を、プレビュー上の週上限として利用します。"
                                                     aria-label="週の上限超過の説明"
                                                 >
+
                                                     <i class="bi bi-question-circle"></i>
+
                                                 </button>
 
                                             </td>
@@ -1039,7 +881,7 @@
 
 
                     <!-- ========================================
-                         右カラム：計算式の確認
+                         右カラム：負担スコア計算式
                     ========================================= -->
 
                     <div class="score-right-column">
@@ -1048,7 +890,9 @@
 
                             <div class="score-card-heading">
 
-                                <h2>計算式の確認</h2>
+                                <h2>
+                                    計算式の確認
+                                </h2>
 
                                 <p>
                                     下記の式で負担スコアを計算します。
@@ -1068,7 +912,9 @@
                             <!-- 追加スコアの内訳 -->
                             <div class="score-formula-example">
 
-                                <h3>追加スコアの内訳（例）</h3>
+                                <h3>
+                                    追加スコアの内訳（例）
+                                </h3>
 
                                 <ul>
 
@@ -1119,7 +965,9 @@
 
                             <div class="score-calculation">
 
-                                <h3>計算例</h3>
+                                <h3>
+                                    計算例
+                                </h3>
 
                                 <p>
                                     Aさんの1日の負担スコア例
@@ -1130,9 +978,13 @@
                                     <thead>
 
                                         <tr>
+
                                             <th>項目</th>
+
                                             <th>内容</th>
+
                                             <th>スコア</th>
+
                                         </tr>
 
                                     </thead>
@@ -1140,33 +992,53 @@
                                     <tbody>
 
                                         <tr>
+
                                             <td>基本スコア</td>
+
                                             <td>通常出勤</td>
+
                                             <td id="exampleBase">1.0</td>
+
                                         </tr>
 
                                         <tr>
+
                                             <td>連続勤務</td>
+
                                             <td>3日目</td>
+
                                             <td id="exampleConsecutive">0.4</td>
+
                                         </tr>
 
                                         <tr>
+
                                             <td>夜間シフト</td>
+
                                             <td>あり</td>
+
                                             <td id="exampleNight">1.0</td>
+
                                         </tr>
 
                                         <tr>
+
                                             <td>早朝シフト</td>
+
                                             <td>なし</td>
+
                                             <td>0.0</td>
+
                                         </tr>
 
                                         <tr>
+
                                             <td>週の上限超過</td>
+
                                             <td>なし</td>
+
                                             <td>0.0</td>
+
                                         </tr>
 
                                     </tbody>
@@ -1216,7 +1088,9 @@
                         class="btn btn-outline-primary"
                         id="resetScoresButton"
                     >
+
                         リセット
+
                     </button>
 
                     <button
@@ -1224,8 +1098,11 @@
                         class="btn btn-primary"
                         id="saveScoresButton"
                     >
+
                         <i class="bi bi-floppy"></i>
+
                         保存
+
                     </button>
 
                 </div>
@@ -1255,7 +1132,6 @@
 
                 <div class="modal-content">
 
-
                     <!-- モーダルヘッダー -->
                     <div class="modal-header">
 
@@ -1276,7 +1152,9 @@
                             </h2>
 
                             <p class="work-type-subtitle mb-0">
+
                                 業務内容に応じた負担スコアの倍率を設定します。
+
                             </p>
 
                         </div>
@@ -1402,7 +1280,9 @@
                             class="btn btn-outline-secondary"
                             data-bs-dismiss="modal"
                         >
+
                             キャンセル
+
                         </button>
 
                         <button
