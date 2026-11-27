@@ -371,7 +371,7 @@
                     <div class="text-gray-600 pl-5">※ 希望シフト・有休申請・繁忙期設定も考慮して調整します。</div>
                 </div>
 
-                <!-- 2カラム構成 -->
+               <!-- 2カラム構成 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- 左側設定エリア -->
                     <div class="space-y-4">
@@ -396,9 +396,28 @@
                             <div class="space-y-1.5">
                                 <label class="block font-bold text-gray-700">対象メンバー <span class="text-red-500">*</span></label>
                                 <div class="space-y-1 pl-1">
-                                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="targetMember" checked class="text-blue-600"> <span>全メンバー (32名)</span></label>
-                                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="targetMember" class="text-blue-600"> <span>特定のメンバーを選択</span></label>
-                                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="targetMember" class="text-blue-600"> <span>特定の部署を選択</span></label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="targetMember" value="all" checked class="text-blue-600">
+                                        <span>全メンバー</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="targetMember" value="member" class="text-blue-600">
+                                        <span>特定のメンバーを選択</span>
+                                    </label>
+                                    <select id="rouletteTargetUserId" class="hidden w-full p-1.5 border border-gray-300 rounded bg-white">
+                                        <option value="1">ユーザーID: 1</option>
+                                        <option value="2">ユーザーID: 2</option>
+                                        <option value="3">ユーザーID: 3</option>
+                                    </select>
+
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="targetMember" value="dept" class="text-blue-600">
+                                        <span>特定の部署を選択</span>
+                                    </label>
+                                    <select id="rouletteTargetDeptId" class="hidden w-full p-1.5 border border-gray-300 rounded bg-white">
+                                        <option value="1">部署ID: 1</option>
+                                        <option value="2">部署ID: 2</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -410,11 +429,26 @@
                                 考慮する条件
                             </div>
                             <div class="space-y-1.5 pl-1">
-                                <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded text-blue-600"> <span>希望シフトを優先する</span></label>
-                                <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded text-blue-600"> <span>有休申請を除外する</span></label>
-                                <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded text-blue-600"> <span>繁忙期設定を考慮する (加算ポイントを反映)</span></label>
-                                <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded text-blue-600"> <span>連続勤務日数の上限を考慮する (例: 5日まで)</span></label>
-                                <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-blue-600"> <span>直近のシフト負担スコアを使用する</span></label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="condPreferShift" checked class="rounded text-blue-600">
+                                    <span>希望シフトを優先する</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="condExcludeLeave" checked class="rounded text-blue-600">
+                                    <span>有休申請を除外する</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="condConsiderBusy" checked class="rounded text-blue-600">
+                                    <span>繁忙期設定を考慮する (加算ポイントを反映)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="condMaxConsecutive" checked class="rounded text-blue-600">
+                                    <span>連続勤務日数の上限を考慮する (例: 5日まで)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="condUseBurdenScore" checked class="rounded text-blue-600">
+                                    <span>直近のシフト負担スコアを使用する</span>
+                                </label>
                             </div>
                         </div>
 
@@ -424,14 +458,13 @@
                                 <span class="flex items-center justify-center w-5 h-5 bg-blue-600 text-white rounded-full text-[11px]">3</span>
                                 当選者数
                             </div>
-                            <select class="w-full p-2 border border-gray-300 rounded bg-white">
-                                <option>1名</option>
-                                <option>2名</option>
-                                <option>3名</option>
+                            <select id="rouletteWinnerCount" class="w-full p-2 border border-gray-300 rounded bg-white">
+                                <option value="1">1名</option>
+                                <option value="2">2名</option>
+                                <option value="3">3名</option>
                             </select>
                         </div>
                     </div>
-
                     <!-- 右側プレビューエリア -->
                     <div class="space-y-4">
                         <!-- メンバー別の当選確率テーブル -->
