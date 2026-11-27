@@ -10,5 +10,35 @@
         "file_path": "..\/..\/backend\/uploads\/task_37_1795740874.jpg",
         "file_name": "柴犬４.jpg",
         "updated_at": "2026-11-27 00:54:34"
+    },
+    "39": {
+        "report": "できた",
+        "file_path": null,
+        "file_name": null,
+        "updated_at": "2026-11-27 02:43:49"
+    },
+    "40": {
+        "report": "できた",
+        "file_path": null,
+        "file_name": null,
+        "updated_at": "2026-11-27 02:51:29"
+    },
+    "38": {
+        "report": "できた",
+        "file_path": null,
+        "file_name": null,
+        "updated_at": "2026-11-27 02:51:42"
+    },
+    "41": {
+        "report": "出来てる",
+        "file_path": null,
+        "file_name": null,
+        "updated_at": "2026-11-27 02:56:19"
+    },
+    "42": {
+        "report": "できた",
+        "file_path": "..\/..\/backend\/uploads\/task_42_1795752395.pdf",
+        "file_name": "無題.pdf",
+        "updated_at": "2026-11-27 04:06:35"
     }
 }

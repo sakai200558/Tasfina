@@ -131,6 +131,23 @@
     font-weight: 700;
 }
 
+/* ★ ここから追加：承認待ちタブの未処理件数バッジ */
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #ef4444;
+    border-radius: 999px;
+    line-height: 1;
+}
+
 /* 検索 */
 
 .task-filters {
@@ -163,7 +180,7 @@
     border: 1px solid #cfd8e5;
     border-radius: 7px;
     background: #ffffff;
-    font-size: 14px;
+    font-size: 15px;
     color: #263249;
     outline: none;
 }
@@ -177,7 +194,7 @@
     width: 195px;
     min-height: 46px;
     border-color: #cfd8e5;
-    font-size: 14px;
+    font-size: 15px;
     color: #263249;
 }
 
@@ -195,7 +212,7 @@
 .task-table thead th {
     background: #f4f6f9;
     color: #202b40;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     padding: 13px 15px;
     border-bottom: 1px solid #e1e7ef;
@@ -213,7 +230,7 @@
 .task-table tbody td {
     padding: 12px 15px;
     border-bottom: 1px solid #e7ebf1;
-    font-size: 14px;
+    font-size: 16px;
     color: #273249;
 }
 
@@ -268,29 +285,42 @@
     color: #1266c5;
 }
 
-/* ステータス */
+/* ステータス（カラーバッジ） */
 
-.task-table .status,
-.task-table .task-status {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    color: #4f5e76;
-    font-size: 14px;
+.status-badge {
+    display: inline-block;
+    padding: 5px 13px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 999px;
+    line-height: 1.2;
     white-space: nowrap;
 }
 
-.task-table .status-progress {
-    color: #2f638f;
+/* 進行中（青） */
+.status-progress {
+    background-color: #e0f2fe;
+    color: #0369a1;
 }
 
-.task-table .status-pending {
-    color: #86611c;
+/* 承認待ち・工数変更承認待ち（オレンジ） */
+.status-pending {
+    background-color: #fef3c7;
+    color: #b45309;
 }
 
-.task-table .status-done {
-    color: #26805b;
+/* 完了（緑） */
+.status-done {
+    background-color: #dcfce7;
+    color: #15803d;
 }
+
+/* 未着手など（グレー） */
+.status-default {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
 
 /* テーブル下部 */
 
@@ -353,7 +383,7 @@
 }
 
 .task-detail-name {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #101a37;
     margin: 0 0 14px;
@@ -374,8 +404,19 @@
     padding: 12px 14px;
 }
 
+/* 長文の報告・申請理由を横幅いっぱいに表示 */
+.task-detail-item.is-wide {
+    grid-column: 1 / -1;
+}
+
+/* 差し戻し理由を薄い赤色で強調 */
+.task-detail-item.is-reject {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
 .task-detail-item p {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #68758c;
     margin: 0 0 4px;
@@ -383,7 +424,7 @@
 
 .task-detail-item strong {
     display: block;
-    font-size: 15px;
+    font-size: 17px;
     color: #17213a;
     word-break: break-word;
 }
@@ -410,7 +451,7 @@
     min-height: 45px;
     padding: 8px 18px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -539,3 +580,35 @@
         padding-bottom: 0;
     }
 }
+
+/* ========================================
+   期限切れ・期限間近の強調表示
+======================================== */
+.due-overdue {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+.due-soon {
+    color: #d97706 !important;
+    font-weight: 700;
+}
+
+/* ========================================
+   集計カード（完了カード）のクリック・選択表示
+======================================== */
+.task-summary-card.is-clickable {
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-summary-card.is-clickable:hover {
+    border-color: #1266c5;
+    box-shadow: 0 2px 8px rgba(18, 102, 197, 0.12);
+}
+
+.task-summary-card.is-clickable.active {
+    border: 2px solid #1266c5;
+    background: #f4f9ff;
+}
+
