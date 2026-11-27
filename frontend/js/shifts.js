@@ -184,31 +184,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nextShiftReqMonthBtn) nextShiftReqMonthBtn.addEventListener('click', () => changeShiftReqMonth(1));
 
     // モーダル開閉のイベントリスナー設定
-    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal.classList.remove('hidden'));
+    if (openPaidLeaveBtn) openPaidLeaveBtn.addEventListener('click', () => paidLeaveModal?.classList.remove('hidden'));
     [closePaidLeaveModalBtn, cancelPaidLeaveModalBtn].forEach(btn => {
-        if (btn) btn.addEventListener('click', () => paidLeaveModal.classList.add('hidden'));
+        if (btn) btn.addEventListener('click', () => paidLeaveModal?.classList.add('hidden'));
     });
 
     if (openPreferredModalBtn) {
         openPreferredModalBtn.addEventListener('click', () => {
             shiftReqYM = currentYM;
             renderShiftRequestGrid(shiftReqYM);
-            preferredModal.classList.remove('hidden');
+            preferredModal?.classList.remove('hidden');
         });
     }
     [closePreferredModalBtn, cancelPreferredModalBtn].forEach(btn => {
-        if (btn) btn.addEventListener('click', () => preferredModal.classList.add('hidden'));
+        if (btn) btn.addEventListener('click', () => preferredModal?.classList.add('hidden'));
     });
 
-    if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal.classList.remove('hidden'));
+    if (openBusyModalBtn) openBusyModalBtn.addEventListener('click', () => busyModal?.classList.remove('hidden'));
     [closeBusyModalBtn, cancelBusyModalBtn].forEach(btn => {
-        if (btn) btn.addEventListener('click', () => busyModal.classList.add('hidden'));
+        if (btn) btn.addEventListener('click', () => busyModal?.classList.add('hidden'));
     });
 
     openRouletteModalBtns.forEach(btn => {
         btn.addEventListener('click', async () => {
-            await loadRouletteOptions();
             if (rouletteModal) rouletteModal.classList.remove('hidden');
+            await loadRouletteOptions();
         });
     });
     [closeRouletteModalBtn, cancelRouletteModalBtn].forEach(btn => {
@@ -219,8 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (openApplicationHistoryBtn) {
         openApplicationHistoryBtn.addEventListener('click', async () => {
-            await loadApplications();
             if (applicationHistoryModal) applicationHistoryModal.classList.remove('hidden');
+            await loadApplications();
         });
     }
     [closeApplicationHistoryBtn, closeApplicationHistoryFooterBtn].forEach(btn => {
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 権限に応じた画面表示切り替え関数
     function applyRoleView(roleCode) {
-        const isAdmin = roleCode === ('3000' || '4000') || roleCode === ('1000' || '2000') || roleCode === 'admin';
+        const isAdmin = roleCode === '3000' || roleCode === '4000' || roleCode === '1000' || roleCode === '2000' || roleCode === 'admin';
         currentIsAdmin = isAdmin;
 
         if (roleSelector) {
@@ -320,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     : `<option value="">登録部署なし</option>`;
             }
 
-            // 負担スコアから当選確率を算出してテーブル・プレビューへ反映
-           if (rouletteProbTableBody && users.length) {
+            if (rouletteProbTableBody && users.length) {
                 const weights = users.map(u => Math.max(1, 500 - parseFloat(u.burden_score || 0)));
                 const totalW = weights.reduce((a, b) => a + b, 0);
 
@@ -343,20 +342,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     rouletteTopProbText.textContent = `${rowsWithProb[0].prob}%`;
                 }
 
-                // 円形プレビューのグラデーションをDB算出の確率に合わせて更新
                 if (rouletteWheelGauge) {
                     const hexColors = ['#3b82f6', '#818cf8', '#93c5fd', '#d1d5db'];
                     const topThree = rowsWithProb.slice(0, 3);
                     const restProb = Math.max(0, 100 - topThree.reduce((sum, r) => sum + r.prob, 0));
-
-                    const segments = topThree.map((r, i) => ({
-                        prob: r.prob,
-                        color: hexColors[i]
-                    }));
+                    const segments = topThree.map((r, i) => ({ prob: r.prob, color: hexColors[i] }));
                     if (rowsWithProb.length > 3) {
                         segments.push({ prob: restProb, color: hexColors[3] });
                     }
-
                     let currentDeg = 0;
                     const stops = segments.map(seg => {
                         const startDeg = currentDeg;
@@ -364,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentDeg = endDeg;
                         return `${seg.color} ${startDeg.toFixed(1)}deg ${endDeg.toFixed(1)}deg`;
                     });
-
                     rouletteWheelGauge.style.background = `conic-gradient(${stops.join(', ')})`;
                 }
 
@@ -845,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (result.success) {
                     alert(result.message || 'シフトルーレットによる割り当てが完了しました。');
-                    rouletteModal.classList.add('hidden');
+                    rouletteModal?.classList.add('hidden');
                     await loadShiftData();
                     await loadDashboardInfo();
                 } else {
