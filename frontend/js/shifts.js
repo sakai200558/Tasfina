@@ -252,18 +252,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- データ取得 & レンダリング ---
-    async function loadShiftData() {
+       async function loadShiftData() {
         try {
-            const res = await fetch(`${SHIFT_API_URL}?action=get_month_data&ym=${currentYM}&user_id=${userId}`);
+            const res = await fetch(`${SHIFT_API_URL}?action=get_month_data&ym=${currentYM}`);
             const data = await res.json();
             if (data.success) {
                 renderCalendar(currentYM, data.shifts, data.busy_days);
-                renderSummary(data.summary);
+                renderSummary(data.shifts);
             }
         } catch (err) {
             console.error('シフトデータ取得エラー:', err);
         }
     }
+
 
     async function loadDashboardInfo() {
         try {
@@ -271,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const todayLabel = document.getElementById('todayDateLabel');
             if (todayLabel) todayLabel.textContent = todayStr;
 
-            const res = await fetch(`${SHIFT_API_URL}?action=get_dashboard_info&today=${todayStr}&user_id=${userId}`);
+            const res = await fetch(`${SHIFT_API_URL}?action=get_dashboard_info&today=${todayStr}`);
             const data = await res.json();
 
             if (data.success) {
@@ -410,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadApplications() {
         try {
-            const res = await fetch(`${SHIFT_API_URL}?action=get_applications&user_id=${userId}&is_admin=${currentIsAdmin ? '1' : '0'}`);
+            const res = await fetch(`${SHIFT_API_URL}?action=get_applications&is_admin=${currentIsAdmin ? '1' : '0'}`);
             const data = await res.json();
             if (!data.success) return;
 
@@ -567,12 +568,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const fullDate = `${ym}-${dayStr}`;
             const shift = shifts.find(s => s.work_date && s.work_date.startsWith(fullDate));
             const isBusy = busyDays.some(b => b.date === fullDate);
+            const isPending = shift && shift.approval_status === '承認待ち';
 
-            let badgeClass = "bg-blue-50 text-blue-700 border-blue-100";
+            let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
             let typeName = shift ? shift.status : '';
-            if (typeName === '在宅勤務') badgeClass = "bg-green-50 text-green-700 border-green-100";
-            else if (typeName === '午前休') badgeClass = "bg-orange-50 text-orange-700 border-orange-100";
-            else if (typeName === '休日' || typeName === '有給休暇') badgeClass = "bg-red-50 text-red-700 border-red-100 text-center";
+            if (typeName === '在宅勤務') badgeClass = "bg-green-50 text-green-700 border-green-200";
+            else if (typeName === '午前休') badgeClass = "bg-orange-50 text-orange-700 border-orange-200";
+            else if (typeName === '休日' || typeName === '有給休暇') badgeClass = "bg-red-50 text-red-700 border-red-200 text-center";
+
+            if (isPending) {
+                badgeClass += " opacity-75 border-dashed border-2";
+            }
 
             const cell = document.createElement('div');
             cell.className = `min-h-[90px] p-1.5 bg-white relative border cursor-pointer hover:bg-blue-50/20 ${isBusy ? 'bg-pink-50/40' : ''}`;
@@ -581,14 +587,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${isBusy ? '<span class="text-[10px] text-pink-600 font-bold block">繁忙日</span>' : ''}
                 ${shift ? `
                     <div class="mt-1 ${badgeClass} rounded p-1 text-xs font-medium border">
-                        <div>${typeName}</div>
+                        <div>${isPending ? `(申請中) ${typeName}` : typeName}</div>
                         ${shift.start_time ? `<div class="text-[10px] opacity-75">${shift.start_time.slice(0,5)}～${shift.end_time.slice(0,5)}</div>` : ''}
                     </div>` : ''}
             `;
 
             cell.addEventListener('click', () => {
                 document.getElementById('selectedDateText').textContent = `${year}年${month}月${i}日`;
-                document.getElementById('detailShiftType').textContent = typeName || 'ー';
+                document.getElementById('detailShiftType').textContent = typeName ? (isPending ? `${typeName}（承認待ち）` : typeName) : 'ー';
                 document.getElementById('detailTime').textContent = shift && shift.start_time ? `${shift.start_time.slice(0,5)} ～ ${shift.end_time.slice(0,5)}` : 'ー';
             });
 
@@ -596,15 +602,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderSummary(summary) {
+    function renderSummary(shifts) {
         const list = document.getElementById('shiftSummaryList');
         if (!list) return;
         list.innerHTML = '';
 
+        const approvedShifts = (shifts || []).filter(s => s.approval_status === '承認済み');
         const types = ['通常出勤', '在宅勤務', '午前休', '有給休暇', '休日'];
         types.forEach(type => {
-            const found = summary.find(s => s.status_type === type);
-            const count = found ? found.count : 0;
+            const count = approvedShifts.filter(s => s.status === type).length;
             list.innerHTML += `
                 <div class="flex justify-between items-center py-1 border-b border-gray-100">
                     <span class="text-gray-600">${type}</span>
@@ -674,6 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(result.message || `${items.length}日分の希望シフトを申請しました。`);
                     preferredModal.classList.add('hidden');
                     await loadApplications();
+                    await loadShiftData();
                 } else {
                     alert('エラー: ' + (result.error || '申請に失敗しました。'));
                 }
@@ -727,6 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(result.message || '有休申請を送信しました。');
                     paidLeaveModal.classList.add('hidden');
                     await loadApplications();
+                    await loadShiftData();
                 } else {
                     alert('エラー: ' + (result.error || '申請に失敗しました。'));
                 }
@@ -861,4 +869,28 @@ document.addEventListener('DOMContentLoaded', () => {
     loadShiftData();
     loadDashboardInfo();
     loadApplications();
+
+        // ★ 「一覧を見る →」ボタンで申請履歴一覧モーダルを確実に開く
+    const openHistoryBtn = document.getElementById('openApplicationHistoryBtn');
+    const historyModalEl = document.getElementById('applicationHistoryModal');
+    const closeHistoryTopBtn = document.getElementById('closeApplicationHistoryBtn');
+    const closeHistoryBottomBtn = document.getElementById('closeApplicationHistoryFooterBtn');
+
+    if (openHistoryBtn && historyModalEl) {
+        openHistoryBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            historyModalEl.classList.remove('hidden');
+                       if (typeof renderApplicationHistoryModal === 'function') {
+                renderApplicationHistoryModal(typeof allApplications !== 'undefined' ? allApplications : []);
+            }
+
+        });
+    }
+    if (closeHistoryTopBtn && historyModalEl) {
+        closeHistoryTopBtn.addEventListener('click', () => historyModalEl.classList.add('hidden'));
+    }
+    if (closeHistoryBottomBtn && historyModalEl) {
+        closeHistoryBottomBtn.addEventListener('click', () => historyModalEl.classList.add('hidden'));
+    }
+
 });

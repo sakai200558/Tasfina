@@ -40,5 +40,11 @@
         "file_path": "..\/..\/backend\/uploads\/task_42_1795752395.pdf",
         "file_name": "無題.pdf",
         "updated_at": "2026-11-27 04:06:35"
+    },
+    "43": {
+        "report": "完了",
+        "file_path": null,
+        "file_name": null,
+        "updated_at": "2026-11-27 04:42:25"
     }
 }

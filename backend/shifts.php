@@ -1,747 +1,390 @@
 <?php
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-$host = 'localhost';
-$dbname = 'Tasfina_db';
-$username = 'tasfina_user';
-$password = 'tasfina_pass';
+require_once __DIR__ . '/../db.php';
 
-$charset = 'utf8mb4';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'error' => 'DB接続失敗: ' . $e->getMessage()]);
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'ログインしていません。再ログインしてください。']);
     exit;
 }
 
+$session_user_id = intval($_SESSION['user_id']);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ==========================================
-// GET リクエスト処理
-// ==========================================
+// =========================================================================
+// GET リクエスト
+// =========================================================================
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
-    $user_id = $_GET['user_id'] ?? 1;
+    $user_id = $session_user_id;
 
-    // --- 月別カレンダーデータ・集計の取得（承認済み・確定シフト対象） ---
+    // 1. カレンダー用の月間シフト & 繁忙日 & 集計取得
     if ($action === 'get_month_data') {
-        $year_month = $_GET['ym'] ?? date('Y-m');
+        $ym = $_GET['ym'] ?? date('Y-m');
 
+        $stmt = $pdo->prepare("
+            SELECT shift_id, user_id, dept_id, app_type, status_type,
+                   DATE(work_date) AS work_date, start_date, end_date,
+                   start_time, end_time, reason,
+                   COALESCE(status_type, status) AS status,
+                   approval_status, busy_day_flag, bonus_pt
+            FROM shifts
+            WHERE user_id = ?
+              AND DATE_FORMAT(work_date, '%Y-%m') = ?
+              AND approval_status IN ('承認済み', '承認待ち')
+            ORDER BY work_date ASC, FIELD(approval_status, '承認済み', '承認待ち'), shift_id ASC
+        ");
+        $stmt->execute([$user_id, $ym]);
+        $shifts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $busy_days = [];
         try {
-            $stmt = $pdo->prepare("
-                SELECT * FROM shifts 
-                WHERE user_id = ?
-                  AND work_date IS NOT NULL
-                  AND app_type IS NULL
-                  AND approval_status = '承認済み'
-                  AND DATE_FORMAT(work_date, '%Y-%m') = ?
-            ");
-            $stmt->execute([$user_id, $year_month]);
-            $shifts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $stmt_busy = $pdo->prepare("
-                SELECT * FROM busy_day_settings 
-                WHERE DATE_FORMAT(date, '%Y-%m') = ? AND is_active = 1
-            ");
-            $stmt_busy->execute([$year_month]);
-            $busy_days = $stmt_busy->fetchAll(PDO::FETCH_ASSOC);
-
-            $stmt_summary = $pdo->prepare("
-                SELECT 
-                    COALESCE(status, '未設定') as status_type, 
-                    COUNT(*) as count 
-                FROM shifts 
-                WHERE user_id = ?
-                  AND work_date IS NOT NULL
-                  AND app_type IS NULL
-                  AND approval_status = '承認済み'
-                  AND DATE_FORMAT(work_date, '%Y-%m') = ?
-                GROUP BY COALESCE(status, '未設定')
-            ");
-            $stmt_summary->execute([$user_id, $year_month]);
-            $summary = $stmt_summary->fetchAll(PDO::FETCH_ASSOC);
-
-            echo json_encode([
-                'success' => true,
-                'shifts' => $shifts,
-                'busy_days' => $busy_days,
-                'summary' => $summary
-            ]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            $bStmt = $pdo->prepare("SELECT * FROM busy_day_settings WHERE DATE_FORMAT(target_date, '%Y-%m') = ?");
+            $bStmt->execute([$ym]);
+            foreach ($bStmt->fetchAll(PDO::FETCH_ASSOC) as $b) {
+                $d = $b['target_date'] ?? $b['busy_date'] ?? $b['date'] ?? '';
+                if ($d) $busy_days[] = ['date' => substr($d, 0, 10)];
+            }
+        } catch (Exception $e) {
+            foreach ($shifts as $s) {
+                if (!empty($s['busy_day_flag'])) {
+                    $busy_days[] = ['date' => $s['work_date']];
+                }
+            }
         }
+
+        $sumStmt = $pdo->prepare("
+            SELECT status_type, COUNT(*) AS count
+            FROM shifts
+            WHERE user_id = ?
+              AND DATE_FORMAT(work_date, '%Y-%m') = ?
+              AND approval_status = '承認済み'
+            GROUP BY status_type
+        ");
+        $sumStmt->execute([$user_id, $ym]);
+        $summary = $sumStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'shifts' => $shifts,
+            'busy_days' => $busy_days,
+            'summary' => $summary
+        ]);
         exit;
     }
 
-    // --- シフトルーレット用 メンバー・部署・負担スコア取得 ---
-    if ($action === 'get_roulette_options') {
-        try {
-            $stmtUsers = $pdo->query("
-                SELECT
-                    u.user_id,
-                    COALESCE(NULLIF(TRIM(u.display_name), ''), CONCAT('ユーザーID:', u.user_id)) AS display_name,
-                    COALESCE(SUM(ws.total_score), 0) AS burden_score
-                FROM users u
-                LEFT JOIN workload_scores ws ON u.user_id = ws.user_id
-                GROUP BY u.user_id, u.display_name
-                ORDER BY u.user_id ASC
-            ");
-            $users = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
 
-            $stmtDepts = $pdo->query("
-                SELECT
-                    d.dept_id,
-                    COALESCE(NULLIF(TRIM(d.dept_name), ''), CONCAT('部署ID:', d.dept_id)) AS dept_name
-                FROM departments d
-                ORDER BY d.dept_id ASC
-            ");
-            $departments = $stmtDepts->fetchAll(PDO::FETCH_ASSOC);
-
-            echo json_encode([
-                'success' => true,
-                'users' => $users,
-                'departments' => $departments
-            ]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    // --- 本日のシフト情報およびユーザー権限の取得 ---
+    // 2. ダッシュボード情報（ログインユーザー情報 & 本日のシフト）
     if ($action === 'get_dashboard_info') {
         $today = $_GET['today'] ?? date('Y-m-d');
 
-        try {
-            $stmt_user = $pdo->prepare("
-                SELECT user_id, display_name, role_code 
-                FROM users 
-                WHERE user_id = ?
-            ");
-            $stmt_user->execute([$user_id]);
-            $user_info = $stmt_user->fetch(PDO::FETCH_ASSOC);
+        $uStmt = $pdo->prepare("SELECT user_id, display_name, display_name AS name, role_code, group_id FROM users WHERE user_id = ?");
+        $uStmt->execute([$user_id]);
+        $user = $uStmt->fetch(PDO::FETCH_ASSOC);
 
-            $stmt_today = $pdo->prepare("
-                SELECT * FROM shifts 
-                WHERE user_id = ?
-                  AND work_date IS NOT NULL
-                  AND app_type IS NULL
-                  AND approval_status = '承認済み'
-                  AND DATE(work_date) = ?
-                ORDER BY shift_id DESC
-                LIMIT 1
-            ");
-            $stmt_today->execute([$user_id, $today]);
-            $todays_shift = $stmt_today->fetch(PDO::FETCH_ASSOC);
+        $sStmt = $pdo->prepare("
+            SELECT shift_id, COALESCE(status_type, status) AS status, start_time, end_time
+            FROM shifts
+            WHERE user_id = ? AND DATE(work_date) = ? AND approval_status = '承認済み'
+            ORDER BY shift_id DESC LIMIT 1
+        ");
+        $sStmt->execute([$user_id, $today]);
+        $todays_shift = $sStmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-            echo json_encode([
-                'success' => true,
-                'user' => $user_info,
-                'todays_shift' => $todays_shift
-            ]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode([
+            'success' => true,
+            'user' => $user,
+            'todays_shift' => $todays_shift
+        ]);
+        exit;
+    }
+    // 3. 申請状況・申請履歴取得
+    if ($action === 'get_applications') {
+        $is_admin = ($_GET['is_admin'] ?? '0') === '1';
+
+        if ($is_admin) {
+            $sql = "
+                SELECT s.shift_id AS application_id, s.user_id, u.display_name AS user_name,
+                       s.app_type, s.status_type, s.status, s.approval_status,
+                       s.start_date, s.end_date, s.reason, s.created_at AS applied_at
+                FROM shifts s
+                JOIN users u ON s.user_id = u.user_id
+                WHERE s.app_type IS NOT NULL AND s.app_type != ''
+                ORDER BY FIELD(s.approval_status, '承認待ち', '承認済み'), s.created_at DESC
+            ";
+            $stmt = $pdo->query($sql);
+        } else {
+            $sql = "
+                SELECT s.shift_id AS application_id, s.user_id, u.display_name AS user_name,
+                       s.app_type, s.status_type, s.status, s.approval_status,
+                       s.start_date, s.end_date, s.reason, s.created_at AS applied_at
+                FROM shifts s
+                JOIN users u ON s.user_id = u.user_id
+                WHERE s.user_id = ? AND s.app_type IS NOT NULL AND s.app_type != ''
+                ORDER BY s.created_at DESC
+            ";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$user_id]);
         }
+
+        echo json_encode([
+            'success' => true,
+            'applications' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+        ]);
         exit;
     }
 
-    // --- 申請履歴一覧の取得（shifts テーブルの app_type が入っているレコード） ---
-    if ($action === 'get_applications') {
-        $req_user_id = $_GET['user_id'] ?? 1;
-        $is_admin = ($_GET['is_admin'] ?? '0') === '1';
-
+    // 4. ルーレット選択肢（メンバー・部署・負担スコア取得）
+    if ($action === 'get_roulette_options') {
         try {
-            if ($is_admin) {
-                $stmt = $pdo->prepare("
-                    SELECT
-                        shift_id AS application_id,
-                        user_id,
-                        dept_id,
-                        app_type,
-                        status_type,
-                        start_date,
-                        end_date,
-                        start_time,
-                        end_time,
-                        payload_json,
-                        reason,
-                        approval_status,
-                        created_at AS applied_at,
-                        upated_at
-                    FROM shifts
-                    WHERE app_type IS NOT NULL
-                    ORDER BY FIELD(approval_status, '承認待ち', '承認済み'), created_at DESC, shift_id DESC
-                ");
-                $stmt->execute();
-            } else {
-                $stmt = $pdo->prepare("
-                    SELECT
-                        shift_id AS application_id,
-                        user_id,
-                        dept_id,
-                        app_type,
-                        status_type,
-                        start_date,
-                        end_date,
-                        start_time,
-                        end_time,
-                        payload_json,
-                        reason,
-                        approval_status,
-                        created_at AS applied_at,
-                        upated_at
-                    FROM shifts
-                    WHERE app_type IS NOT NULL AND user_id = ?
-                    ORDER BY FIELD(approval_status, '承認待ち', '承認済み'), created_at DESC, shift_id DESC
-                ");
-                $stmt->execute([$req_user_id]);
-            }
-            $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode(['success' => true, 'applications' => $applications]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            $uSql = "
+                SELECT u.user_id, u.display_name, dm.dept_id,
+                       COALESCE(w.total_score, w.score, 0) AS burden_score
+                FROM users u
+                LEFT JOIN department_members dm ON u.user_id = dm.user_id
+                LEFT JOIN workload_scores w ON u.user_id = w.user_id
+                GROUP BY u.user_id
+                ORDER BY burden_score ASC, u.user_id ASC
+            ";
+            $users = $pdo->query($uSql)->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $users = $pdo->query("SELECT user_id, display_name, NULL AS dept_id, 0 AS burden_score FROM users ORDER BY user_id ASC")->fetchAll(PDO::FETCH_ASSOC);
         }
+
+        $departments = $pdo->query("SELECT dept_id, dept_name FROM departments ORDER BY dept_id ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'users' => $users,
+            'departments' => $departments
+        ]);
         exit;
     }
 }
 
-// ==========================================
-// POST リクエスト処理
-// ==========================================
+// =========================================================================
+// POST リクエスト
+// =========================================================================
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $action = $input['action'] ?? '';
-    $user_id = $input['user_id'] ?? 1;
+    $user_id = $session_user_id;
 
-    // --- 希望シフト登録（1日単位：承認待ちとして登録） ---
-    if ($action === 'submit_shift_request') {
-        $work_date = $input['work_date'] ?? '';
-        $start_time = $input['start_time'] ?? '09:00:00';
-        $end_time = $input['end_time'] ?? '18:00:00';
-        $status = $input['status'] ?? '通常出勤';
-
-        if (empty($work_date)) {
-            echo json_encode(['success' => false, 'error' => '日付が選択されていません。']);
-            exit;
-        }
-
-        try {
-            $payload = [[
-                'work_date' => $work_date,
-                'status' => $status,
-                'start_time' => $start_time,
-                'end_time' => $end_time
-            ]];
-
-            $stmt = $pdo->prepare("
-                INSERT INTO shifts (
-                    user_id, app_type, status_type, start_date, end_date,
-                    start_time, end_time, payload_json, status, approval_status, created_at
-                ) VALUES (
-                    ?, '希望シフト', ?, ?, ?,
-                    ?, ?, ?, ?, '承認待ち', NOW()
-                )
-            ");
-            $stmt->execute([
-                $user_id,
-                $status,
-                $work_date,
-                $work_date,
-                $start_time,
-                $end_time,
-                json_encode($payload, JSON_UNESCAPED_UNICODE),
-                $status
-            ]);
-
-            echo json_encode(['success' => true, 'message' => '希望シフトを申請しました（管理者の承認待ちです）。']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
+    // ユーザーのdept_idをdepartment_membersから取得
+    $userDeptId = null;
+    try {
+        $dStmt = $pdo->prepare("SELECT dept_id FROM department_members WHERE user_id = ? LIMIT 1");
+        $dStmt->execute([$user_id]);
+        $userDeptId = $dStmt->fetchColumn() ?: null;
+    } catch (Exception $e) {
+        $userDeptId = null;
     }
 
-    // --- 希望シフト一括登録（複数日対応：承認待ちとして登録） ---
+    // 1. 希望シフト一括提出
     if ($action === 'submit_bulk_shifts') {
-        $shifts = $input['shifts'] ?? [];
-        $comment = $input['comment'] ?? '';
-        if (!is_array($shifts) || count($shifts) === 0) {
-            echo json_encode(['success' => false, 'error' => 'シフトデータが選択されていません。']);
+        $items = $input['shifts'] ?? [];
+        $comment = $input['comment'] ?? $input['reason'] ?? '';
+
+        if (empty($items)) {
+            echo json_encode(['success' => false, 'error' => '希望シフトが選択されていません。']);
             exit;
         }
 
-        try {
-            $dates = array_column($shifts, 'work_date');
-            sort($dates);
-            $start_date = $dates[0];
-            $end_date = $dates[count($dates) - 1];
-            $first_status = $shifts[0]['status'] ?? '希望シフト';
+        $ins = $pdo->prepare("
+            INSERT INTO shifts (
+                user_id, dept_id, app_type, status_type, work_date, start_date, end_date,
+                start_time, end_time, reason, status, approval_status, created_at, updated_at
+            )
+            VALUES (?, ?, '希望シフト', ?, ?, ?, ?, ?, ?, ?, ?, '承認待ち', NOW(), NOW())
+        ");
 
-            $stmt = $pdo->prepare("
-                INSERT INTO shifts (
-                    user_id, app_type, status_type, start_date, end_date,
-                    payload_json, reason, status, approval_status, created_at
-                ) VALUES (
-                    ?, '希望シフト', ?, ?, ?,
-                    ?, ?, ?, '承認待ち', NOW()
-                )
-            ");
-            $stmt->execute([
-                $user_id,
-                $first_status,
-                $start_date,
-                $end_date,
-                json_encode($shifts, JSON_UNESCAPED_UNICODE),
-                $comment,
-                $first_status
+        foreach ($items as $item) {
+            $d = $item['date'] ?? $item['work_date'] ?? '';
+            $stName = $item['type'] ?? $item['status'] ?? '通常出勤';
+            if (!$d) continue;
+
+            $stTime = $item['start_time'] ?? (($stName === '通常出勤' || $stName === '在宅勤務') ? '09:00:00' : null);
+            $edTime = $item['end_time'] ?? (($stName === '通常出勤' || $stName === '在宅勤務') ? '18:00:00' : null);
+
+            $ins->execute([
+                $user_id, $userDeptId, $stName, $d . ' 00:00:00', $d, $d,
+                $stTime, $edTime, $comment, $stName
             ]);
-
-            echo json_encode(['success' => true, 'message' => count($shifts) . '日分の希望シフトを申請しました（管理者の承認待ちです）。']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
+
+        echo json_encode(['success' => true, 'message' => count($items) . '日分の希望シフトを申請しました。']);
         exit;
     }
-
-    // --- 有休申請の登録（期間指定・複数日対応：承認待ちとして登録） ---
+    // 2. 有休申請提出
     if ($action === 'submit_paid_leave') {
-        $start_date = $input['start_date'] ?? '';
-        $end_date = $input['end_date'] ?? '';
+        $leaveType = $input['leave_type'] ?? 'full';
+        $startDate = $input['start_date'] ?? '';
+        $endDate = $input['end_date'] ?? $startDate;
         $reason = $input['reason'] ?? '';
-        $leave_type = $input['leave_type'] ?? 'full';
 
-        if (empty($start_date) || empty($end_date)) {
-            echo json_encode(['success' => false, 'error' => '日付が正しく選択されていません。']);
+        if (!$startDate || !$endDate || !$reason) {
+            echo json_encode(['success' => false, 'error' => '必須項目を入力してください。']);
             exit;
         }
 
-        $start = new DateTime($start_date);
-        $end = new DateTime($end_date);
-        if ($end < $start) {
-            echo json_encode(['success' => false, 'error' => '終了日は開始日以降を指定してください。']);
-            exit;
-        }
+        $statusType = ($leaveType === 'half') ? '午前休' : '有給休暇';
+        $stTime = ($leaveType === 'half') ? '09:00:00' : null;
+        $edTime = ($leaveType === 'half') ? '13:00:00' : null;
 
-        $status_type = ($leave_type === 'half') ? '午前休' : '有給休暇';
+        $ins = $pdo->prepare("
+            INSERT INTO shifts (
+                user_id, dept_id, app_type, status_type, work_date, start_date, end_date,
+                start_time, end_time, reason, status, approval_status, created_at, updated_at
+            )
+            VALUES (?, ?, '有休申請', ?, ?, ?, ?, ?, ?, ?, ?, '承認待ち', NOW(), NOW())
+        ");
+        $ins->execute([
+            $user_id, $userDeptId, $statusType, $startDate . ' 00:00:00', $startDate, $endDate,
+            $stTime, $edTime, $reason, $statusType
+        ]);
 
-        try {
-            $stmt = $pdo->prepare("
-                INSERT INTO shifts (
-                    user_id, app_type, status_type, start_date, end_date,
-                    reason, status, approval_status, created_at
-                ) VALUES (
-                    ?, '有休申請', ?, ?, ?,
-                    ?, ?, '承認待ち', NOW()
-                )
-            ");
-            $stmt->execute([
-                $user_id,
-                $status_type,
-                $start_date,
-                $end_date,
-                $reason,
-                $status_type
-            ]);
-
-            echo json_encode(['success' => true, 'message' => '有休申請を送信しました（管理者の承認待ちです）。']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
+        echo json_encode(['success' => true, 'message' => '有休申請を送信しました。']);
         exit;
     }
 
-    // --- 申請の承認（shifts テーブルへ反映） ---
+    // 3. 申請の承認（管理者）
     if ($action === 'approve_application') {
-        $application_id = intval($input['application_id'] ?? 0);
-        if ($application_id <= 0) {
-            echo json_encode(['success' => false, 'error' => '申請IDが不正です。']);
+        $appId = intval($input['application_id'] ?? 0);
+        $stmt = $pdo->prepare("SELECT * FROM shifts WHERE shift_id = ?");
+        $stmt->execute([$appId]);
+        $app = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$app) {
+            echo json_encode(['success' => false, 'error' => '申請データが見つかりません。']);
             exit;
         }
 
+        $pdo->beginTransaction();
         try {
-            $pdo->beginTransaction();
+            $del = $pdo->prepare("DELETE FROM shifts WHERE user_id = ? AND DATE(work_date) = DATE(?) AND approval_status = '承認済み' AND shift_id != ?");
+            $del->execute([$app['user_id'], $app['work_date'], $appId]);
 
-            $stmt = $pdo->prepare("SELECT * FROM shifts WHERE shift_id = ? AND app_type IS NOT NULL FOR UPDATE");
-            $stmt->execute([$application_id]);
-            $app = $stmt->fetch(PDO::FETCH_ASSOC);
+            $upd = $pdo->prepare("UPDATE shifts SET approval_status = '承認済み', updated_at = NOW() WHERE shift_id = ?");
+            $upd->execute([$appId]);
 
-            if (!$app) {
-                $pdo->rollBack();
-                echo json_encode(['success' => false, 'error' => '対象の申請が見つかりません。']);
-                exit;
-            }
-
-            $insertShiftStmt = $pdo->prepare("
-                INSERT INTO shifts (
-                    user_id, dept_id, work_date, start_time, end_time,
-                    status, approval_status, source_application_id, created_at
-                ) VALUES (
-                    ?, ?, ?, ?, ?,
-                    ?, '承認済み', ?, NOW()
-                )
-            ");
-
-            $deleteOldDayStmt = $pdo->prepare("
-                DELETE FROM shifts
-                WHERE user_id = ?
-                  AND app_type IS NULL
-                  AND work_date IS NOT NULL
-                  AND DATE(work_date) = ?
-            ");
-
-            if ($app['app_type'] === '希望シフト' && !empty($app['payload_json'])) {
-                $rows = json_decode($app['payload_json'], true) ?: [];
-                foreach ($rows as $row) {
-                    if (empty($row['work_date']) || empty($row['status'])) continue;
-                    $deleteOldDayStmt->execute([$app['user_id'], $row['work_date']]);
-                    $insertShiftStmt->execute([
-                        $app['user_id'],
-                        $app['dept_id'],
-                        $row['work_date'] . ' 09:00:00',
-                        $row['start_time'] ?? null,
-                        $row['end_time'] ?? null,
-                        $row['status'],
-                        $application_id
-                    ]);
-                }
-            } else {
-                $current = new DateTime($app['start_date']);
-                $end = new DateTime($app['end_date']);
-                $isHalf = ($app['status_type'] === '午前休');
-                $startTime = $isHalf ? '09:00:00' : null;
-                $endTime = $isHalf ? '13:00:00' : null;
-
-                while ($current <= $end) {
-                    $dayStr = $current->format('Y-m-d');
-                    $deleteOldDayStmt->execute([$app['user_id'], $dayStr]);
-                    $insertShiftStmt->execute([
-                        $app['user_id'],
-                        $app['dept_id'],
-                        $dayStr . ' 09:00:00',
-                        $startTime,
-                        $endTime,
-                        $app['status_type'],
-                        $application_id
-                    ]);
-                    $current->modify('+1 day');
-                }
-            }
-
-            $updStmt = $pdo->prepare("
-                UPDATE shifts
-                SET approval_status = '承認済み', upated_at = NOW()
-                WHERE shift_id = ?
-            ");
-            $updStmt->execute([$application_id]);
-
-            $pdo->commit();
-            echo json_encode(['success' => true, 'message' => '申請を承認し、シフトに反映しました。']);
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    // --- 申請の拒否（shifts テーブルの申請レコードを削除） ---
-    if ($action === 'reject_application') {
-        $application_id = intval($input['application_id'] ?? 0);
-        if ($application_id <= 0) {
-            echo json_encode(['success' => false, 'error' => '申請IDが不正です。']);
-            exit;
-        }
-
-        try {
-            $stmt = $pdo->prepare("DELETE FROM shifts WHERE shift_id = ? AND app_type IS NOT NULL");
-            $stmt->execute([$application_id]);
-            echo json_encode(['success' => true, 'message' => '申請を拒否し、履歴から削除しました。']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    // --- 繁忙日設定登録（1日単位） ---
-    if ($action === 'save_busy_setting') {
-        $date = $input['date'] ?? '';
-        $required_people = $input['required_people'] ?? 5;
-        $bonus_pt = $input['bonus_pt'] ?? 2.0;
-
-        try {
-            $stmt = $pdo->prepare("
-                INSERT INTO busy_day_settings (date, required_peple, bonus_pt, is_active) 
-                VALUES (?, ?, ?, 1)
-            ");
-            $stmt->execute([$date, $required_people, $bonus_pt]);
-
-            echo json_encode(['success' => true, 'message' => '繁忙期設定を保存しました。']);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    // --- 繁忙期設定一括登録（期間指定・複数日対応） ---
-    if ($action === 'save_busy_period') {
-        $start_date = $input['start_date'] ?? '';
-        $end_date = $input['end_date'] ?? '';
-        $required_people = $input['required_people'] ?? 5;
-        $bonus_pt = $input['bonus_pt'] ?? 2.0;
-
-        if (empty($start_date) || empty($end_date)) {
-            echo json_encode(['success' => false, 'error' => '開始日と終了日を指定してください。']);
-            exit;
-        }
-
-        $start = new DateTime($start_date);
-        $end = new DateTime($end_date);
-        if ($end < $start) {
-            echo json_encode(['success' => false, 'error' => '終了日は開始日以降を指定してください。']);
-            exit;
-        }
-
-        try {
-            $pdo->beginTransaction();
-            $stmt = $pdo->prepare("
-                INSERT INTO busy_day_settings (date, required_peple, bonus_pt, is_active) 
-                VALUES (?, ?, ?, 1)
-                ON DUPLICATE KEY UPDATE 
-                required_peple = VALUES(required_peple),
-                bonus_pt = VALUES(bonus_pt),
-                is_active = 1
-            ");
-
-            $current = clone $start;
-            $daysCount = 0;
-            while ($current <= $end) {
-                $stmt->execute([$current->format('Y-m-d'), $required_people, $bonus_pt]);
-                $daysCount++;
-                $current->modify('+1 day');
-            }
-
-            $pdo->commit();
-            echo json_encode(['success' => true, 'message' => "{$daysCount}日分の繁忙期設定を保存しました。"]);
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    // --- シフトルーレットの実行・割り当て処理 ---
-    if ($action === 'execute_roulette') {
-        $target_date = $input['target_date'] ?? '';
-        $shift_type = $input['shift_type'] ?? '在宅勤務';
-        $target_member_type = $input['target_member_type'] ?? 'all';
-        $target_user_id = $input['target_user_id'] ?? null;
-        $target_dept_id = $input['target_dept_id'] ?? null;
-        $winner_count = max(1, intval($input['winner_count'] ?? 1));
-        $conditions = $input['conditions'] ?? [];
-
-        $prefer_shift = !empty($conditions['prefer_shift']);
-        $exclude_leave = !empty($conditions['exclude_leave']);
-        $consider_busy = !empty($conditions['consider_busy']);
-        $max_consecutive = !empty($conditions['max_consecutive']);
-        $use_burden_score = !empty($conditions['use_burden_score']);
-
-        if (empty($target_date)) {
-            echo json_encode(['success' => false, 'error' => '対象日が指定されていません。']);
-            exit;
-        }
-
-        try {
-            // 1. 対象メンバー一覧を取得（最新DBスキーマ対応）
-            if ($target_member_type === 'member' && !empty($target_user_id)) {
-                $stmtUsers = $pdo->prepare("SELECT user_id, group_id FROM users WHERE user_id = ?");
-                $stmtUsers->execute([intval($target_user_id)]);
-                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
-            } elseif ($target_member_type === 'dept' && !empty($target_dept_id)) {
-                $stmtUsers = $pdo->prepare("
-                    SELECT DISTINCT dm.user_id, d.group_id
-                    FROM department_members dm
-                    LEFT JOIN departments d ON dm.dept_id = d.dept_id
-                    WHERE dm.dept_id = ?
+            if (!empty($app['start_date']) && !empty($app['end_date']) && $app['start_date'] !== $app['end_date']) {
+                $curr = strtotime('+1 day', strtotime($app['start_date']));
+                $end = strtotime($app['end_date']);
+                $ins = $pdo->prepare("
+                    INSERT INTO shifts (
+                        user_id, dept_id, status_type, work_date, start_date, end_date,
+                        start_time, end_time, reason, status, approval_status, source_application_id, created_at, updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '承認済み', ?, NOW(), NOW())
                 ");
-                $stmtUsers->execute([intval($target_dept_id)]);
-                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
-            } else {
-                $stmtUsers = $pdo->query("SELECT user_id, group_id FROM users");
-                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
-            }
-
-            if (empty($candidates)) {
-                $candidates = [['user_id' => intval($user_id), 'group_id' => null]];
-            }
-
-            // 繁忙期ボーナスポイント取得
-            $bonusPt = 0.0;
-            if ($consider_busy) {
-                $stmtBusy = $pdo->prepare("SELECT bonus_pt FROM busy_day_settings WHERE date = ? AND is_active = 1 LIMIT 1");
-                $stmtBusy->execute([$target_date]);
-                $busyRow = $stmtBusy->fetch(PDO::FETCH_ASSOC);
-                if ($busyRow && isset($busyRow['bonus_pt'])) {
-                    $bonusPt = floatval($busyRow['bonus_pt']);
+                while ($curr <= $end) {
+                    $dStr = date('Y-m-d', $curr);
+                    $pdo->prepare("DELETE FROM shifts WHERE user_id = ? AND DATE(work_date) = ? AND approval_status = '承認済み'")->execute([$app['user_id'], $dStr]);
+                    $ins->execute([
+                        $app['user_id'], $app['dept_id'], $app['status_type'], $dStr . ' 00:00:00',
+                        $dStr, $dStr, $app['start_time'], $app['end_time'], $app['reason'], $app['status_type'], $appId
+                    ]);
+                    $curr = strtotime('+1 day', $curr);
                 }
             }
 
-            $weightedPool = [];
-            $targetDt = new DateTime($target_date);
-            $checkStart = (clone $targetDt)->modify('-5 days')->format('Y-m-d');
-            $checkEnd = (clone $targetDt)->modify('+5 days')->format('Y-m-d');
-
-            foreach ($candidates as $cand) {
-                $uid = intval($cand['user_id']);
-
-                // 条件: 有休申請を除外する
-                if ($exclude_leave) {
-                    $stmtLeave = $pdo->prepare("
-                        SELECT COUNT(*) FROM shifts
-                        WHERE user_id = ?
-                          AND status_type IN ('有給休暇', '午前休')
-                          AND approval_status != '却下'
-                          AND start_date <= ? AND end_date >= ?
-                    ");
-                    $stmtLeave->execute([$uid, $target_date, $target_date]);
-                    if (intval($stmtLeave->fetchColumn()) > 0) {
-                        continue;
-                    }
-                }
-
-                // 条件: 連続勤務日数の上限（5日まで）を考慮
-                if ($max_consecutive) {
-                    $stmtConsec = $pdo->prepare("
-                        SELECT COUNT(*) FROM shifts
-                        WHERE user_id = ?
-                          AND app_type IS NULL
-                          AND approval_status = '承認済み'
-                          AND status NOT IN ('休日', '有給休暇')
-                          AND work_date IS NOT NULL
-                          AND DATE(work_date) BETWEEN ? AND ?
-                    ");
-                    $stmtConsec->execute([$uid, $checkStart, $checkEnd]);
-                    if (intval($stmtConsec->fetchColumn()) >= 5) {
-                        continue;
-                    }
-                }
-
-                // 重み算出（workload_scores の total_score が低いほど当選しやすい）
-                $weight = 10.0;
-                if ($use_burden_score) {
-                    $stmtBurden = $pdo->prepare("
-                        SELECT COALESCE(SUM(total_score), 0)
-                        FROM workload_scores
-                        WHERE user_id = ?
-                    ");
-                    $stmtBurden->execute([$uid]);
-                    $burdenScore = floatval($stmtBurden->fetchColumn());
-                    $weight = max(1.0, 500.0 - $burdenScore);
-                }
-
-                // 条件: 希望シフトを優先する
-                if ($prefer_shift) {
-                    $stmtPref = $pdo->prepare("
-                        SELECT COUNT(*) FROM shifts
-                        WHERE user_id = ?
-                          AND app_type = '希望シフト'
-                          AND status_type = ?
-                          AND start_date <= ? AND end_date >= ?
-                    ");
-                    $stmtPref->execute([$uid, $shift_type, $target_date, $target_date]);
-                    if (intval($stmtPref->fetchColumn()) > 0) {
-                        $weight *= 2.0;
-                    }
-                }
-
-                // 繁忙期加算ポイント反映
-                if ($consider_busy && $bonusPt > 0) {
-                    $weight += $bonusPt;
-                }
-
-                $weightedPool[] = [
-                    'user_id' => $uid,
-                    'group_id' => $cand['group_id'] ?? null,
-                    'weight' => $weight
-                ];
-            }
-
-            if (empty($weightedPool)) {
-                echo json_encode(['success' => false, 'error' => '条件を満たす対象メンバーが見つかりませんでした。']);
-                exit;
-            }
-
-            // 2. 重み付き抽選で当選者を選出
-            $winners = [];
-            $actualCount = min($winner_count, count($weightedPool));
-            for ($i = 0; $i < $actualCount; $i++) {
-                $totalWeight = array_sum(array_column($weightedPool, 'weight'));
-                $rand = mt_rand() / mt_getrandmax() * $totalWeight;
-                $acc = 0.0;
-                $pickedIndex = count($weightedPool) - 1;
-
-                foreach ($weightedPool as $idx => $item) {
-                    $acc += $item['weight'];
-                    if ($rand <= $acc) {
-                        $pickedIndex = $idx;
-                        break;
-                    }
-                }
-
-                $winners[] = $weightedPool[$pickedIndex];
-                array_splice($weightedPool, $pickedIndex, 1);
-            }
-
-            // 3. shifts テーブルへ反映（承認済み・確定シフトとして登録）
-            $pdo->beginTransaction();
-            $delStmt = $pdo->prepare("
-                DELETE FROM shifts
-                WHERE user_id = ?
-                  AND app_type IS NULL
-                  AND work_date IS NOT NULL
-                  AND DATE(work_date) = ?
-            ");
-            $insStmt = $pdo->prepare("
-                INSERT INTO shifts (
-                    user_id, group_id, work_date, start_time, end_time,
-                    status, approval_status, bonus_pt, created_at
-                ) VALUES (
-                    ?, ?, ?, ?, ?,
-                    ?, '承認済み', ?, NOW()
-                )
-            ");
-
-            $startTime = '09:00:00';
-            $endTime = ($shift_type === '午前休') ? '13:00:00' : '18:00:00';
-            $winnerIds = [];
-
-            foreach ($winners as $w) {
-                $delStmt->execute([$w['user_id'], $target_date]);
-                $insStmt->execute([
-                    $w['user_id'],
-                    $w['group_id'] ?? null,
-                    $target_date . ' 09:00:00',
-                    $startTime,
-                    $endTime,
-                    $shift_type,
-                    $consider_busy ? $bonusPt : null
-                ]);
-                $winnerIds[] = $w['user_id'];
-            }
             $pdo->commit();
-
-            echo json_encode([
-                'success' => true,
-                'message' => "対象ユーザーID（" . implode(', ', $winnerIds) . "）に「{$shift_type}」を割り当てました。",
-                'winners' => $winnerIds
-            ]);
+            echo json_encode(['success' => true, 'message' => '申請を承認しました。']);
         } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'error' => '承認エラー: ' . $e->getMessage()]);
         }
         exit;
     }
 
-    echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
+    // 4. 申請の拒否（削除）
+    if ($action === 'reject_application') {
+        $appId = intval($input['application_id'] ?? 0);
+        $del = $pdo->prepare("DELETE FROM shifts WHERE shift_id = ?");
+        $del->execute([$appId]);
+        echo json_encode(['success' => true, 'message' => '申請を拒否しました。']);
+        exit;
+    }
+
+    // 5. 繁忙期設定の保存
+    if ($action === 'save_busy_period') {
+        $startDate = $input['start_date'] ?? '';
+        $endDate = $input['end_date'] ?? $startDate;
+        $bonusPt = floatval($input['bonus_pt'] ?? 2.0);
+
+        $curr = strtotime($startDate);
+        $end = strtotime($endDate);
+        while ($curr <= $end) {
+            $dStr = date('Y-m-d', $curr);
+            $pdo->prepare("UPDATE shifts SET busy_day_flag = 1, bonus_pt = ? WHERE DATE(work_date) = ?")->execute([$bonusPt, $dStr]);
+            $curr = strtotime('+1 day', $curr);
+        }
+
+        echo json_encode(['success' => true, 'message' => '繁忙期設定を保存しました。']);
+        exit;
+    }
+
+    // 6. ルーレット実行
+    if ($action === 'execute_roulette') {
+        $targetDate = $input['target_date'] ?? '';
+        $shiftType = $input['shift_type'] ?? '在宅勤務';
+        $memberType = $input['target_member_type'] ?? 'all';
+        $targetUserId = intval($input['target_user_id'] ?? 0);
+        $targetDeptId = intval($input['target_dept_id'] ?? 0);
+        $winnerCount = max(1, intval($input['winner_count'] ?? 1));
+
+        if ($memberType === 'member' && $targetUserId) {
+            $candidates = [$targetUserId];
+        } elseif ($memberType === 'dept' && $targetDeptId) {
+            $stmt = $pdo->prepare("SELECT user_id FROM department_members WHERE dept_id = ?");
+            $stmt->execute([$targetDeptId]);
+            $candidates = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } else {
+            $candidates = $pdo->query("SELECT user_id FROM users")->fetchAll(PDO::FETCH_COLUMN);
+        }
+
+        if (empty($candidates)) {
+            echo json_encode(['success' => false, 'error' => '対象となるメンバーが見つかりません。']);
+            exit;
+        }
+
+        shuffle($candidates);
+        $winners = array_slice($candidates, 0, $winnerCount);
+        $winnerNames = [];
+
+        foreach ($winners as $wId) {
+            $uInfo = $pdo->prepare("SELECT display_name FROM users WHERE user_id = ?");
+            $uInfo->execute([$wId]);
+            $uName = $uInfo->fetchColumn();
+            if ($uName) $winnerNames[] = $uName;
+
+            $wDeptId = null;
+            try {
+                $wdStmt = $pdo->prepare("SELECT dept_id FROM department_members WHERE user_id = ? LIMIT 1");
+                $wdStmt->execute([$wId]);
+                $wDeptId = $wdStmt->fetchColumn() ?: null;
+            } catch (Exception $e) {}
+
+            $pdo->prepare("DELETE FROM shifts WHERE user_id = ? AND DATE(work_date) = ? AND approval_status = '承認済み'")->execute([$wId, $targetDate]);
+            $ins = $pdo->prepare("
+                INSERT INTO shifts (
+                    user_id, dept_id, app_type, status_type, work_date, start_date, end_date,
+                    start_time, end_time, reason, status, approval_status, created_at, updated_at
+                )
+                VALUES (?, ?, 'ルーレット割当', ?, ?, ?, ?, '09:00:00', '18:00:00', 'シフトルーレット確定', ?, '承認済み', NOW(), NOW())
+            ");
+            $ins->execute([$wId, $wDeptId, $shiftType, $targetDate . ' 00:00:00', $targetDate, $targetDate, $shiftType]);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => '当選者（' . implode('、', $winnerNames) . '）に' . $shiftType . 'を割り当てました。'
+        ]);
+        exit;
+    }
 }
+
+echo json_encode(['success' => false, 'error' => '不正なリクエストです。']);
+?>
