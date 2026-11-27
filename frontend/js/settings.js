@@ -1,6 +1,7 @@
 /* ========================================
    Tasfina 設定画面
    settings.js
+   MySQL・PHP連携対応版
 ======================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,176 +13,43 @@ document.addEventListener("DOMContentLoaded", () => {
        共通設定
     ======================================== */
 
-    const SHIFT_STORAGE_KEY = "tasfina_shift_settings_v1";
-
-    const SCORE_STORAGE_KEY = "tasfina_score_settings_v1";
-
-    const WORK_TYPE_STORAGE_KEY = "tasfina_work_types_v1";
+    const API_URL = "../../backend/setting_api.php";
 
     const get = id => document.getElementById(id);
 
-    const clone = value => JSON.parse(JSON.stringify(value));
-
-
-    /* ========================================
-       初期データ：シフト種別
-    ======================================== */
-
-    const defaultShiftTypes = [
-        {
-            id: 1,
-            name: "通常出勤",
-            color: "#409eff",
-            start: "09:00",
-            end: "18:00",
-            breakMinutes: 60,
-            score: 1.0,
-            description: "通常の勤務"
-        },
-        {
-            id: 2,
-            name: "在宅勤務",
-            color: "#50c99c",
-            start: "09:00",
-            end: "18:00",
-            breakMinutes: 60,
-            score: 0.8,
-            description: "在宅での勤務"
-        },
-        {
-            id: 3,
-            name: "午前休",
-            color: "#ffca62",
-            start: "13:00",
-            end: "18:00",
-            breakMinutes: 0,
-            score: 0.5,
-            description: "午前休暇・午後勤務"
-        },
-        {
-            id: 4,
-            name: "午後休",
-            color: "#ffd49b",
-            start: "09:00",
-            end: "13:00",
-            breakMinutes: 0,
-            score: 0.5,
-            description: "午後休暇・午前勤務"
-        },
-        {
-            id: 5,
-            name: "有給休暇",
-            color: "#ff8394",
-            start: "",
-            end: "",
-            breakMinutes: 0,
-            score: 0.0,
-            description: "有給休暇取得"
-        },
-        {
-            id: 6,
-            name: "休日",
-            color: "#cbd2de",
-            start: "",
-            end: "",
-            breakMinutes: 0,
-            score: 0.0,
-            description: "所定休日"
-        }
-    ];
-
-
-    /* ========================================
-       初期データ：自動調整ルール
-    ======================================== */
-
-    const defaultRules = {
-        maxConsecutiveDays: 5,
-        maxMonthlyDays: 20,
-        requestPriority: "high"
-    };
-
-
-    /* ========================================
-       初期データ：負担スコア
-    ======================================== */
-
-    const defaultScoreSettings = {
-
-        aggregationPeriod: "4",
-
-        resetTiming: "monthly",
-
-        shiftScores: {
-            "1": 1.0,
-            "2": 0.8,
-            "3": 0.5,
-            "4": 0.5,
-            "5": 0.0,
-            "6": 0.0
-        },
-
-        conditions: {
-            consecutive: 0.2,
-            night: 1.0,
-            early: 0.5,
-            weeklyOver: 1.0
-        }
-
-    };
-
-
-    /* ========================================
-       初期データ：業務タイプ
-    ======================================== */
-
-    const defaultWorkTypes = [
-        {
-            id: 1,
-            name: "通常業務",
-            multiplier: 1.0,
-            enabled: true
-        },
-        {
-            id: 2,
-            name: "専門業務",
-            multiplier: 1.2,
-            enabled: true
-        },
-        {
-            id: 3,
-            name: "高負荷業務",
-            multiplier: 1.3,
-            enabled: true
-        },
-        {
-            id: 4,
-            name: "緊急対応",
-            multiplier: 1.5,
-            enabled: true
-        }
-    ];
+    const clone = value =>
+        JSON.parse(JSON.stringify(value));
 
 
     /* ========================================
        状態管理
     ======================================== */
 
-    let shiftTypes = clone(defaultShiftTypes);
+    let shiftTypes = [];
 
-    let rules = clone(defaultRules);
+    let rules = {};
 
-    let scoreSettings = clone(defaultScoreSettings);
+    let scoreSettings = {};
 
-    let workTypes = clone(defaultWorkTypes);
+    let workTypes = [];
 
-    let selectedShiftTypeId = null;
+    let editingWorkTypes = [];
+
+    let selectedShiftId = null;
+
+    let csrfToken = "";
+
+    let canEdit = false;
+
+    let initialized = false;
+
+    let isSaving = false;
 
     let workTypeModal = null;
 
 
     /* ========================================
-       HTML要素の取得
+       HTML要素取得
     ======================================== */
 
     const shiftTable = get("shiftTypeTableBody");
@@ -212,11 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function escapeHtml(value) {
 
         return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
     }
 
@@ -229,11 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const number = Number(value);
 
-        if (!Number.isFinite(number)) {
-            return "0.0";
-        }
-
-        return number.toFixed(1);
+        return Number.isFinite(number)
+            ? number.toFixed(1)
+            : "0.0";
 
     }
 
@@ -246,19 +112,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const value = Number(minutes);
 
-        if (value === 0) {
+        if (!value) {
             return "なし";
         }
 
-        if (value === 60) {
-            return "1時間";
+        const hours = Math.floor(value / 60);
+
+        const remaining = value % 60;
+
+        if (hours === 0) {
+            return `${remaining}分`;
         }
 
-        if (value === 90) {
-            return "1時間30分";
+        if (remaining === 0) {
+            return `${hours}時間`;
         }
 
-        return `${value}分`;
+        return `${hours}時間${remaining}分`;
 
     }
 
@@ -283,7 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function isValidNumber(value, min, max) {
 
-        if (String(value).trim() === "") {
+        if (
+            value === null ||
+            value === undefined ||
+            String(value).trim() === ""
+        ) {
             return false;
         }
 
@@ -299,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       共通処理：シフト設定メッセージ
+       共通処理：メッセージ表示
     ======================================== */
 
     function showShiftMessage(message, isError = false) {
@@ -314,10 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* ========================================
-       共通処理：負担スコアメッセージ
-    ======================================== */
-
     function showScoreMessage(message, isError = false) {
 
         scoreMessage.textContent = message;
@@ -330,356 +200,321 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* ========================================
-       共通処理：業務タイプエラー
-    ======================================== */
-
     function showWorkTypeError(message = "") {
 
         workTypeError.textContent = message;
 
-        workTypeError.hidden = !message;
+        workTypeError.hidden = message === "";
 
     }
 
 
     /* ========================================
-       localStorage：読み込み
+       API通信
     ======================================== */
 
-    function readStorage(key) {
+    async function requestApi(method = "GET", body = null) {
 
-        try {
+        const options = {
 
-            const saved = localStorage.getItem(key);
+            method: method,
 
-            if (!saved) {
-                return null;
+            credentials: "same-origin",
+
+            cache: "no-store",
+
+            headers: {
+                "Accept": "application/json"
             }
 
-            return JSON.parse(saved);
+        };
 
-        } catch (error) {
+        if (method === "POST") {
 
-            console.error(
-                "設定の読み込みに失敗しました。",
-                key,
-                error
-            );
+            options.headers["Content-Type"] =
+                "application/json";
 
-            return null;
+            options.headers["X-CSRF-Token"] =
+                csrfToken;
+
+            options.body = JSON.stringify(body);
 
         }
 
-    }
+        const response = await fetch(
+            API_URL,
+            options
+        );
 
-
-    /* ========================================
-       localStorage：保存
-    ======================================== */
-
-    function writeStorage(key, data) {
+        let result;
 
         try {
 
-            localStorage.setItem(
-                key,
-                JSON.stringify(data)
-            );
-
-            return true;
+            result = await response.json();
 
         } catch (error) {
 
-            console.error(
-                "設定の保存に失敗しました。",
-                key,
-                error
+            throw new Error(
+                "サーバーから正常なJSONが返されませんでした。"
             );
 
-            return false;
+        }
+
+        if (response.status === 401) {
+
+            window.location.href = "login.html";
+
+            throw new Error(
+                "ログインが必要です。"
+            );
 
         }
+
+        if (!response.ok || result.success !== true) {
+
+            throw new Error(
+                result.message ||
+                result.comment ||
+                "設定の取得または保存に失敗しました。"
+            );
+
+        }
+
+        return result;
 
     }
 
 
     /* ========================================
-       シフト設定：保存データの読み込み
+       APIレスポンス確認
     ======================================== */
 
-    function loadShiftSettings() {
-
-        const saved = readStorage(
-            SHIFT_STORAGE_KEY
-        );
-
-        if (!saved) {
-            return;
-        }
-
-        if (Array.isArray(saved.shiftTypes)) {
-
-            shiftTypes = saved.shiftTypes.map(item => ({
-                ...item,
-                id: Number(item.id)
-            }));
-
-        }
+    function validateResponseSettings(settings) {
 
         if (
-            saved.rules &&
-            typeof saved.rules === "object"
+            !settings ||
+            !Array.isArray(settings.shiftTypes) ||
+            !settings.rules ||
+            !settings.scoreSettings ||
+            !settings.scoreSettings.conditions ||
+            !Array.isArray(settings.workTypes)
         ) {
 
-            rules = {
-                ...defaultRules,
-                ...saved.rules
-            };
-
-        }
-
-    }
-
-
-    /* ========================================
-       負担スコア：保存データの読み込み
-    ======================================== */
-
-    function loadScoreSettings() {
-
-        const saved = readStorage(
-            SCORE_STORAGE_KEY
-        );
-
-        if (saved && typeof saved === "object") {
-
-            scoreSettings = {
-
-                ...clone(defaultScoreSettings),
-
-                ...saved,
-
-                conditions: {
-                    ...defaultScoreSettings.conditions,
-                    ...saved.conditions
-                },
-
-                shiftScores: {
-                    ...defaultScoreSettings.shiftScores,
-                    ...saved.shiftScores
-                }
-
-            };
-
-        }
-
-        synchronizeShiftScores();
-
-    }
-
-
-    /* ========================================
-       業務タイプ：保存データの読み込み
-    ======================================== */
-
-    function loadWorkTypes() {
-
-        const saved = readStorage(
-            WORK_TYPE_STORAGE_KEY
-        );
-
-        const items = Array.isArray(saved)
-
-            ? saved
-
-            : saved?.workTypes;
-
-        if (!Array.isArray(items)) {
-            return;
-        }
-
-        workTypes = items.map((item, index) => ({
-
-            id: Number(item.id) || index + 1,
-
-            name: String(item.name ?? ""),
-
-            multiplier: Number(
-                item.multiplier ?? item.rate ?? 1
-            ),
-
-            enabled: item.enabled !== false
-
-        }));
-
-    }
-
-
-    /* ========================================
-       シフト種別と負担スコアの同期
-    ======================================== */
-
-    function synchronizeShiftScores() {
-
-        scoreSettings.shiftScores =
-            Object.fromEntries(
-
-                shiftTypes.map(item => [
-
-                    String(item.id),
-
-                    Number(item.score) || 0
-
-                ])
-
+            throw new Error(
+                "設定データの形式が不正です。"
             );
 
+        }
+
     }
 
 
     /* ========================================
-       シフト設定：保存
+       初期設定データ取得
     ======================================== */
 
-    function saveShiftSettings() {
+    async function loadSettings() {
 
-        /*
-         * 既存の保存データを取得する。
-         *
-         * シフト種別と自動調整ルール以外の
-         * データを消さないようにする。
-         */
+        const result = await requestApi("GET");
 
-        let previousData;
+        validateResponseSettings(result.settings);
+
+        csrfToken = result.csrf_token || "";
+
+        canEdit = result.can_edit === true;
+
+        if (canEdit && !csrfToken) {
+
+            throw new Error(
+                "セキュリティトークンを取得できませんでした。"
+            );
+
+        }
+
+        shiftTypes = clone(
+            result.settings.shiftTypes
+        );
+
+        rules = clone(
+            result.settings.rules
+        );
+
+        scoreSettings = clone(
+            result.settings.scoreSettings
+        );
+
+        workTypes = clone(
+            result.settings.workTypes
+        );
+
+    }
+
+
+    /* ========================================
+       編集可能状態の確認
+    ======================================== */
+
+    function isEditable() {
+
+        return (
+            initialized &&
+            canEdit &&
+            !isSaving
+        );
+
+    }
+
+
+    /* ========================================
+       編集権限・保存中の操作制御
+    ======================================== */
+
+    function applyPermissions() {
+
+        const disabled = !isEditable();
+
+        const controls = document.querySelectorAll(
+            "#panel-shifts input, " +
+            "#panel-shifts select, " +
+            "#panel-shifts textarea, " +
+            "#panel-shifts button, " +
+            "#panel-scores input, " +
+            "#panel-scores select, " +
+            "#panel-scores textarea, " +
+            "#panel-scores button, " +
+            "#workTypeEditForm input, " +
+            "#workTypeEditForm button, " +
+            "#saveWorkTypesButton"
+        );
+
+        controls.forEach(element => {
+
+            element.disabled = disabled;
+
+        });
+
+        // ヘルプボタンは閲覧時も利用可能
+
+        document.querySelectorAll(
+            ".score-help-button"
+        ).forEach(button => {
+
+            button.disabled = false;
+
+        });
+
+        // 業務タイプの内容確認は閲覧者も可能
+
+        get("openWorkTypeEditButton").disabled =
+            !initialized || isSaving;
+
+        // シフト詳細の閲覧は許可
+
+        shiftTable.querySelectorAll(
+            '[data-action="edit"]'
+        ).forEach(button => {
+
+            button.disabled =
+                !initialized || isSaving;
+
+        });
+
+    }
+
+
+    /* ========================================
+       保存処理
+    ======================================== */
+
+    async function saveSettings(action, data) {
+
+        if (!isEditable()) {
+
+            throw new Error(
+                "設定を変更できない状態です。"
+            );
+
+        }
+
+        isSaving = true;
+
+        applyPermissions();
 
         try {
 
-            const raw = localStorage.getItem(
-                SHIFT_STORAGE_KEY
-            );
-
-            previousData = raw === null
-
-                ? {}
-
-                : JSON.parse(raw);
-
-            if (
-                !previousData ||
-                typeof previousData !== "object" ||
-                Array.isArray(previousData)
-            ) {
-
-                throw new Error(
-                    "保存済みデータの形式が正しくありません。"
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            showShiftMessage(
-                "既存の設定を読み込めないため、保存を中止しました。",
-                true
-            );
-
-            return false;
-
-        }
-
-
-        /* 既存データを維持したまま更新 */
-
-        const success = writeStorage(
-
-            SHIFT_STORAGE_KEY,
-
-            {
-                ...previousData,
-
-                shiftTypes,
-
-                rules
-            }
-
-        );
-
-        if (!success) {
-
-            showShiftMessage(
-                "シフト設定を保存できませんでした。",
-                true
-            );
-
-            return false;
-
-        }
-
-
-        /* 負担スコアとの同期 */
-
-        synchronizeShiftScores();
-
-        const savedScores = readStorage(
-            SCORE_STORAGE_KEY
-        );
-
-        if (
-            savedScores &&
-            typeof savedScores === "object" &&
-            !Array.isArray(savedScores)
-        ) {
-
-            const synced = writeStorage(
-
-                SCORE_STORAGE_KEY,
-
+            const result = await requestApi(
+                "POST",
                 {
-                    ...savedScores,
-
-                    shiftScores: {
-                        ...scoreSettings.shiftScores
-                    }
+                    action: action,
+                    data: data
                 }
-
             );
 
-            if (!synced) {
+            validateResponseSettings(
+                result.settings
+            );
 
-                console.warn(
-                    "負担スコア設定との同期に失敗しました。"
-                );
+            canEdit = result.can_edit === true;
+
+            /*
+               保存した項目のみ更新する。
+
+               他の設定欄に入力途中の内容が
+               ある場合に上書きしないため。
+            */
+
+            switch (action) {
+
+                case "save_shift_types":
+
+                    shiftTypes = clone(
+                        result.settings.shiftTypes
+                    );
+
+                    break;
+
+                case "save_rules":
+
+                    rules = clone(
+                        result.settings.rules
+                    );
+
+                    break;
+
+                case "save_scores":
+                case "reset_scores":
+
+                    scoreSettings = clone(
+                        result.settings.scoreSettings
+                    );
+
+                    break;
+
+                case "save_work_types":
+
+                    workTypes = clone(
+                        result.settings.workTypes
+                    );
+
+                    break;
 
             }
 
+            return result;
+
+        } finally {
+
+            isSaving = false;
+
+            applyPermissions();
+
         }
-
-
-        /* 計算例を更新 */
-
-        updateCalculationExample();
-
-
-        /* 更新イベント */
-
-        document.dispatchEvent(
-
-            new Event(
-                "tasfina:shift-settings-updated"
-            )
-
-        );
-
-        return true;
 
     }
 
 
     /* ========================================
-       シフト種別：一覧表示
+       シフト種別一覧表示
     ======================================== */
 
     function renderShiftTypes() {
@@ -687,17 +522,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (shiftTypes.length === 0) {
 
             shiftTable.innerHTML = `
-
                 <tr>
-
-                    <td colspan="7" class="text-center py-4">
-
+                    <td colspan="7" class="text-center">
                         シフト種別が登録されていません。
-
                     </td>
-
                 </tr>
-
             `;
 
             return;
@@ -706,60 +535,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         shiftTable.innerHTML = shiftTypes.map(item => {
 
-            const selected =
-                item.id === selectedShiftTypeId;
+            const id = Number(item.id);
 
-            const workingHours =
+            const selectedClass =
+                id === selectedShiftId
+                    ? "selected-row"
+                    : "";
+
+            const workingTime =
                 item.start && item.end
-
-                    ? `${item.start} ～ ${item.end}`
-
+                    ? `${escapeHtml(item.start)} ～ ${escapeHtml(item.end)}`
                     : "-";
 
             return `
-
                 <tr
-                    data-shift-id="${escapeHtml(item.id)}"
-                    class="${selected ? "selected-row" : ""}"
+                    class="${selectedClass}"
+                    data-id="${id}"
                 >
 
                     <td>
-
                         ${escapeHtml(item.name)}
-
                     </td>
 
                     <td>
-
                         <span
                             class="shift-color-dot"
-                            data-dot-color="${escapeHtml(item.color)}"
+                            data-shift-color="${escapeHtml(item.color)}"
                         ></span>
-
                     </td>
 
                     <td>
-
-                        ${escapeHtml(workingHours)}
-
+                        ${workingTime}
                     </td>
 
                     <td>
-
-                        ${escapeHtml(formatBreak(item.breakMinutes))}
-
+                        ${formatBreak(item.breakMinutes)}
                     </td>
 
                     <td>
-
                         ${formatScore(item.score)}
-
                     </td>
 
                     <td>
-
-                        ${escapeHtml(item.description)}
-
+                        ${escapeHtml(item.description || "-")}
                     </td>
 
                     <td>
@@ -768,26 +586,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             <button
                                 type="button"
-                                class="shift-action-button edit-shift"
-                                data-id="${escapeHtml(item.id)}"
-                                aria-label="${escapeHtml(item.name)}を編集"
-                                title="編集"
+                                class="shift-action-button"
+                                data-action="edit"
+                                data-id="${id}"
+                                title="詳細・編集"
+                                aria-label="詳細・編集"
                             >
-
                                 <i class="bi bi-pencil-fill"></i>
-
                             </button>
 
                             <button
                                 type="button"
-                                class="shift-action-button delete delete-shift"
-                                data-id="${escapeHtml(item.id)}"
-                                aria-label="${escapeHtml(item.name)}を削除"
+                                class="shift-action-button delete"
+                                data-action="delete"
+                                data-id="${id}"
                                 title="削除"
+                                aria-label="削除"
                             >
-
-                                <i class="bi bi-trash3"></i>
-
+                                <i class="bi bi-trash"></i>
                             </button>
 
                         </div>
@@ -795,32 +611,38 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
 
                 </tr>
-
             `;
 
         }).join("");
 
 
         /* ========================================
-           シフト種別の表示色を設定
+           表示色の反映
         ======================================== */
 
-        shiftTable
-            .querySelectorAll("[data-dot-color]")
-            .forEach(dot => {
+        shiftTable.querySelectorAll(
+            "[data-shift-color]"
+        ).forEach(element => {
 
-                const color = dot.dataset.dotColor;
+            const color =
+                element.dataset.shiftColor;
 
-                if (/^#[0-9a-fA-F]{6}$/.test(color)) {
+            const validColor =
+                /^#[0-9a-fA-F]{6}$/.test(color)
+                    ? color
+                    : "#cccccc";
 
-                    dot.style.setProperty(
-                        "--shift-dot-color",
-                        color
-                    );
+            element.style.setProperty(
+                "--shift-dot-color",
+                validColor
+            );
 
-                }
+            element.style.backgroundColor =
+                validColor;
 
-            });
+        });
+
+        applyPermissions();
 
     }
 
@@ -831,24 +653,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addShiftType(focus = true) {
 
-        selectedShiftTypeId = null;
+        selectedShiftId = null;
 
         shiftForm.reset();
-
-        get("shiftTypeColor").value = "#409eff";
-
-        get("shiftTypeScore").value = "1.0";
-
-        get("shiftBreakMinutes").value = "0";
 
         editorHeading.textContent =
             "シフト種別の新規追加";
 
+        get("shiftTypeName").value = "";
+
+        get("shiftTypeColor").value = "#409eff";
+
+        get("shiftStartTime").value = "";
+
+        get("shiftEndTime").value = "";
+
+        get("shiftBreakMinutes").value = "0";
+
+        get("shiftTypeScore").value = "1.0";
+
+        get("shiftTypeDescription").value = "";
+
         renderShiftTypes();
 
-        showShiftMessage("");
-
-        if (focus) {
+        if (focus && isEditable()) {
 
             get("shiftTypeName").focus();
 
@@ -858,20 +686,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       シフト種別：編集
+       シフト種別：詳細・編集
     ======================================== */
 
     function editShiftType(id) {
 
         const item = shiftTypes.find(
-            shift => shift.id === id
+            shift => Number(shift.id) === Number(id)
         );
 
         if (!item) {
             return;
         }
 
-        selectedShiftTypeId = id;
+        selectedShiftId = Number(item.id);
 
         editorHeading.textContent =
             "シフト種別の詳細設定";
@@ -880,26 +708,24 @@ document.addEventListener("DOMContentLoaded", () => {
             item.name;
 
         get("shiftTypeColor").value =
-            item.color || "#409eff";
+            item.color;
 
         get("shiftStartTime").value =
-            item.start ?? "";
+            item.start || "";
 
         get("shiftEndTime").value =
-            item.end ?? "";
+            item.end || "";
 
         get("shiftBreakMinutes").value =
-            item.breakMinutes ?? 0;
+            String(item.breakMinutes);
 
         get("shiftTypeScore").value =
             item.score;
 
         get("shiftTypeDescription").value =
-            item.description ?? "";
+            item.description || "";
 
         renderShiftTypes();
-
-        showShiftMessage("");
 
     }
 
@@ -908,17 +734,21 @@ document.addEventListener("DOMContentLoaded", () => {
        シフト種別：削除
     ======================================== */
 
-    function deleteShiftType(id) {
+    async function deleteShiftType(id) {
+
+        if (!isEditable()) {
+            return;
+        }
 
         const item = shiftTypes.find(
-            shift => shift.id === id
+            shift => Number(shift.id) === Number(id)
         );
 
         if (!item) {
             return;
         }
 
-        const confirmed = confirm(
+        const confirmed = window.confirm(
             `「${item.name}」を削除しますか？`
         );
 
@@ -926,101 +756,94 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const previous = clone(shiftTypes);
-
-        shiftTypes = shiftTypes.filter(
-            shift => shift.id !== id
+        const updated = shiftTypes.filter(
+            shift => Number(shift.id) !== Number(id)
         );
 
-        if (!saveShiftSettings()) {
+        try {
 
-            shiftTypes = previous;
+            const result = await saveSettings(
+                "save_shift_types",
+                updated
+            );
 
-            return;
+            if (selectedShiftId === Number(id)) {
 
-        }
+                if (shiftTypes.length > 0) {
 
+                    editShiftType(
+                        shiftTypes[0].id
+                    );
 
-        /* 削除したシフトが編集中だった場合 */
+                } else {
 
-        if (selectedShiftTypeId === id) {
+                    addShiftType(false);
 
-            if (shiftTypes.length > 0) {
-
-                editShiftType(
-                    shiftTypes[0].id
-                );
+                }
 
             } else {
 
-                addShiftType(false);
+                renderShiftTypes();
 
             }
 
-        } else {
+            updateCalculationExample();
 
-            renderShiftTypes();
+            showShiftMessage(
+                result.message
+            );
+
+        } catch (error) {
+
+            showShiftMessage(
+                error.message,
+                true
+            );
 
         }
-
-        showShiftMessage(
-            "シフト種別を削除しました。"
-        );
 
     }
 
 
     /* ========================================
-       勤務時間：分単位への変換
+       勤務時間計算
     ======================================== */
 
     function timeToMinutes(time) {
 
-        const [hours, minutes] =
-            time.split(":").map(Number);
+        const parts = time.split(":").map(Number);
 
-        return hours * 60 + minutes;
+        return parts[0] * 60 + parts[1];
 
     }
 
 
-    /* ========================================
-       勤務時間の計算
-    ======================================== */
-
     function calculateWorkingMinutes(start, end) {
-
-        if (!start || !end) {
-            return 0;
-        }
 
         const startMinutes =
             timeToMinutes(start);
 
-        let endMinutes =
+        const endMinutes =
             timeToMinutes(end);
 
-
-        /* 日付をまたぐ勤務に対応 */
-
-        if (endMinutes < startMinutes) {
-
-            endMinutes += 24 * 60;
-
-        }
-
-        return endMinutes - startMinutes;
+        return (
+            endMinutes - startMinutes + 1440
+        ) % 1440;
 
     }
 
 
     /* ========================================
-       シフト種別：保存処理
+       シフト種別：保存
     ======================================== */
 
-    shiftForm.addEventListener("submit", event => {
+    shiftForm.addEventListener("submit", async event => {
 
         event.preventDefault();
+
+        if (!isEditable()) {
+            return;
+        }
 
         const name =
             get("shiftTypeName").value.trim();
@@ -1038,19 +861,21 @@ document.addEventListener("DOMContentLoaded", () => {
             get("shiftBreakMinutes").value
         );
 
-        const rawScore =
+        const scoreValue =
             get("shiftTypeScore").value;
 
         const description =
             get("shiftTypeDescription").value.trim();
 
 
-        /* 必須項目チェック */
+        /* ========================================
+           入力チェック
+        ======================================== */
 
-        if (!name) {
+        if (!name || name.length > 50) {
 
             showShiftMessage(
-                "シフト種別名を入力してください。",
+                "シフト種別名は1～50文字で入力してください。",
                 true
             );
 
@@ -1058,125 +883,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+        const duplicate = shiftTypes.some(item => {
 
-        /* 文字数チェック */
-
-        if (
-            name.length > 50 ||
-            description.length > 300
-        ) {
-
-            showShiftMessage(
-                "入力可能な文字数を超えています。",
-                true
+            return (
+                item.name.trim() === name &&
+                Number(item.id) !== selectedShiftId
             );
 
-            return;
-
-        }
-
-
-        /* 勤務時間チェック */
-
-        if (
-            (start && !end) ||
-            (!start && end)
-        ) {
-
-            showShiftMessage(
-                "勤務時間は開始時刻と終了時刻の両方を入力してください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 同一時刻チェック */
-
-        if (start && end && start === end) {
-
-            showShiftMessage(
-                "開始時刻と終了時刻を同じにすることはできません。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 休憩時間チェック */
-
-        if (
-            ![0, 30, 45, 60, 90].includes(breakMinutes)
-        ) {
-
-            showShiftMessage(
-                "休憩時間が正しくありません。",
-                true
-            );
-
-            return;
-
-        }
-
-        const workingMinutes =
-            calculateWorkingMinutes(start, end);
-
-        if (
-            (!start && breakMinutes > 0) ||
-            (start && breakMinutes >= workingMinutes)
-        ) {
-
-            showShiftMessage(
-                "休憩時間は勤務時間より短くしてください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 負担スコアチェック */
-
-        if (!isValidNumber(rawScore, 0, 10)) {
-
-            showShiftMessage(
-                "負担スコアは0～10で入力してください。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* 表示色チェック */
-
-        if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
-
-            showShiftMessage(
-                "表示色が正しくありません。",
-                true
-            );
-
-            return;
-
-        }
-
-
-        /* シフト種別名の重複チェック */
-
-        const duplicate = shiftTypes.some(item =>
-
-            String(item.name).trim() === name &&
-
-            item.id !== selectedShiftTypeId
-
-        );
+        });
 
         if (duplicate) {
 
@@ -1189,115 +903,247 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+        if (!/^#[0-9a-fA-F]{6}$/.test(color)) {
 
-        /* 保存するデータ */
-
-        const id =
-            selectedShiftTypeId ?? nextId(shiftTypes);
-
-        const item = {
-
-            id,
-
-            name,
-
-            color,
-
-            start,
-
-            end,
-
-            breakMinutes,
-
-            score: Number(rawScore),
-
-            description
-
-        };
-
-        const previous = clone(shiftTypes);
-
-        const index = shiftTypes.findIndex(
-            shift => shift.id === id
-        );
-
-
-        /* 新規追加または更新 */
-
-        if (index >= 0) {
-
-            shiftTypes[index] = item;
-
-        } else {
-
-            shiftTypes.push(item);
-
-        }
-
-
-        /* 保存 */
-
-        if (!saveShiftSettings()) {
-
-            shiftTypes = previous;
+            showShiftMessage(
+                "表示色が不正です。",
+                true
+            );
 
             return;
 
         }
 
-        selectedShiftTypeId = id;
+        if (
+            (start && !end) ||
+            (!start && end)
+        ) {
 
-        editorHeading.textContent =
-            "シフト種別の詳細設定";
+            showShiftMessage(
+                "開始時刻と終了時刻を両方入力してください。",
+                true
+            );
 
-        renderShiftTypes();
+            return;
 
-        showShiftMessage(
-            "シフト種別の設定を保存しました。"
+        }
+
+        if (
+            start &&
+            end &&
+            start === end
+        ) {
+
+            showShiftMessage(
+                "開始時刻と終了時刻を同じ時刻にはできません。",
+                true
+            );
+
+            return;
+
+        }
+
+        if (
+            ![0, 30, 45, 60, 90].includes(breakMinutes)
+        ) {
+
+            showShiftMessage(
+                "休憩時間が不正です。",
+                true
+            );
+
+            return;
+
+        }
+
+        if (!start && !end && breakMinutes !== 0) {
+
+            showShiftMessage(
+                "勤務時間がない場合は休憩時間を設定できません。",
+                true
+            );
+
+            return;
+
+        }
+
+        if (start && end) {
+
+            const workingMinutes =
+                calculateWorkingMinutes(
+                    start,
+                    end
+                );
+
+            if (breakMinutes >= workingMinutes) {
+
+                showShiftMessage(
+                    "休憩時間は勤務時間より短くしてください。",
+                    true
+                );
+
+                return;
+
+            }
+
+        }
+
+        if (!isValidNumber(scoreValue, 0, 10)) {
+
+            showShiftMessage(
+                "負担スコアは0～10で入力してください。",
+                true
+            );
+
+            return;
+
+        }
+
+        if (description.length > 300) {
+
+            showShiftMessage(
+                "説明は300文字以内で入力してください。",
+                true
+            );
+
+            return;
+
+        }
+
+        if (
+            selectedShiftId === null &&
+            shiftTypes.length >= 100
+        ) {
+
+            showShiftMessage(
+                "シフト種別は100件まで登録できます。",
+                true
+            );
+
+            return;
+
+        }
+
+
+        /* ========================================
+           保存データ作成
+        ======================================== */
+
+        const id =
+            selectedShiftId === null
+                ? nextId(shiftTypes)
+                : selectedShiftId;
+
+        const item = {
+
+            id: id,
+
+            name: name,
+
+            color: color,
+
+            start: start,
+
+            end: end,
+
+            breakMinutes: breakMinutes,
+
+            score: Number(scoreValue),
+
+            description: description
+
+        };
+
+        const updated = clone(shiftTypes);
+
+        const index = updated.findIndex(
+            shift => Number(shift.id) === id
         );
+
+        if (index === -1) {
+
+            updated.push(item);
+
+        } else {
+
+            updated[index] = item;
+
+        }
+
+
+        /* ========================================
+           PHPへ送信
+        ======================================== */
+
+        try {
+
+            const result = await saveSettings(
+                "save_shift_types",
+                updated
+            );
+
+            editShiftType(id);
+
+            updateCalculationExample();
+
+            showShiftMessage(
+                result.message
+            );
+
+        } catch (error) {
+
+            showShiftMessage(
+                error.message,
+                true
+            );
+
+        }
 
     });
 
 
     /* ========================================
-       シフト種別：一覧のクリック処理
+       シフト種別：一覧操作
     ======================================== */
 
     shiftTable.addEventListener("click", event => {
 
-        const deleteButton =
-            event.target.closest(".delete-shift");
+        if (!initialized || isSaving) {
+            return;
+        }
 
-        if (deleteButton) {
+        const button = event.target.closest(
+            "button[data-action]"
+        );
 
-            deleteShiftType(
-                Number(deleteButton.dataset.id)
-            );
+        if (button) {
+
+            const id = Number(button.dataset.id);
+
+            if (button.dataset.action === "edit") {
+
+                editShiftType(id);
+
+            }
+
+            if (button.dataset.action === "delete") {
+
+                deleteShiftType(id);
+
+            }
 
             return;
 
         }
 
-        const editButton =
-            event.target.closest(".edit-shift");
-
-        if (editButton) {
-
-            editShiftType(
-                Number(editButton.dataset.id)
-            );
-
-            return;
-
-        }
-
-        const row =
-            event.target.closest("[data-shift-id]");
+        const row = event.target.closest(
+            "tr[data-id]"
+        );
 
         if (row) {
 
             editShiftType(
-                Number(row.dataset.shiftId)
+                Number(row.dataset.id)
             );
 
         }
@@ -1312,6 +1158,12 @@ document.addEventListener("DOMContentLoaded", () => {
     get("addShiftTypeButton")
         .addEventListener("click", () => {
 
+            if (!isEditable()) {
+                return;
+            }
+
+            showShiftMessage("");
+
             addShiftType();
 
         });
@@ -1324,19 +1176,29 @@ document.addEventListener("DOMContentLoaded", () => {
     get("cancelShiftTypeButton")
         .addEventListener("click", () => {
 
-            if (selectedShiftTypeId !== null) {
+            if (!isEditable()) {
+                return;
+            }
 
-                editShiftType(selectedShiftTypeId);
+            showShiftMessage("");
+
+            if (selectedShiftId !== null) {
+
+                editShiftType(
+                    selectedShiftId
+                );
+
+            } else if (shiftTypes.length > 0) {
+
+                editShiftType(
+                    shiftTypes[0].id
+                );
 
             } else {
 
                 addShiftType(false);
 
             }
-
-            showShiftMessage(
-                "編集内容を元に戻しました。"
-            );
 
         });
 
@@ -1363,9 +1225,13 @@ document.addEventListener("DOMContentLoaded", () => {
        自動調整ルール：保存
     ======================================== */
 
-    rulesForm.addEventListener("submit", event => {
+    rulesForm.addEventListener("submit", async event => {
 
         event.preventDefault();
+
+        if (!isEditable()) {
+            return;
+        }
 
         const maxConsecutiveDays = Number(
             get("maxConsecutiveDays").value
@@ -1379,7 +1245,9 @@ document.addEventListener("DOMContentLoaded", () => {
             get("requestPriority").value;
 
 
-        /* 連続勤務日数チェック */
+        /* ========================================
+           入力チェック
+        ======================================== */
 
         if (
             !Number.isInteger(maxConsecutiveDays) ||
@@ -1396,9 +1264,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-
-        /* 月間勤務日数チェック */
-
         if (
             !Number.isInteger(maxMonthlyDays) ||
             maxMonthlyDays < 1 ||
@@ -1414,22 +1279,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-
-        /* 上限日数の整合性チェック */
-
         if (maxConsecutiveDays > maxMonthlyDays) {
 
             showShiftMessage(
-                "連続勤務の上限は月の最大勤務日数以下にしてください。",
+                "連続勤務の上限日数は月の最大勤務日数以下にしてください。",
                 true
             );
 
             return;
 
         }
-
-
-        /* 希望シフトの優先度チェック */
 
         if (
             !["high", "medium", "low"]
@@ -1437,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             showShiftMessage(
-                "希望シフトの優先度が正しくありません。",
+                "希望シフトの優先度が不正です。",
                 true
             );
 
@@ -1446,27 +1305,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /* 保存 */
+        /* ========================================
+           保存データ作成
+        ======================================== */
 
-        const previous = clone(rules);
+        const data = {
 
-        rules = {
-            maxConsecutiveDays,
-            maxMonthlyDays,
-            requestPriority
+            maxConsecutiveDays: maxConsecutiveDays,
+
+            maxMonthlyDays: maxMonthlyDays,
+
+            requestPriority: requestPriority
+
         };
 
-        if (!saveShiftSettings()) {
 
-            rules = previous;
+        /* ========================================
+           PHPへ送信
+        ======================================== */
 
-            return;
+        try {
+
+            const result = await saveSettings(
+                "save_rules",
+                data
+            );
+
+            applyRules();
+
+            updateCalculationExample();
+
+            showShiftMessage(
+                result.message
+            );
+
+        } catch (error) {
+
+            showShiftMessage(
+                error.message,
+                true
+            );
 
         }
-
-        showShiftMessage(
-            "自動調整ルールを保存しました。"
-        );
 
     });
 
@@ -1477,23 +1357,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyScoreSettings() {
 
+        const conditions =
+            scoreSettings.conditions;
+
         get("aggregationPeriod").value =
-            scoreSettings.aggregationPeriod;
+            String(scoreSettings.aggregationPeriod);
 
         get("resetTiming").value =
             scoreSettings.resetTiming;
 
         get("consecutiveScore").value =
-            scoreSettings.conditions.consecutive;
+            conditions.consecutive;
 
         get("nightScore").value =
-            scoreSettings.conditions.night;
+            conditions.night;
 
         get("earlyScore").value =
-            scoreSettings.conditions.early;
+            conditions.early;
 
         get("weeklyOverScore").value =
-            scoreSettings.conditions.weeklyOver;
+            conditions.weeklyOver;
 
         updateCalculationExample();
 
@@ -1501,7 +1384,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       負担スコア設定：フォーム取得
+       負担スコア設定：入力値取得
     ======================================== */
 
     function readScoreForm() {
@@ -1525,115 +1408,88 @@ document.addEventListener("DOMContentLoaded", () => {
             get("weeklyOverScore").value;
 
 
-        /* 集計期間チェック */
+        /* ========================================
+           入力チェック
+        ======================================== */
 
         if (
             !["1", "2", "4", "8"]
                 .includes(aggregationPeriod)
         ) {
 
-            return {
-
-                success: false,
-
-                message:
-                    "集計期間を選択してください。"
-
-            };
+            throw new Error(
+                "集計期間が不正です。"
+            );
 
         }
-
-
-        /* リセットタイミングチェック */
 
         if (
-            ![
-                "monthly",
-                "weekly",
-                "quarterly",
-                "none"
-            ].includes(resetTiming)
+            !["weekly", "monthly", "quarterly", "none"]
+                .includes(resetTiming)
         ) {
 
-            return {
-
-                success: false,
-
-                message:
-                    "リセットタイミングを選択してください。"
-
-            };
+            throw new Error(
+                "リセットタイミングが不正です。"
+            );
 
         }
-
-
-        /* 追加スコアチェック */
 
         const values = [
 
-            consecutive,
+            {
+                name: "連続勤務",
+                value: consecutive
+            },
 
-            night,
+            {
+                name: "夜間シフト",
+                value: night
+            },
 
-            early,
+            {
+                name: "早朝シフト",
+                value: early
+            },
 
-            weeklyOver
+            {
+                name: "週の上限超過",
+                value: weeklyOver
+            }
 
         ];
 
-        if (
-            values.some(
-                value => !isValidNumber(value, 0, 100)
-            )
-        ) {
+        for (const item of values) {
 
-            return {
+            if (!isValidNumber(item.value, 0, 100)) {
 
-                success: false,
+                throw new Error(
+                    `${item.name}のスコアは0～100で入力してください。`
+                );
 
-                message:
-                    "追加スコアは0～100で入力してください。"
-
-            };
+            }
 
         }
 
 
-        /* フォームの設定内容 */
+        /* ========================================
+           設定データ返却
+        ======================================== */
 
         return {
 
-            success: true,
+            aggregationPeriod: aggregationPeriod,
 
-            data: {
+            resetTiming: resetTiming,
 
-                aggregationPeriod,
+            conditions: {
 
-                resetTiming,
+                consecutive: Number(consecutive),
 
-                shiftScores: Object.fromEntries(
+                night: Number(night),
 
-                    shiftTypes.map(item => [
+                early: Number(early),
 
-                        String(item.id),
-
-                        Number(item.score) || 0
-
-                    ])
-
-                ),
-
-                conditions: {
-
-                    consecutive: Number(consecutive),
-
-                    night: Number(night),
-
-                    early: Number(early),
-
-                    weeklyOver: Number(weeklyOver)
-
-                }
+                weeklyOver: Number(weeklyOver)
 
             }
 
@@ -1643,61 +1499,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       負担スコア：計算処理
+       負担スコア計算
     ======================================== */
 
     function calculateScore(data, config) {
 
-        const baseScore = Number(
+        const conditions =
+            config.conditions;
 
-            config.shiftScores[
-                String(data.shiftTypeId)
-            ] ?? 0
-
-        );
-
-        const consecutiveDays = Math.max(
-
-            0,
-
-            Number(data.consecutiveDays) || 0
-
-        );
+        const baseScore =
+            Number(data.baseScore || 0) *
+            Number(data.multiplier ?? 1);
 
         const consecutiveScore =
-
-            Math.max(0, consecutiveDays - 1) *
-
-            Number(config.conditions.consecutive);
+            Math.max(
+                0,
+                Number(data.consecutiveDays || 0) - 1
+            ) *
+            Number(conditions.consecutive);
 
         const nightScore =
-
-            Math.max(0, Number(data.nightCount) || 0) *
-
-            Number(config.conditions.night);
+            data.isNight
+                ? Number(conditions.night)
+                : 0;
 
         const earlyScore =
-
-            Math.max(0, Number(data.earlyCount) || 0) *
-
-            Number(config.conditions.early);
+            data.isEarly
+                ? Number(conditions.early)
+                : 0;
 
         const weeklyOverScore =
+            Math.max(
+                0,
+                Number(data.weeklyOverDays || 0)
+            ) *
+            Number(conditions.weeklyOver);
 
-            Math.max(0, Number(data.weeklyOverDays) || 0) *
-
-            Number(config.conditions.weeklyOver);
-
-        const totalScore =
-
+        const total =
             baseScore +
-
             consecutiveScore +
-
             nightScore +
-
             earlyScore +
-
             weeklyOverScore;
 
         return {
@@ -1712,7 +1554,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             weeklyOverScore,
 
-            totalScore
+            total
 
         };
 
@@ -1720,135 +1562,128 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       負担スコア：計算例の更新
+       負担スコア：計算例更新
     ======================================== */
 
     function updateCalculationExample() {
 
-        const result = readScoreForm();
+        if (!scoreSettings.conditions) {
+            return;
+        }
 
-        if (!result.success) {
+        let config;
+
+        try {
+
+            config = readScoreForm();
+
+        } catch (error) {
+
+            // 入力途中で不正な値の場合は更新しない
 
             return;
 
         }
 
-        const config = result.data;
+        const conditions =
+            config.conditions;
 
 
-        /* 計算式の表示 */
+        /* ========================================
+           計算式の表示更新
+        ======================================== */
 
         get("formulaConsecutive").textContent =
-            formatScore(
-                config.conditions.consecutive
-            );
+            formatScore(conditions.consecutive);
 
         get("formulaNight").textContent =
-            formatScore(
-                config.conditions.night
-            );
+            formatScore(conditions.night);
 
         get("formulaEarly").textContent =
-            formatScore(
-                config.conditions.early
-            );
+            formatScore(conditions.early);
 
         get("formulaWeekly").textContent =
-            formatScore(
-                config.conditions.weeklyOver
-            );
+            formatScore(conditions.weeklyOver);
 
 
-        /* 計算例に使用するシフト種別 */
+        /* ========================================
+           基本スコア取得
+        ======================================== */
 
-        const normalShift = shiftTypes.find(
-            item => item.name === "通常出勤"
-        );
+        const normalShift =
+            shiftTypes.find(
+                item => item.name === "通常出勤"
+            ) ||
+            shiftTypes.find(
+                item => Number(item.id) === 1
+            ) ||
+            shiftTypes[0];
 
-        const exampleShift =
-
-            normalShift ??
-
-            shiftTypes[0] ??
-
-            null;
-
-
-        /* 計算例のデータ */
-
-        const exampleData = {
-
-            shiftTypeId:
-                exampleShift?.id ?? null,
-
-            consecutiveDays: 3,
-
-            nightCount: 1,
-
-            earlyCount: 0,
-
-            weeklyOverDays: 0
-
-        };
+        const baseScore =
+            normalShift
+                ? Number(normalShift.score)
+                : 0;
 
 
-        /* 負担スコアを計算 */
+        /* ========================================
+           計算例の条件
 
-        const calculated = calculateScore(
+           連続勤務：3日目
+           夜間勤務：あり
+           早朝勤務：なし
+           週の上限超過：なし
+           業務倍率：1.0
+        ======================================== */
 
-            exampleData,
+        const result = calculateScore(
+            {
 
+                baseScore: baseScore,
+
+                multiplier: 1,
+
+                consecutiveDays: 3,
+
+                isNight: true,
+
+                isEarly: false,
+
+                weeklyOverDays: 0
+
+            },
             config
-
         );
 
 
-        /* 基本スコア */
+        /* ========================================
+           計算結果表示
+        ======================================== */
 
         get("exampleBase").textContent =
-            formatScore(
-                calculated.baseScore
-            );
-
-
-        /* 連続勤務 */
+            formatScore(result.baseScore);
 
         get("exampleConsecutive").textContent =
-            formatScore(
-                calculated.consecutiveScore
-            );
-
-
-        /* 夜間勤務 */
+            formatScore(result.consecutiveScore);
 
         get("exampleNight").textContent =
-            formatScore(
-                calculated.nightScore
-            );
-
-
-        /* 合計スコア */
+            formatScore(result.nightScore);
 
         get("exampleTotal").textContent =
-            formatScore(
-                calculated.totalScore
-            );
+            formatScore(result.total);
 
 
-        /* 計算例のシフト種別名を更新 */
+        /* ========================================
+           計算例のシフト種別名更新
+        ======================================== */
 
-        const exampleBaseCell =
-            get("exampleBase");
+        const baseCell = get("exampleBase");
 
-        if (exampleBaseCell.previousElementSibling) {
+        if (baseCell.previousElementSibling) {
 
-            exampleBaseCell
-                .previousElementSibling
-                .textContent =
-
-                exampleShift?.name ??
-
-                "シフト種別なし";
+            baseCell.previousElementSibling.textContent =
+                normalShift
+                    ? normalShift.name
+                    : "未登録";
 
         }
 
@@ -1859,61 +1694,35 @@ document.addEventListener("DOMContentLoaded", () => {
        負担スコア設定：保存
     ======================================== */
 
-    function saveScoreSettings() {
+    async function saveScoreSettings() {
 
-        const result = readScoreForm();
-
-        if (!result.success) {
-
-            showScoreMessage(
-
-                result.message,
-
-                true
-
-            );
-
+        if (!isEditable()) {
             return;
-
         }
 
-        const success = writeStorage(
+        try {
 
-            SCORE_STORAGE_KEY,
+            const data = readScoreForm();
 
-            result.data
+            const result = await saveSettings(
+                "save_scores",
+                data
+            );
 
-        );
-
-        if (!success) {
+            applyScoreSettings();
 
             showScoreMessage(
-                "負担スコア設定を保存できませんでした。",
+                result.message
+            );
+
+        } catch (error) {
+
+            showScoreMessage(
+                error.message,
                 true
             );
 
-            return;
-
         }
-
-        scoreSettings = result.data;
-
-        updateCalculationExample();
-
-        showScoreMessage(
-            "負担スコア設定を保存しました。"
-        );
-
-
-        /* 更新イベント */
-
-        document.dispatchEvent(
-
-            new Event(
-                "tasfina:score-settings-updated"
-            )
-
-        );
 
     }
 
@@ -1922,85 +1731,51 @@ document.addEventListener("DOMContentLoaded", () => {
        負担スコア設定：リセット
     ======================================== */
 
-    function resetScoreSettings() {
+    async function resetScoreSettings() {
 
-        const confirmed = confirm(
+        if (!isEditable()) {
+            return;
+        }
 
+        const confirmed = window.confirm(
             "負担スコア設定を初期値に戻しますか？\n" +
-
-            "シフト種別の基本スコアと業務タイプは変更されません。"
-
+            "シフト種別と業務タイプの設定は変更されません。"
         );
 
         if (!confirmed) {
             return;
         }
 
-        const resetData =
-            clone(defaultScoreSettings);
+        try {
 
-
-        /* シフト種別の基本スコアは維持 */
-
-        resetData.shiftScores =
-            Object.fromEntries(
-
-                shiftTypes.map(item => [
-
-                    String(item.id),
-
-                    Number(item.score) || 0
-
-                ])
-
+            const result = await saveSettings(
+                "reset_scores",
+                {}
             );
 
-
-        /* 保存 */
-
-        if (
-            !writeStorage(
-                SCORE_STORAGE_KEY,
-                resetData
-            )
-        ) {
+            applyScoreSettings();
 
             showScoreMessage(
-                "設定をリセットできませんでした。",
+                result.message
+            );
+
+        } catch (error) {
+
+            showScoreMessage(
+                error.message,
                 true
             );
 
-            return;
-
         }
-
-        scoreSettings = resetData;
-
-        applyScoreSettings();
-
-        showScoreMessage(
-            "負担スコア設定を初期値に戻しました。"
-        );
-
-
-        /* 更新イベント */
-
-        document.dispatchEvent(
-
-            new Event(
-                "tasfina:score-settings-updated"
-            )
-
-        );
 
     }
 
 
     /* ========================================
-       負担スコア：入力イベント
+       負担スコア設定：リアルタイム計算
     ======================================== */
 
-    const scoreInputIds = [
+    [
 
         "aggregationPeriod",
 
@@ -2014,78 +1789,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
         "weeklyOverScore"
 
-    ];
-
-    scoreInputIds.forEach(id => {
+    ].forEach(id => {
 
         const element = get(id);
 
-        const update = () => {
-
-            showScoreMessage("");
-
-            updateCalculationExample();
-
-        };
-
         element.addEventListener(
-
             "input",
+            () => {
 
-            update
+                showScoreMessage("");
 
+                updateCalculationExample();
+
+            }
         );
 
         element.addEventListener(
-
             "change",
-
-            update
-
+            updateCalculationExample
         );
 
     });
 
 
     /* ========================================
-       負担スコア：保存ボタン
+       負担スコア設定：ボタン操作
     ======================================== */
 
     get("saveScoresButton")
         .addEventListener(
-
             "click",
-
             saveScoreSettings
-
         );
-
-
-    /* ========================================
-       負担スコア：リセットボタン
-    ======================================== */
 
     get("resetScoresButton")
         .addEventListener(
-
             "click",
-
             resetScoreSettings
-
         );
 
 
     /* ========================================
-       業務タイプ：テーブル行作成
+       業務タイプ：行作成
     ======================================== */
 
     function createWorkTypeRow(item) {
 
-        const row =
-            document.createElement("tr");
+        const row = document.createElement("tr");
 
-        row.dataset.workTypeId =
-            String(item.id);
+        row.dataset.id = Number(item.id);
 
         row.innerHTML = `
 
@@ -2095,8 +1847,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     type="text"
                     class="form-control work-type-name"
                     maxlength="50"
+                    value="${escapeHtml(item.name)}"
                     aria-label="業務タイプ名"
-                    placeholder="業務タイプ名"
                     required
                 >
 
@@ -2104,39 +1856,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <td>
 
-                <div class="input-group">
-
-                    <input
-                        type="number"
-                        class="form-control work-type-rate"
-                        min="0.1"
-                        max="10"
-                        step="0.1"
-                        aria-label="業務倍率"
-                        required
-                    >
-
-                    <span class="input-group-text">
-
-                        倍
-
-                    </span>
-
-                </div>
+                <input
+                    type="number"
+                    class="form-control work-type-rate"
+                    min="0.1"
+                    max="10"
+                    step="0.1"
+                    value="${escapeHtml(item.multiplier)}"
+                    aria-label="業務倍率"
+                    required
+                >
 
             </td>
 
             <td>
 
-                <div class="form-check form-switch">
-
-                    <input
-                        type="checkbox"
-                        class="form-check-input work-type-enabled"
-                        aria-label="業務タイプを有効にする"
-                    >
-
-                </div>
+                <input
+                    type="checkbox"
+                    class="form-check-input work-type-enabled"
+                    aria-label="有効"
+                    ${item.enabled ? "checked" : ""}
+                >
 
             </td>
 
@@ -2145,39 +1885,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button
                     type="button"
                     class="btn btn-outline-danger btn-sm work-type-remove"
+                    data-action="delete"
                     aria-label="業務タイプを削除"
-                    title="削除"
                 >
 
-                    <i class="bi bi-trash3"></i>
+                    <i class="bi bi-trash"></i>
+
+                    削除
 
                 </button>
 
             </td>
 
         `;
-
-
-        /* 業務タイプ名 */
-
-        row.querySelector(
-            ".work-type-name"
-        ).value = item.name ?? "";
-
-
-        /* 業務倍率 */
-
-        row.querySelector(
-            ".work-type-rate"
-        ).value = item.multiplier ?? 1.0;
-
-
-        /* 有効・無効 */
-
-        row.querySelector(
-            ".work-type-enabled"
-        ).checked = item.enabled !== false;
-
 
         return row;
 
@@ -2190,58 +1910,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderWorkTypes() {
 
-        workTypeRows.replaceChildren();
+        workTypeRows.innerHTML = "";
 
-        workTypes.forEach(item => {
+        editingWorkTypes.forEach(item => {
 
             workTypeRows.appendChild(
-
                 createWorkTypeRow(item)
-
             );
 
         });
 
-        showWorkTypeError("");
+        applyPermissions();
 
     }
 
 
     /* ========================================
-       業務タイプ：新規追加
+       業務タイプ：現在の入力値取得
+    ======================================== */
+
+    function readWorkTypeRows() {
+
+        const rows = workTypeRows.querySelectorAll(
+            "tr[data-id]"
+        );
+
+        return Array.from(rows).map(row => {
+
+            return {
+
+                id: Number(row.dataset.id),
+
+                name: row.querySelector(
+                    ".work-type-name"
+                ).value.trim(),
+
+                multiplier: row.querySelector(
+                    ".work-type-rate"
+                ).value,
+
+                enabled: row.querySelector(
+                    ".work-type-enabled"
+                ).checked
+
+            };
+
+        });
+
+    }
+
+
+    /* ========================================
+       業務タイプ：追加
     ======================================== */
 
     function addWorkType() {
 
-        const existingIds = [
+        if (!isEditable()) {
+            return;
+        }
 
-            ...workTypes.map(item =>
-                Number(item.id) || 0
-            ),
+        editingWorkTypes =
+            readWorkTypeRows();
 
-            ...Array.from(
+        if (editingWorkTypes.length >= 100) {
 
-                workTypeRows.querySelectorAll(
-                    "[data-work-type-id]"
-                )
+            showWorkTypeError(
+                "業務タイプは100件まで登録できます。"
+            );
 
-            ).map(row =>
-                Number(row.dataset.workTypeId) || 0
-            )
+            return;
 
-        ];
+        }
 
-        const id = Math.max(
+        editingWorkTypes.push({
 
-            0,
-
-            ...existingIds
-
-        ) + 1;
-
-        const item = {
-
-            id,
+            id: nextId(editingWorkTypes),
 
             name: "",
 
@@ -2249,17 +1993,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             enabled: true
 
-        };
+        });
 
-        const row = createWorkTypeRow(item);
-
-        workTypeRows.appendChild(row);
+        renderWorkTypes();
 
         showWorkTypeError("");
 
-        row.querySelector(
-            ".work-type-name"
-        ).focus();
+        const lastRow =
+            workTypeRows.lastElementChild;
+
+        if (lastRow) {
+
+            lastRow.querySelector(
+                ".work-type-name"
+            ).focus();
+
+        }
 
     }
 
@@ -2270,34 +2019,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     workTypeRows.addEventListener("click", event => {
 
+        if (!isEditable()) {
+            return;
+        }
+
         const button = event.target.closest(
-            ".work-type-remove"
+            'button[data-action="delete"]'
         );
 
         if (!button) {
             return;
         }
 
-        const row = button.closest("tr");
+        const row = button.closest(
+            "tr[data-id]"
+        );
 
         if (!row) {
             return;
         }
 
-        const name = row.querySelector(
-            ".work-type-name"
-        ).value.trim();
+        editingWorkTypes =
+            readWorkTypeRows();
 
-        if (
-            name &&
-            !confirm(`「${name}」を削除しますか？`)
-        ) {
+        if (editingWorkTypes.length <= 1) {
+
+            showWorkTypeError(
+                "業務タイプは1件以上必要です。"
+            );
 
             return;
 
         }
 
-        row.remove();
+        const id = Number(row.dataset.id);
+
+        editingWorkTypes =
+            editingWorkTypes.filter(
+                item => item.id !== id
+            );
+
+        renderWorkTypes();
 
         showWorkTypeError("");
 
@@ -2305,220 +2067,164 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       業務タイプ：フォーム取得
+       業務タイプ：入力チェック
     ======================================== */
 
     function collectWorkTypes() {
 
-        const rows = Array.from(
+        const items =
+            readWorkTypeRows();
 
-            workTypeRows.querySelectorAll("tr")
+        if (
+            items.length < 1 ||
+            items.length > 100
+        ) {
 
-        );
+            throw new Error(
+                "業務タイプは1～100件登録してください。"
+            );
 
-        const items = [];
+        }
 
         const names = new Set();
 
-        for (const row of rows) {
+        const ids = new Set();
 
-            const id = Number(
-                row.dataset.workTypeId
-            );
+        const result = [];
 
-            const name = row.querySelector(
-                ".work-type-name"
-            ).value.trim();
+        for (const item of items) {
 
-            const rawMultiplier = row.querySelector(
-                ".work-type-rate"
-            ).value;
+            if (
+                !Number.isInteger(item.id) ||
+                item.id <= 0 ||
+                ids.has(item.id)
+            ) {
 
-            const enabled = row.querySelector(
-                ".work-type-enabled"
-            ).checked;
-
-
-            /* 業務タイプ名チェック */
-
-            if (!name || name.length > 50) {
-
-                return {
-
-                    success: false,
-
-                    message:
-                        "業務タイプ名を1～50文字で入力してください。"
-
-                };
+                throw new Error(
+                    "業務タイプIDが不正です。"
+                );
 
             }
 
+            if (
+                !item.name ||
+                item.name.length > 50
+            ) {
 
-            /* 倍率チェック */
+                throw new Error(
+                    "業務タイプ名は1～50文字で入力してください。"
+                );
+
+            }
+
+            const normalizedName =
+                item.name.toLowerCase();
+
+            if (names.has(normalizedName)) {
+
+                throw new Error(
+                    "業務タイプ名が重複しています。"
+                );
+
+            }
 
             if (
                 !isValidNumber(
-                    rawMultiplier,
+                    item.multiplier,
                     0.1,
                     10
                 )
             ) {
 
-                return {
-
-                    success: false,
-
-                    message:
-                        `「${name}」の倍率は0.1～10で入力してください。`
-
-                };
-
-            }
-
-
-            /* 業務タイプ名の重複チェック */
-
-            const normalizedName =
-                name.toLowerCase();
-
-            if (names.has(normalizedName)) {
-
-                return {
-
-                    success: false,
-
-                    message:
-                        `「${name}」が重複しています。`
-
-                };
+                throw new Error(
+                    "業務倍率は0.1～10で入力してください。"
+                );
 
             }
 
             names.add(normalizedName);
 
+            ids.add(item.id);
 
-            /* データ追加 */
+            result.push({
 
-            items.push({
+                id: item.id,
 
-                id,
+                name: item.name,
 
-                name,
+                multiplier: Number(item.multiplier),
 
-                multiplier: Number(rawMultiplier),
-
-                enabled
+                enabled: item.enabled
 
             });
 
         }
 
+        const hasEnabled = result.some(
+            item => item.enabled
+        );
 
-        /* 最低1件の業務タイプを維持 */
+        if (!hasEnabled) {
 
-        if (items.length === 0) {
-
-            return {
-
-                success: false,
-
-                message:
-                    "業務タイプを1件以上登録してください。"
-
-            };
+            throw new Error(
+                "業務タイプを1件以上有効にしてください。"
+            );
 
         }
 
-
-        /* 最低1件を有効にする */
-
-        if (!items.some(item => item.enabled)) {
-
-            return {
-
-                success: false,
-
-                message:
-                    "業務タイプを1件以上有効にしてください。"
-
-            };
-
-        }
-
-        return {
-
-            success: true,
-
-            data: items
-
-        };
+        return result;
 
     }
 
 
     /* ========================================
-       業務タイプ：保存処理
+       業務タイプ：保存
     ======================================== */
 
-    workTypeForm.addEventListener("submit", event => {
+    workTypeForm.addEventListener("submit", async event => {
 
         event.preventDefault();
 
-        const result = collectWorkTypes();
-
-        if (!result.success) {
-
-            showWorkTypeError(
-                result.message
-            );
-
+        if (!isEditable()) {
             return;
-
         }
-
-        const success = writeStorage(
-
-            WORK_TYPE_STORAGE_KEY,
-
-            result.data
-
-        );
-
-        if (!success) {
-
-            showWorkTypeError(
-                "業務タイプを保存できませんでした。"
-            );
-
-            return;
-
-        }
-
-        workTypes = result.data;
 
         showWorkTypeError("");
 
-        if (workTypeModal) {
+        try {
 
-            workTypeModal.hide();
+            const data =
+                collectWorkTypes();
+
+            const result = await saveSettings(
+                "save_work_types",
+                data
+            );
+
+            editingWorkTypes =
+                clone(workTypes);
+
+            renderWorkTypes();
+
+            if (workTypeModal) {
+
+                workTypeModal.hide();
+
+            }
+
+            showScoreMessage(
+                result.message
+            );
+
+            updateCalculationExample();
+
+        } catch (error) {
+
+            showWorkTypeError(
+                error.message
+            );
 
         }
-
-        showScoreMessage(
-            "業務タイプ・倍率設定を保存しました。"
-        );
-
-
-        /* 更新イベント */
-
-        document.dispatchEvent(
-
-            new Event(
-                "tasfina:work-types-updated"
-            )
-
-        );
 
     });
 
@@ -2529,11 +2235,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     get("addWorkTypeButton")
         .addEventListener(
-
             "click",
-
             addWorkType
-
         );
 
 
@@ -2554,13 +2257,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function openWorkTypeModal() {
 
-        if (
-            typeof window.bootstrap === "undefined" ||
-            !window.bootstrap.Modal
-        ) {
+        if (!initialized || isSaving) {
+            return;
+        }
+
+        if (!window.bootstrap) {
 
             showScoreMessage(
-                "モーダルを表示できませんでした。",
+                "モーダルの読み込みに失敗しました。",
                 true
             );
 
@@ -2568,13 +2272,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+        editingWorkTypes =
+            clone(workTypes);
+
         renderWorkTypes();
+
+        showWorkTypeError("");
 
         workTypeModal =
             bootstrap.Modal.getOrCreateInstance(
-
                 workTypeModalElement
-
             );
 
         workTypeModal.show();
@@ -2583,72 +2290,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       業務タイプ：モーダルを開くボタン
+       業務タイプ：モーダル操作
     ======================================== */
 
     get("openWorkTypeEditButton")
         .addEventListener(
-
             "click",
-
             openWorkTypeModal
-
         );
 
 
-    /* ========================================
-       業務タイプ：モーダル終了処理
-    ======================================== */
+    /* 保存中はモーダルを閉じない */
 
     workTypeModalElement.addEventListener(
+        "hide.bs.modal",
+        event => {
 
+            if (isSaving) {
+
+                event.preventDefault();
+
+            }
+
+        }
+    );
+
+
+    /* モーダル終了時に未保存データを破棄 */
+
+    workTypeModalElement.addEventListener(
         "hidden.bs.modal",
-
         () => {
 
-            workTypeRows.replaceChildren();
+            editingWorkTypes = [];
 
             showWorkTypeError("");
 
         }
-
     );
 
 
     /* ========================================
-       業務タイプ：外部参照用
-    ======================================== */
-
-    window.TasfinaWorkTypes = {
-
-        get() {
-
-            return clone(workTypes);
-
-        }
-
-    };
-
-
-    /* ========================================
-       Bootstrap：ツールチップ初期化
+       Bootstrapツールチップ初期化
     ======================================== */
 
     function initializeTooltips() {
 
-        if (
-            typeof window.bootstrap === "undefined" ||
-            !window.bootstrap.Tooltip
-        ) {
-
+        if (!window.bootstrap) {
             return;
-
         }
 
         document.querySelectorAll(
-
             '[data-bs-toggle="tooltip"]'
-
         ).forEach(element => {
 
             bootstrap.Tooltip.getOrCreateInstance(
@@ -2661,69 +2354,145 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* ========================================
-       初期化処理
+       注意書き更新
     ======================================== */
 
-    function initialize() {
+    function updateSettingsNote() {
 
-        /* 保存済みデータの読み込み */
+        const note = document.querySelector(
+            ".settings-demo-note"
+        );
 
-        loadShiftSettings();
+        if (!note) {
+            return;
+        }
 
-        loadScoreSettings();
+        if (canEdit) {
 
-        loadWorkTypes();
-
-
-        /* シフト種別の一覧表示 */
-
-        renderShiftTypes();
-
-
-        /* 自動調整ルールの反映 */
-
-        applyRules();
-
-
-        /* 負担スコア設定の反映 */
-
-        applyScoreSettings();
-
-
-        /* 初期編集フォーム */
-
-        if (shiftTypes.length > 0) {
-
-            editShiftType(
-                shiftTypes[0].id
-            );
+            note.textContent =
+                "設定は所属グループごとにデータベースへ保存されます。" +
+                "実際のシフト・ランキングの計算への反映は別途連携が必要です。";
 
         } else {
 
-            addShiftType(false);
+            note.textContent =
+                "現在のアカウントは設定の閲覧のみ可能です。";
 
         }
 
-
-        /* ツールチップ初期化 */
-
-        initializeTooltips();
+    }
 
 
-        /* メッセージ初期化 */
+    /* ========================================
+       初期化
+    ======================================== */
 
-        showShiftMessage("");
+    async function initialize() {
 
-        showScoreMessage("");
+        applyPermissions();
 
-        showWorkTypeError("");
-
-
-        /* 初期化完了 */
-
-        console.log(
-            "Tasfina：設定画面の初期化が完了しました。"
+        showShiftMessage(
+            "設定データを読み込み中..."
         );
+
+        showScoreMessage(
+            "設定データを読み込み中..."
+        );
+
+        try {
+
+            /* PHPから設定取得 */
+
+            await loadSettings();
+
+
+            /* 初期化完了 */
+
+            initialized = true;
+
+
+            /* シフト種別表示 */
+
+            if (shiftTypes.length > 0) {
+
+                editShiftType(
+                    shiftTypes[0].id
+                );
+
+            } else {
+
+                addShiftType(false);
+
+            }
+
+
+            /* 自動調整ルール表示 */
+
+            applyRules();
+
+
+            /* 負担スコア設定表示 */
+
+            applyScoreSettings();
+
+
+            /* 編集権限反映 */
+
+            applyPermissions();
+
+
+            /* 注意書き更新 */
+
+            updateSettingsNote();
+
+
+            /* ツールチップ初期化 */
+
+            initializeTooltips();
+
+
+            /* メッセージ初期化 */
+
+            showShiftMessage("");
+
+            showScoreMessage("");
+
+            if (!canEdit) {
+
+                showShiftMessage(
+                    "設定の閲覧のみ可能です。"
+                );
+
+                showScoreMessage(
+                    "設定の閲覧のみ可能です。"
+                );
+
+            }
+
+        } catch (error) {
+
+            initialized = false;
+
+            canEdit = false;
+
+            applyPermissions();
+
+            showShiftMessage(
+                error.message,
+                true
+            );
+
+            showScoreMessage(
+                error.message,
+                true
+            );
+
+            console.error(
+                "設定画面の初期化エラー:",
+                error
+            );
+
+        }
 
     }
 
