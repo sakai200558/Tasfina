@@ -494,10 +494,21 @@ if ($method === 'POST') {
         exit;
     }
 
-    // --- シフトルーレットの実行・割り当て処理 ---
+   // --- シフトルーレットの実行・割り当て処理 ---
     if ($action === 'execute_roulette') {
         $target_date = $input['target_date'] ?? '';
         $shift_type = $input['shift_type'] ?? '在宅勤務';
+        $target_member_type = $input['target_member_type'] ?? 'all';
+        $target_user_id = $input['target_user_id'] ?? null;
+        $target_dept_id = $input['target_dept_id'] ?? null;
+        $winner_count = max(1, intval($input['winner_count'] ?? 1));
+        $conditions = $input['conditions'] ?? [];
+
+        $prefer_shift = !empty($conditions['prefer_shift']);
+        $exclude_leave = !empty($conditions['exclude_leave']);
+        $consider_busy = !empty($conditions['consider_busy']);
+        $max_consecutive = !empty($conditions['max_consecutive']);
+        $use_burden_score = !empty($conditions['use_burden_score']);
 
         if (empty($target_date)) {
             echo json_encode(['success' => false, 'error' => '対象日が指定されていません。']);
@@ -505,23 +516,198 @@ if ($method === 'POST') {
         }
 
         try {
-            $stmt = $pdo->prepare("
-                INSERT INTO shifts (user_id, work_date, status, approval_status, created_at) 
-                VALUES (?, ?, ?, '承認済み', NOW())
-                ON DUPLICATE KEY UPDATE 
-                status = VALUES(status),
-                approval_status = '承認済み',
-                upated_at = NOW()
-            ");
-            $stmt->execute([$user_id, $target_date, $shift_type]);
+          // 1. 対象メンバー一覧を取得（最新DBスキーマ対応）
+            if ($target_member_type === 'member' && !empty($target_user_id)) {
+                $stmtUsers = $pdo->prepare("SELECT user_id, group_id FROM users WHERE user_id = ?");
+                $stmtUsers->execute([intval($target_user_id)]);
+                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+            } elseif ($target_member_type === 'dept' && !empty($target_dept_id)) {
+                $stmtUsers = $pdo->prepare("
+                    SELECT DISTINCT dm.user_id, d.group_id
+                    FROM department_members dm
+                    LEFT JOIN departments d ON dm.dept_id = d.dept_id
+                    WHERE dm.dept_id = ?
+                ");
+                $stmtUsers->execute([intval($target_dept_id)]);
+                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                $stmtUsers = $pdo->query("SELECT user_id, group_id FROM users");
+                $candidates = $stmtUsers->fetchAll(PDO::FETCH_ASSOC);
+            }
 
-            echo json_encode(['success' => true, 'message' => 'シフトルーレットによりメンバーが選出・割り当てられました。']);
-        } catch (PDOException $e) {
+            if (empty($candidates)) {
+                $candidates = [['user_id' => intval($user_id), 'group_id' => null]];
+            }
+
+            // 繁忙期ボーナスポイント取得
+            $bonusPt = 0.0;
+            if ($consider_busy) {
+                $stmtBusy = $pdo->prepare("SELECT bonus_pt FROM busy_day_settings WHERE date = ? AND is_active = 1 LIMIT 1");
+                $stmtBusy->execute([$target_date]);
+                $busyRow = $stmtBusy->fetch(PDO::FETCH_ASSOC);
+                if ($busyRow && isset($busyRow['bonus_pt'])) {
+                    $bonusPt = floatval($busyRow['bonus_pt']);
+                }
+            }
+
+            $weightedPool = [];
+            $targetDt = new DateTime($target_date);
+            $checkStart = (clone $targetDt)->modify('-5 days')->format('Y-m-d');
+            $checkEnd = (clone $targetDt)->modify('+5 days')->format('Y-m-d');
+
+            foreach ($candidates as $cand) {
+                $uid = intval($cand['user_id']);
+
+                // 条件: 有休申請を除外する
+                if ($exclude_leave) {
+                    $stmtLeave = $pdo->prepare("
+                        SELECT COUNT(*) FROM shifts
+                        WHERE user_id = ?
+                          AND status_type IN ('有給休暇', '午前休')
+                          AND approval_status != '却下'
+                          AND start_date <= ? AND end_date >= ?
+                    ");
+                    $stmtLeave->execute([$uid, $target_date, $target_date]);
+                    if (intval($stmtLeave->fetchColumn()) > 0) {
+                        continue;
+                    }
+                }
+
+                // 条件: 連続勤務日数の上限（5日まで）を考慮
+                if ($max_consecutive) {
+                    $stmtConsec = $pdo->prepare("
+                        SELECT COUNT(*) FROM shifts
+                        WHERE user_id = ?
+                          AND app_type IS NULL
+                          AND approval_status = '承認済み'
+                          AND status NOT IN ('休日', '有給休暇')
+                          AND work_date IS NOT NULL
+                          AND DATE(work_date) BETWEEN ? AND ?
+                    ");
+                    $stmtConsec->execute([$uid, $checkStart, $checkEnd]);
+                    if (intval($stmtConsec->fetchColumn()) >= 5) {
+                        continue;
+                    }
+                }
+
+               // 重み算出（workload_scores の total_score が低いほど当選しやすい）
+                $weight = 10.0;
+                if ($use_burden_score) {
+                    $stmtBurden = $pdo->prepare("
+                        SELECT COALESCE(SUM(total_score), 0)
+                        FROM workload_scores
+                        WHERE user_id = ?
+                    ");
+                    $stmtBurden->execute([$uid]);
+                    $burdenScore = floatval($stmtBurden->fetchColumn());
+                    $weight = max(1.0, 500.0 - $burdenScore);
+                }
+                // 条件: 希望シフトを優先する
+                if ($prefer_shift) {
+                    $stmtPref = $pdo->prepare("
+                        SELECT COUNT(*) FROM shifts
+                        WHERE user_id = ?
+                          AND app_type = '希望シフト'
+                          AND status_type = ?
+                          AND start_date <= ? AND end_date >= ?
+                    ");
+                    $stmtPref->execute([$uid, $shift_type, $target_date, $target_date]);
+                    if (intval($stmtPref->fetchColumn()) > 0) {
+                        $weight *= 2.0;
+                    }
+                }
+
+                // 繁忙期加算ポイント反映
+                if ($consider_busy && $bonusPt > 0) {
+                    $weight += $bonusPt;
+                }
+
+                $weightedPool[] = [
+                    'user_id' => $uid,
+                    'dept_id' => $cand['dept_id'],
+                    'weight' => $weight
+                ];
+            }
+
+            if (empty($weightedPool)) {
+                echo json_encode(['success' => false, 'error' => '条件を満たす対象メンバーが見つかりませんでした。']);
+                exit;
+            }
+
+            // 2. 重み付き抽選で当選者を選出
+            $winners = [];
+            $actualCount = min($winner_count, count($weightedPool));
+            for ($i = 0; $i < $actualCount; $i++) {
+                $totalWeight = array_sum(array_column($weightedPool, 'weight'));
+                $rand = mt_rand() / mt_getrandmax() * $totalWeight;
+                $acc = 0.0;
+                $pickedIndex = count($weightedPool) - 1;
+
+                foreach ($weightedPool as $idx => $item) {
+                    $acc += $item['weight'];
+                    if ($rand <= $acc) {
+                        $pickedIndex = $idx;
+                        break;
+                    }
+                }
+
+                $winners[] = $weightedPool[$pickedIndex];
+                array_splice($weightedPool, $pickedIndex, 1);
+            }
+
+            // 3. shifts テーブルへ反映（承認済み・確定シフトとして登録）
+            $pdo->beginTransaction();
+            $delStmt = $pdo->prepare("
+                DELETE FROM shifts
+                WHERE user_id = ?
+                  AND app_type IS NULL
+                  AND work_date IS NOT NULL
+                  AND DATE(work_date) = ?
+            ");
+           $insStmt = $pdo->prepare("
+                INSERT INTO shifts (
+                    user_id, group_id, work_date, start_time, end_time,
+                    status, approval_status, bonus_pt, created_at
+                ) VALUES (
+                    ?, ?, ?, ?, ?,
+                    ?, '承認済み', ?, NOW()
+                )
+            ");
+
+            $startTime = '09:00:00';
+            $endTime = ($shift_type === '午前休') ? '13:00:00' : '18:00:00';
+            $winnerIds = [];
+
+            foreach ($winners as $w) {
+                $delStmt->execute([$w['user_id'], $target_date]);
+                $insStmt->execute([
+                    $w['user_id'],
+                    $w['group_id'] ?? null,
+                    $target_date . ' 09:00:00',
+                    $startTime,
+                    $endTime,
+                    $shift_type,
+                    $consider_busy ? $bonusPt : null
+                ]);
+                $winnerIds[] = $w['user_id'];
+            }
+            $pdo->commit();
+
+            echo json_encode([
+                'success' => true,
+                'message' => "対象ユーザーID（" . implode(', ', $winnerIds) . "）に「{$shift_type}」を割り当てました。",
+                'winners' => $winnerIds
+            ]);
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
         exit;
     }
-}
+
+
 
 echo json_encode(['success' => false, 'error' => '無効なリクエストです。']);
-?>
+}

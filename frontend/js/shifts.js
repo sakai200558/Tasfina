@@ -684,17 +684,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- ルーレット実行処理 ---
-    if (executeRouletteBtn) {
+    // 対象メンバー種別に応じたセレクト表示切替
+    document.querySelectorAll('input[name="targetMember"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const val = document.querySelector('input[name="targetMember"]:checked')?.value || 'all';
+            const userSel = document.getElementById('rouletteTargetUserId');
+            const deptSel = document.getElementById('rouletteTargetDeptId');
+            if (userSel) userSel.classList.toggle('hidden', val !== 'member');
+            if (deptSel) deptSel.classList.toggle('hidden', val !== 'dept');
+        });
+    });
+
+   if (executeRouletteBtn) {
         executeRouletteBtn.addEventListener('click', async () => {
-            const targetDate = document.getElementById('rouletteDate').value;
-            const shiftType = document.getElementById('rouletteShiftType').value;
+            const targetDate = document.getElementById('rouletteDate')?.value || '';
+            const shiftType = document.getElementById('rouletteShiftType')?.value || '在宅勤務';
+            const targetMemberType = document.querySelector('input[name="targetMember"]:checked')?.value || 'all';
+            const targetUserId = document.getElementById('rouletteTargetUserId')?.value || null;
+            const targetDeptId = document.getElementById('rouletteTargetDeptId')?.value || null;
+            const winnerCount = parseInt(document.getElementById('rouletteWinnerCount')?.value || '1', 10);
+
+            const conditions = {
+                prefer_shift: Boolean(document.getElementById('condPreferShift')?.checked),
+                exclude_leave: Boolean(document.getElementById('condExcludeLeave')?.checked),
+                consider_busy: Boolean(document.getElementById('condConsiderBusy')?.checked),
+                max_consecutive: Boolean(document.getElementById('condMaxConsecutive')?.checked),
+                use_burden_score: Boolean(document.getElementById('condUseBurdenScore')?.checked)
+            };
 
             const body = {
                 action: 'execute_roulette',
                 user_id: userId,
                 target_date: targetDate,
-                shift_type: shiftType
+                shift_type: shiftType,
+                target_member_type: targetMemberType,
+                target_user_id: targetUserId,
+                target_dept_id: targetDeptId,
+                winner_count: winnerCount,
+                conditions: conditions
             };
 
             try {
@@ -708,7 +735,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.success) {
                     alert(result.message || 'シフトルーレットによる割り当てが完了しました。');
                     rouletteModal.classList.add('hidden');
-                    loadShiftData();
+                    await loadShiftData();
+                    await loadDashboardInfo();
                 } else {
                     alert('エラー: ' + (result.error || '処理に失敗しました。'));
                 }
