@@ -15,11 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'db.php';
 
 try {
-    // POSTで送られてきたJSONデータを受け取る
-    $input = json_decode(file_get_contents('php://input'), true);
+    // ★ JSON と FormData（ファイル添付あり）の両方を受け取る
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($contentType, 'application/json') !== false) {
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+    } else {
+        $input = $_POST;
+    }
 
     $taskId = $input['id'] ?? null;
     $status = $input['status'] ?? null;
+    $rejectReason = trim($input['reject_reason'] ?? '');
+    $completeReport = trim($input['report'] ?? '');
 
     // バリデーション（IDとステータスが指定されているか）
     if (!$taskId || !$status) {
@@ -29,8 +36,9 @@ try {
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
-        // ★ ここから追加：承認（completed または approve_hours）の場合は依頼者本人かチェックする
-    if ($status === 'completed'|| $status === 'approve_hours') {
+
+   // ★ 承認または差し戻しの場合は依頼者本人かチェックする
+    if ($status === 'completed' || $status === 'approve_hours' || $status === 'reject_hours' || $status === 'reject_complete') {
         $currentUserId = $_SESSION['user_id'] ?? null;
         $checkStmt = $pdo->prepare("SELECT created_by FROM tasks WHERE id = :id");
         $checkStmt->execute([':id' => $taskId]);
@@ -39,7 +47,7 @@ try {
         if (!$targetTask || (int)$targetTask['created_by'] !== (int)$currentUserId) {
             echo json_encode([
                 "status" => "error",
-                "message" => "このタスクの依頼者本人のみ承認できます。"
+                "message" => "このタスクの依頼者本人のみ承認・差し戻しできます。"
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -70,6 +78,43 @@ try {
 
     // 更新された行があるか確認
     if ($stmt->rowCount() > 0) {
+
+                // ★ ここから追加：完了申請（pending）のとき完了報告とファイルを保存（DBは触らない）
+        if ($status === 'pending') {
+            $uploadDir = __DIR__ . '/uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $filePath = null;
+            $fileName = null;
+
+            if (isset($_FILES['evidence']) && $_FILES['evidence']['error'] === UPLOAD_ERR_OK) {
+                $originalName = basename($_FILES['evidence']['name']);
+                $ext = pathinfo($originalName, PATHINFO_EXTENSION);
+                $safeName = 'task_' . $taskId . '_' . time() . ($ext ? '.' . $ext : '');
+                $destPath = $uploadDir . $safeName;
+
+                if (move_uploaded_file($_FILES['evidence']['tmp_name'], $destPath)) {
+                    $filePath = '../../backend/uploads/' . $safeName;
+                    $fileName = $originalName;
+                }
+            }
+
+            $jsonFile = __DIR__ . '/reports.json';
+            $reports = file_exists($jsonFile) ? json_decode(file_get_contents($jsonFile), true) : [];
+            if (!is_array($reports)) $reports = [];
+
+            $reports[(string)$taskId] = [
+                'report' => $completeReport,
+                'file_path' => $filePath,
+                'file_name' => $fileName,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            file_put_contents($jsonFile, json_encode($reports, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        }
+        // ★ ここまで追加
 
         // 承認（completed）されたときだけポイントを担当者に付与する
         if ($status === 'completed') {
@@ -130,12 +175,26 @@ try {
                     ':id'    => $taskId
                 ]);
             }
+        } elseif ($status === 'reject_hours' || $status === 'reject_complete') {
+            $savedReason = $rejectReason !== '' ? "【差し戻し】" . $rejectReason : null;
+
+            $rejectSql = "UPDATE tasks 
+                          SET requested_hours = NULL,
+                              hours_change_reason = :reason,
+                              status = 'in_progress'
+                          WHERE id = :id";
+            $rejectStmt = $pdo->prepare($rejectSql);
+            $rejectStmt->execute([
+                ':reason' => $savedReason,
+                ':id'     => $taskId
+            ]);
         }
 
           $msg = "ステータスを更新しました。";
         if ($status === 'completed') $msg = "タスクを承認し、ポイントを付与しました。";
         if ($status === 'approve_hours') $msg = "工数変更を承認し、新しい工数とポイントを反映しました。";
         if ($status === 'pending') $msg = "完了申請を送信しました（承認待ち）。";
+         if ($status === 'reject_hours' || $status === 'reject_complete') $msg = "申請を差し戻しました。";
 
         echo json_encode([
             "status" => "success",

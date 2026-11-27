@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: Tasfina_db
 -- ------------------------------------------------------
--- Server version	8.0.46-0ubuntu0.24.04.4
+-- Server version	8.0.46-0ubuntu0.24.04.5
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,8 +23,8 @@ DROP TABLE IF EXISTS `business_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `business_types` (
-  `type_code` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'タイプコード',
-  `type_name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'タイプの名前',
+  `type_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'タイプコード',
+  `type_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'タイプの名前',
   `multiplier` float DEFAULT NULL COMMENT 'マルチ',
   PRIMARY KEY (`type_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='ビジネスタイプ';
@@ -78,7 +78,7 @@ CREATE TABLE `department_members` (
   `dept_id` int DEFAULT NULL COMMENT 'deptのID',
   `joined_at` datetime DEFAULT NULL COMMENT '入った日',
   PRIMARY KEY (`dm_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='department_members';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='department_members';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,7 +87,7 @@ CREATE TABLE `department_members` (
 
 LOCK TABLES `department_members` WRITE;
 /*!40000 ALTER TABLE `department_members` DISABLE KEYS */;
-INSERT INTO `department_members` VALUES (1,13,1,'2026-11-12 01:57:27'),(2,14,2,'2026-11-13 01:03:41'),(3,15,3,'2026-11-13 10:28:07'),(4,16,4,'2026-11-19 01:40:54');
+INSERT INTO `department_members` VALUES (1,13,1,'2026-11-12 01:57:27'),(2,14,2,'2026-11-13 01:03:41'),(3,15,3,'2026-11-13 10:28:07'),(4,16,4,'2026-11-19 01:40:54'),(5,17,5,'2026-11-19 02:21:22'),(6,18,6,'2026-11-20 00:59:13'),(7,19,7,'2026-11-26 02:38:01');
 /*!40000 ALTER TABLE `department_members` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -101,13 +101,14 @@ DROP TABLE IF EXISTS `departments`;
 CREATE TABLE `departments` (
   `dept_id` int NOT NULL AUTO_INCREMENT COMMENT 'デパートメントID',
   `group_id` int DEFAULT NULL COMMENT 'グループID',
-  `dept_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'デパートメントの名前',
-  `dept_code` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'デパートメントのコード',
+  `dept_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'デパートメントの名前',
+  `dept_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'デパートメントのコード',
   `parent_dept_id` int DEFAULT NULL COMMENT '親デパートメントのID',
   `leader_id` int DEFAULT NULL COMMENT 'リーダーID',
   `created_at` datetime DEFAULT NULL COMMENT '作られた日',
-  PRIMARY KEY (`dept_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='departments';
+  `user_id` int DEFAULT NULL,
+  KEY `idx_dept_id` (`dept_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='departments';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -116,7 +117,7 @@ CREATE TABLE `departments` (
 
 LOCK TABLES `departments` WRITE;
 /*!40000 ALTER TABLE `departments` DISABLE KEYS */;
-INSERT INTO `departments` VALUES (1,1,NULL,NULL,NULL,NULL,NULL),(2,2,NULL,NULL,NULL,NULL,NULL),(3,3,NULL,NULL,NULL,NULL,NULL),(4,4,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO `departments` VALUES (1,1,NULL,NULL,NULL,NULL,NULL,NULL),(2,2,NULL,NULL,NULL,NULL,NULL,NULL),(3,3,NULL,NULL,NULL,NULL,NULL,NULL),(4,4,NULL,NULL,NULL,NULL,NULL,NULL),(5,5,NULL,NULL,NULL,NULL,NULL,NULL),(6,6,NULL,NULL,NULL,NULL,NULL,NULL),(7,7,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `departments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -128,8 +129,8 @@ DROP TABLE IF EXISTS `difficulties`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `difficulties` (
-  `difficulty_code` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'difficulty_code',
-  `difficulty_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'difficulty_name',
+  `difficulty_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'difficulty_code',
+  `difficulty_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'difficulty_name',
   `multiplier` float DEFAULT NULL COMMENT 'multiplier',
   PRIMARY KEY (`difficulty_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='difficulties';
@@ -152,8 +153,8 @@ DROP TABLE IF EXISTS `fixed_additions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `fixed_additions` (
-  `addition_code` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT '追加コード',
-  `addition_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '追加名前',
+  `addition_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '追加コード',
+  `addition_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '追加名前',
   `point` float DEFAULT NULL COMMENT 'ポイント',
   PRIMARY KEY (`addition_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='fixed_additions';
@@ -176,8 +177,8 @@ DROP TABLE IF EXISTS `job_titiles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `job_titiles` (
-  `job_title` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT '仕事のタイトル',
-  `job_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仕事名',
+  `job_title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '仕事のタイトル',
+  `job_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仕事名',
   `base_factor` float DEFAULT NULL COMMENT '基礎係数',
   PRIMARY KEY (`job_title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='job_titiles';
@@ -201,11 +202,11 @@ DROP TABLE IF EXISTS `member`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `member` (
   `group_id` int NOT NULL AUTO_INCREMENT COMMENT 'グループのID',
-  `group_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'グループの名前',
+  `group_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'グループの名前',
   `owner_id` int DEFAULT NULL COMMENT 'オーナーのID',
   `created_at` datetime DEFAULT NULL COMMENT '作った人',
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Groups';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Groups';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -214,7 +215,7 @@ CREATE TABLE `member` (
 
 LOCK TABLES `member` WRITE;
 /*!40000 ALTER TABLE `member` DISABLE KEYS */;
-INSERT INTO `member` VALUES (1,'gggggggのグループ',13,'2026-11-12 01:57:27'),(2,'yarimasuneのグループ',14,'2026-11-13 01:03:41'),(3,'asdfのグループ',15,'2026-11-13 10:28:07'),(4,'酒井のグループ',16,'2026-11-19 01:40:54');
+INSERT INTO `member` VALUES (1,'gggggggのグループ',13,'2026-11-12 01:57:27'),(2,'yarimasuneのグループ',14,'2026-11-13 01:03:41'),(3,'asdfのグループ',15,'2026-11-13 10:28:07'),(4,'酒井のグループ',16,'2026-11-19 01:40:54'),(5,'酒井隆行のグループ',17,'2026-11-19 02:21:22'),(6,'大空のグループ',18,'2026-11-20 00:59:13'),(7,'ユキのグループ',19,'2026-11-26 02:38:01');
 /*!40000 ALTER TABLE `member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -226,8 +227,8 @@ DROP TABLE IF EXISTS `role_codes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role_codes` (
-  `role_code` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT '役割のコード',
-  `role_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '役割の名前',
+  `role_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '役割のコード',
+  `role_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '役割の名前',
   `group_id` int DEFAULT NULL,
   PRIMARY KEY (`role_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='role_codes';
@@ -253,18 +254,26 @@ CREATE TABLE `shifts` (
   `shift_id` int NOT NULL AUTO_INCREMENT COMMENT 'シフトID',
   `user_id` int DEFAULT NULL COMMENT 'ユーザーID',
   `dept_id` int DEFAULT NULL COMMENT 'deptID',
+  `app_type` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '希望シフト または 有休申請',
+  `status_type` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '通常出勤, 在宅勤務, 午前休, 休日, 有給休暇 など',
   `work_date` datetime DEFAULT NULL COMMENT '仕事の概要',
+  `start_date` date DEFAULT NULL COMMENT '申請開始日',
+  `end_date` date DEFAULT NULL COMMENT '申請終了日',
   `start_time` time DEFAULT NULL COMMENT '始めた時間',
   `end_time` time DEFAULT NULL COMMENT '終わった時間',
   `actual_hours` float DEFAULT NULL COMMENT '実際の時間',
-  `status` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '状況',
+  `payload_json` longtext COLLATE utf8mb4_general_ci COMMENT '複数日希望シフトの詳細JSON',
+  `reason` text COLLATE utf8mb4_general_ci COMMENT '申請理由',
+  `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '状況',
+  `approval_status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '承認待ち' COMMENT '承認待ち / 承認済み',
   `busy_day_flag` tinyint(1) DEFAULT NULL COMMENT '忙しいかどうか',
   `bonus_pt` float DEFAULT NULL COMMENT 'ボーナスポイント',
   `created_at` datetime DEFAULT NULL COMMENT '作った日',
   `updated_at` datetime DEFAULT NULL,
   `group_id` int DEFAULT NULL,
+  `source_application_id` int DEFAULT NULL COMMENT '移行元application_id',
   PRIMARY KEY (`shift_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='shifts';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='shifts';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,7 +282,7 @@ CREATE TABLE `shifts` (
 
 LOCK TABLES `shifts` WRITE;
 /*!40000 ALTER TABLE `shifts` DISABLE KEYS */;
-INSERT INTO `shifts` VALUES (1,1,NULL,'2026-10-25 09:00:00','09:00:00','18:00:00',NULL,'approved',NULL,NULL,NULL,NULL,NULL),(2,13,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-11-12 01:57:27','2026-11-12 01:57:27',1),(3,14,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-11-13 01:03:41','2026-11-13 01:03:41',2),(4,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-11-13 10:28:07','2026-11-13 10:28:07',3),(5,16,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2026-11-19 01:40:54','2026-11-19 01:40:54',4);
+INSERT INTO `shifts` VALUES (1,1,NULL,NULL,NULL,'2026-10-25 09:00:00',NULL,NULL,'09:00:00','18:00:00',NULL,NULL,NULL,'approved','承認待ち',NULL,NULL,NULL,NULL,NULL,NULL),(2,13,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-12 01:57:27','2026-11-12 01:57:27',1,NULL),(3,14,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-13 01:03:41','2026-11-13 01:03:41',2,NULL),(4,15,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-13 10:28:07','2026-11-13 10:28:07',3,NULL),(5,16,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-19 01:40:54','2026-11-19 01:40:54',4,NULL),(6,17,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-19 02:21:22','2026-11-19 02:21:22',5,NULL),(7,18,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-20 00:59:13','2026-11-20 00:59:13',6,NULL),(8,19,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'承認待ち',NULL,NULL,'2026-11-26 02:38:01','2026-11-26 02:38:01',7,NULL);
 /*!40000 ALTER TABLE `shifts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -315,7 +324,7 @@ CREATE TABLE `system_settings` (
   `feature_lottery` tinyint(1) DEFAULT '1' COMMENT 'シフトルーレット機能',
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最終更新日時',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='システム設定管理テーブル';
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='システム設定管理テーブル';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -324,7 +333,7 @@ CREATE TABLE `system_settings` (
 
 LOCK TABLES `system_settings` WRITE;
 /*!40000 ALTER TABLE `system_settings` DISABLE KEYS */;
-INSERT INTO `system_settings` VALUES (16,'Tasfina','株式会社Tasfina',NULL,'(UTC+09:00) 東京','月曜日','2024/10/17','24時間形式（例：09:00）',8,1,1,1,0,'90日',5,1,'30日','blue',1,1,20,1,1,1,1,1,1,1,'2026-11-19 01:40:54');
+INSERT INTO `system_settings` VALUES (16,'Tasfina','株式会社Tasfina',NULL,'(UTC+09:00) 東京','月曜日','2024/10/17','24時間形式（例：09:00）',8,1,1,1,0,'90日',5,1,'30日','blue',1,1,20,1,1,1,1,1,1,1,'2026-11-19 01:40:54'),(17,'Tasfina','株式会社Tasfina',NULL,'(UTC+09:00) 東京','月曜日','2024/10/17','24時間形式（例：09:00）',8,1,1,1,0,'90日',5,1,'30日','blue',1,1,20,1,1,1,1,1,1,1,'2026-11-19 02:21:22'),(18,'Tasfina','株式会社Tasfina',NULL,'(UTC+09:00) 東京','月曜日','2024/10/17','24時間形式（例：09:00）',8,1,1,1,0,'90日',5,1,'30日','blue',1,1,20,1,1,1,1,1,1,1,'2026-11-20 00:59:13'),(19,'Tasfina','株式会社Tasfina',NULL,'(UTC+09:00) 東京','月曜日','2024/10/17','24時間形式（例：09:00）',8,1,1,1,0,'90日',5,1,'30日','blue',1,1,20,1,1,1,1,1,1,1,'2026-11-26 02:38:01');
 /*!40000 ALTER TABLE `system_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -369,17 +378,21 @@ CREATE TABLE `tasks` (
   `id` int NOT NULL AUTO_INCREMENT,
   `organization_id` int DEFAULT '1',
   `department_id` int DEFAULT '1',
-  `title` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
+  `assigned_user_id` int DEFAULT NULL,
+  `created_by` int DEFAULT NULL,
+  `title` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
   `difficulty_level` int DEFAULT '1',
   `discomfort_level` int DEFAULT '1',
   `estimated_hours` decimal(4,1) DEFAULT '1.0',
   `calculated_burden_pts` int DEFAULT '10',
-  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT '未着手',
+  `status` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT '未着手',
   `due_date` date NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `requested_hours` decimal(4,1) DEFAULT NULL,
+  `hours_change_reason` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -388,6 +401,7 @@ CREATE TABLE `tasks` (
 
 LOCK TABLES `tasks` WRITE;
 /*!40000 ALTER TABLE `tasks` DISABLE KEYS */;
+INSERT INTO `tasks` VALUES (4,1,1,17,NULL,'あああああああ','うううううううううう',3,3,4.0,79,'assigned','2026-11-27','2026-11-19 03:19:13',NULL,NULL),(5,1,1,17,NULL,'あああああああ','あああああああ',3,3,4.0,79,'hours_pending','2026-11-27','2026-11-20 00:56:03',1.0,'簡単すぎました'),(6,1,1,17,NULL,'あああああああ','ああああああ',3,3,4.0,79,'assigned','2026-11-27','2026-11-20 00:57:23',NULL,NULL),(7,1,1,18,NULL,'あああああああ','aaaaaa',3,3,4.0,79,'assigned','2026-11-27','2026-11-20 00:59:54',NULL,NULL),(8,1,1,17,NULL,'あああああああ','',3,3,4.0,79,'assigned','2026-11-27','2026-11-20 01:06:47',NULL,NULL),(9,1,1,18,NULL,'いいいいいいいいいいいい','',3,3,4.0,79,'assigned','2026-11-30','2026-11-20 01:07:11',NULL,NULL),(10,1,1,10,NULL,'テスト','ああああああああああ',3,3,4.0,79,'assigned','2026-11-30','2026-11-20 01:07:42',NULL,NULL),(11,1,1,17,NULL,'ログイン','',3,3,4.0,79,'assigned','2026-12-17','2026-11-20 01:22:51',NULL,NULL),(12,1,1,17,18,'ログイン','',3,3,4.0,79,'completed','2026-12-17','2026-11-20 01:36:46',NULL,NULL),(13,1,1,17,18,'ログイン１１・２０','',3,3,4.0,79,'completed','2026-12-17','2026-11-20 01:37:33',NULL,NULL),(14,1,1,18,18,'ログイン33333','',3,3,4.0,79,'assigned','2026-12-17','2026-11-20 01:41:39',NULL,NULL),(15,1,1,18,17,'ログイン44444','',3,3,4.0,79,'completed','2026-12-17','2026-11-20 01:58:57',NULL,NULL),(16,1,1,17,18,'ログイン1111','',3,3,4.0,79,'completed','2026-12-17','2026-11-20 02:01:16',NULL,NULL),(17,1,1,18,17,'１１１１１１１１１１１１','',3,3,4.0,79,'completed','2026-12-10','2026-11-20 03:02:27',NULL,NULL),(18,1,1,18,17,'テスト','',3,3,4.0,79,'completed','2026-11-28','2026-11-20 03:04:17',NULL,NULL),(19,1,1,18,17,'テスト９９９９９９９','',3,3,4.0,79,'completed','2026-11-28','2026-11-20 03:11:27',NULL,NULL),(20,1,1,17,17,'ご飯を食べる','',3,3,4.0,79,'completed','2026-12-05','2026-11-20 03:16:22',NULL,NULL),(21,1,1,17,17,'ご飯を食べる','',3,3,4.0,79,'assigned','2026-12-05','2026-11-20 03:16:22',NULL,NULL),(22,1,1,17,18,'シングル','',3,3,4.0,79,'completed','2026-12-11','2026-11-20 04:31:24',NULL,NULL),(23,1,1,17,18,'シングル','',3,3,4.0,79,'assigned','2026-12-11','2026-11-20 04:31:24',NULL,NULL),(24,1,1,17,18,'さかい','',3,3,4.0,79,'hours_pending','2026-12-17','2026-11-20 04:44:21',10.0,'大変過ぎました'),(25,1,1,18,17,'大空へ','',3,3,4.0,79,'assigned','2027-01-01','2026-11-20 04:45:08',NULL,NULL),(26,1,1,17,18,'1107','',3,3,3.0,69,'in_progress','2026-12-18','2026-11-20 05:43:27',NULL,NULL),(27,1,1,17,18,'フロント','',3,3,3.0,69,'completed','2026-12-08','2026-11-20 05:47:43',NULL,NULL),(28,1,1,17,18,'フロント','',3,3,4.0,79,'assigned','2026-12-08','2026-11-26 01:52:58',NULL,NULL),(29,1,1,17,18,'フロント','',3,3,4.0,79,'assigned','2026-12-08','2026-11-26 01:57:59',NULL,NULL),(30,1,1,17,18,'2026/11/26','あああああああああ',3,3,4.0,79,'assigned','2026-12-19','2026-11-26 02:06:07',NULL,NULL),(31,1,1,19,17,'1139','登録を申請できるようにしてほしい',3,3,5.0,89,'in_progress','2026-12-26','2026-11-26 02:40:14',NULL,NULL),(32,1,1,19,17,'test11/26','',3,3,4.0,79,'in_progress','2027-01-01','2026-11-26 03:07:13',NULL,'【差し戻し】少し甘すぎです'),(33,1,1,19,17,'test11111111','',3,3,4.0,79,'assigned','2026-12-11','2026-11-26 03:15:05',NULL,NULL);
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -413,7 +427,7 @@ CREATE TABLE `user_groups` (
 
 LOCK TABLES `user_groups` WRITE;
 /*!40000 ALTER TABLE `user_groups` DISABLE KEYS */;
-INSERT INTO `user_groups` VALUES (1,13,'gggggggのグループ','2026-11-12 01:57:27'),(2,14,'yarimasuneのグループ','2026-11-13 01:03:41'),(3,15,'asdfのグループ','2026-11-13 10:28:07'),(4,16,'酒井のグループ','2026-11-19 01:40:54');
+INSERT INTO `user_groups` VALUES (1,13,'gggggggのグループ','2026-11-12 01:57:27'),(2,14,'yarimasuneのグループ','2026-11-13 01:03:41'),(3,15,'asdfのグループ','2026-11-13 10:28:07'),(4,16,'酒井のグループ','2026-11-19 01:40:54'),(5,17,'酒井隆行のグループ','2026-11-19 02:21:22'),(6,18,'大空のグループ','2026-11-20 00:59:13'),(7,19,'ユキのグループ','2026-11-26 02:38:01');
 /*!40000 ALTER TABLE `user_groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -426,18 +440,18 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
-  `display_name` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '表示名',
-  `email` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'メールアドレス',
-  `password_hash` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role_code` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '役職コード',
-  `job_title` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仕事タイトル',
+  `display_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '表示名',
+  `email` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'メールアドレス',
+  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `role_code` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '役職コード',
+  `job_title` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '仕事タイトル',
   `level_factor` float DEFAULT NULL COMMENT 'レベル要素',
   `created_at` datetime DEFAULT NULL COMMENT '作られた日',
   `updated_at` datetime DEFAULT NULL COMMENT 'アップデートされた日',
   `group_id` int DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   KEY `idx_group_id` (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='users';
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='users';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -446,7 +460,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,NULL,NULL,13),(2,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,NULL,NULL,14),(3,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,'2026-10-23 01:32:59',NULL,15),(4,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,'2026-10-23 01:41:45',NULL,16),(5,'asdfda','afsdaf@gmail.com','fe82945b76e4073410f5ddedd1090b69fd943ae758f52bd764a202f03337e9ed','',NULL,0,'2026-10-23 01:43:32',NULL,17),(6,'夏目','tintin@gmail.com','d7b710be38069183069168115df9be4fd8f7dc94c17acc3e70170693e0231912','',NULL,0,'2026-10-23 01:44:40',NULL,18),(7,'aaa','aaa@gmail.com','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','',NULL,0,'2026-10-23 01:46:11',NULL,19),(8,'safad','asfsdafdsa@gmaill.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-23 02:10:28',NULL,20),(9,'aaaaaa','bbb@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-29 00:57:46',NULL,21),(10,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:25:34',NULL,22),(11,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:25:38',NULL,23),(12,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:26:55',NULL,24),(13,'ggggggg','8354.tysgggggg@gmail.com','$2y$10$RFYJJqhC42RBFWm4muS0wOcK9vrOM66mPJFnWCeUCsMiS4TFyaie2','',NULL,0,'2026-11-12 01:57:27',NULL,1),(14,'yarimasune','ppp@gmail.com','$2y$10$60N/wIA9A/q7WXrsgrrlO./Y8iYUVySiPbCnr9HF9fymgsJARg4eC','',NULL,0,'2026-11-13 01:03:41',NULL,2),(15,'asdf','asdf@gmail.com','$2y$10$/cot2R4vkxFOL9CN1fVv2.KDWAYFFESguIFwlwX3ot1.NziuJx17a','',NULL,0,'2026-11-13 10:28:07',NULL,3),(16,'酒井','sakai@tinko.com','$2y$10$rStlJPfM.U86ZMRo5KGMF.ndVbw6nTOcKtto4QVgt9pUKYhUHrV7q','',NULL,0,'2026-11-19 01:40:54',NULL,4);
+INSERT INTO `users` VALUES (1,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,NULL,NULL,13),(2,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,NULL,NULL,14),(3,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,'2026-10-23 01:32:59',NULL,15),(4,NULL,NULL,'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',NULL,NULL,0,'2026-10-23 01:41:45',NULL,16),(5,'asdfda','afsdaf@gmail.com','fe82945b76e4073410f5ddedd1090b69fd943ae758f52bd764a202f03337e9ed','',NULL,0,'2026-10-23 01:43:32',NULL,17),(6,'夏目','tintin@gmail.com','d7b710be38069183069168115df9be4fd8f7dc94c17acc3e70170693e0231912','',NULL,0,'2026-10-23 01:44:40',NULL,18),(7,'aaa','aaa@gmail.com','ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f','',NULL,0,'2026-10-23 01:46:11',NULL,19),(8,'safad','asfsdafdsa@gmaill.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-23 02:10:28',NULL,20),(9,'aaaaaa','bbb@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-29 00:57:46',NULL,21),(10,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:25:34',NULL,22),(11,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:25:38',NULL,23),(12,'eeeee','onanii@gmail.com','932f3c1b56257ce8539ac269d7aab42550dacf8818d075f0bdf1990562aae3ef','',NULL,0,'2026-10-30 03:26:55',NULL,24),(13,'ggggggg','8354.tysgggggg@gmail.com','$2y$10$RFYJJqhC42RBFWm4muS0wOcK9vrOM66mPJFnWCeUCsMiS4TFyaie2','',NULL,0,'2026-11-12 01:57:27',NULL,1),(14,'yarimasune','ppp@gmail.com','$2y$10$60N/wIA9A/q7WXrsgrrlO./Y8iYUVySiPbCnr9HF9fymgsJARg4eC','',NULL,0,'2026-11-13 01:03:41',NULL,2),(15,'asdf','asdf@gmail.com','$2y$10$/cot2R4vkxFOL9CN1fVv2.KDWAYFFESguIFwlwX3ot1.NziuJx17a','',NULL,0,'2026-11-13 10:28:07',NULL,3),(16,'酒井','sakai@tinko.com','$2y$10$rStlJPfM.U86ZMRo5KGMF.ndVbw6nTOcKtto4QVgt9pUKYhUHrV7q','',NULL,0,'2026-11-19 01:40:54',NULL,4),(17,'酒井隆行','nkc20246119@st.denpa.jp','$2y$10$qIcSTsjUGB9HcevowCWAVeL57QKGcaCpPj.oOPXNhe7mDozyOoNj.','',NULL,0,'2026-11-19 02:21:22',NULL,5),(18,'大空','nkc@st.denpa.jp','$2y$10$24Uy3erh/Ow24/aORJqCyOYj.yeedORMkCmSI9PItU7PwAzrgnKPq','',NULL,0,'2026-11-20 00:59:13',NULL,6),(19,'ユキ','sakai@st.denpa.jp','$2y$10$Jx/66b72grUAvbUa7UnN2.WP9coCBzuQR5uR4nSkbyvlb6Cww.rW2','',NULL,0,'2026-11-26 02:38:01',NULL,7);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -470,7 +484,7 @@ CREATE TABLE `workload_scores` (
   `calculated_at` datetime DEFAULT NULL COMMENT '足した日',
   `group_id` int DEFAULT NULL,
   PRIMARY KEY (`score_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='workload_scores';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='workload_scores';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -479,7 +493,7 @@ CREATE TABLE `workload_scores` (
 
 LOCK TABLES `workload_scores` WRITE;
 /*!40000 ALTER TABLE `workload_scores` DISABLE KEYS */;
-INSERT INTO `workload_scores` VALUES (1,13,NULL,NULL,0,0,0,0,NULL,NULL,1),(2,14,NULL,NULL,0,0,0,0,NULL,NULL,2),(3,15,NULL,NULL,0,0,0,0,NULL,NULL,3),(4,16,NULL,NULL,0,0,0,0,NULL,NULL,4);
+INSERT INTO `workload_scores` VALUES (1,13,NULL,NULL,0,0,0,0,NULL,NULL,1),(2,14,NULL,NULL,0,0,0,0,NULL,NULL,2),(3,15,NULL,NULL,0,0,0,0,NULL,NULL,3),(4,16,NULL,NULL,0,0,0,0,NULL,NULL,4),(5,17,NULL,NULL,464,0,0,464,NULL,'2026-11-20 14:49:24',5),(6,18,NULL,NULL,237,0,0,237,NULL,'2026-11-20 14:45:28',6),(7,19,NULL,NULL,0,0,0,0,NULL,NULL,7);
 /*!40000 ALTER TABLE `workload_scores` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -492,4 +506,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-11-19 10:42:27
+-- Dump completed on 2026-11-26 12:34:04

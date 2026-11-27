@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ) || null;
     }
 
-    function renderTaskDetail() {
+    async function renderTaskDetail(){
         const task = getSelectedTask();
 
         detailContainer.innerHTML = "";
@@ -388,6 +388,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+                // ★ ここから追加（reports.json の読み込み）
+        let reportData = null;
+        try {
+            const res = await fetch(`../../backend/reports.json?t=${Date.now()}`);
+            if (res.ok) {
+                const allReports = await res.json();
+                reportData = allReports[String(task.id)] || null;
+            }
+        } catch (e) {}
+        // ★ ここまで追加
+
         const name = document.createElement("p");
         name.className = "task-detail-name";
         name.textContent = task.name;
@@ -401,7 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ["想定工数", `${Number(task.hours || 0).toFixed(1)}時間`],
             ["算出ポイント", `${Number(task.points || 0).toFixed(1)}pt`],
             ["業務タイプ", task.workType || "-"],
-            ["エビデンス", task.evidence || "未提出"]
+             ["エビデンス", (reportData && reportData.file_path)
+            ? { url: reportData.file_path, text: `${reportData.file_name}（提出済み）` }
+            : (task.evidence || "未提出")],
         ];
 
           // ★ 工数変更の承認待ち中は、申請内容と理由を詳細に表示する
@@ -422,8 +435,18 @@ document.addEventListener("DOMContentLoaded", () => {
             labelElement.textContent = label;
 
             const valueElement = document.createElement("strong");
-            valueElement.textContent = value;
-
+             // ★ ここから書き換え（リンク用データなら <a> タグを作る）
+            if (typeof value === "object" && value !== null && value.url) {
+                const link = document.createElement("a");
+                link.href = value.url;
+                link.textContent = value.text;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                valueElement.appendChild(link);
+            } else {
+                valueElement.textContent = value;
+            }
+        
             item.appendChild(labelElement);
             item.appendChild(valueElement);
             grid.appendChild(item);
@@ -490,7 +513,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("taskCompleteForm").reset();
         document.getElementById("completeError").textContent = "";
         document.getElementById("completeTaskName").textContent = task.name;
-        document.getElementById("actualHours").value = task.hours;
 
         bootstrap.Modal.getOrCreateInstance(
             document.getElementById("taskCompleteModal")
@@ -567,46 +589,45 @@ document.addEventListener("DOMContentLoaded", () => {
             const task = getSelectedTask();
             if (!task) return;
 
-            const actualHours = Number(
-                document.getElementById("actualHours").value
-            );
             const report = document.getElementById("completeReport").value.trim();
-            const evidence = document.getElementById("completeEvidence").files[0];
+            const evidenceFiles = document.getElementById("completeEvidence").files;
             const error = document.getElementById("completeError");
 
             error.textContent = "";
 
-            if (!Number.isFinite(actualHours) || actualHours <= 0 || !report) {
-                error.textContent = "実績工数と完了報告を正しく入力してください。";
+            if (!report) {
+                error.textContent = "完了報告を入力してください。";
                 return;
             }
 
-            if (evidence && evidence.size > 10 * 1024 * 1024) {
-                error.textContent = "添付ファイルは10MB以下にしてください。";
+            if (evidenceFiles.length > 0 && evidenceFiles[0].size > 5 * 1024 * 1024) {
+                error.textContent = "添付ファイルは5MB以下にしてください。";
                 return;
             }
 
-            // PHP側（api_update_status.php）が受け取る id と status を持つオブジェクトにする
-const requestData = {
-    id: task.id,
-    status: "pending"
-};
+            // FormDataにテキストとファイルを詰める
+            const formData = new FormData();
+            formData.append("id", task.id);
+            formData.append("status", "pending");
+            formData.append("report", report);
+            if (evidenceFiles.length > 0) {
+                formData.append("evidence", evidenceFiles[0]);
+            }
 
             try {
                 const response = await fetch('../../backend/api_update_status.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestData)   
+                    body: formData // headersは書かない（ブラウザが自動設定）
                 });
 
                 const result = await response.json();
 
-                if (result.status==="success") {
+                if (result.status === "success") {
                     bootstrap.Modal.getInstance(
                         document.getElementById("taskCompleteModal")
                     ).hide();
 
-                    showToast("完了申請の内容を確認しました。");
+                    showToast("完了申請を送信しました。");
                     fetchTasks();
                 } else {
                     error.textContent = result.message || "申請に失敗しました。";
@@ -616,6 +637,7 @@ const requestData = {
                 error.textContent = "通信エラーが発生しました。";
             }
         });
+
 
     /* ========================================
        通知トースト表示

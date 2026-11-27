@@ -87,7 +87,9 @@ try {
         // 承認待ち
         if (
             $status === "pending" ||
-            $status === "承認待ち"
+            $status === "hours_pending" ||
+            $status === "承認待ち" ||
+            $status === "工数変更承認待ち"
         ) {
             $pendingCount++;
         }

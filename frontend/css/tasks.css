@@ -352,29 +352,51 @@
     font-size: 15px;
 }
 
-#selectedTaskDetail h3 {
-    font-size: 17px;
+.task-detail-name {
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 12px;
+    color: #101a37;
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e7ee;
 }
 
-#selectedTaskDetail dl {
+.task-detail-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 30px;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
 }
 
-#selectedTaskDetail dt {
-    font-size: 13px;
-    font-weight: 500;
-    color: #758199;
+.task-detail-item {
+    background: #ffffff;
+    border: 1px solid #dce4ee;
+    border-radius: 8px;
+    padding: 12px 14px;
 }
 
-#selectedTaskDetail dd {
-    font-size: 17px;
-    color: #263249;
-    margin-bottom: 8px;
+.task-detail-item p {
+    font-size: 12px;
+    font-weight: 600;
+    color: #68758c;
+    margin: 0 0 4px;
 }
+
+.task-detail-item strong {
+    display: block;
+    font-size: 15px;
+    color: #17213a;
+    word-break: break-word;
+}
+
+.task-detail-item strong a {
+    color: #1266c5;
+    text-decoration: underline;
+}
+
+.task-detail-item strong a:hover {
+    color: #0753a6;
+}
+
 
 .task-detail-actions {
     position: absolute;
