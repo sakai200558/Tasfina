@@ -113,6 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const createChatButton = get("createChatButton");
     const newChatError = get("newChatError");
 
+    /* チャット情報編集 */
+    const editChatModal = get("editChatModal");
+    const editChatForm = get("editChatForm");
+    const editChatName = get("editChatName");
+    const editChatDescription = get("editChatDescription");
+    const editChatError = get("editChatError");
+    const saveChatInfoButton = get("saveChatInfoButton");
+
     /* メンバー追加 */
 
     const addMemberModal = get("addMemberModal");
@@ -153,6 +161,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let additionalUsers = new Set();
 
     let addMemberRoomId = null;
+    let editRoomId = null;
+    let isEditingRoom = false;
 
     let showAllMemberState = false;
     let showAllFileState = false;
@@ -971,22 +981,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chatMenuButton.disabled = !hasRoom;
 
-        /* 作成者のみメンバー追加可能 */
-
-        addMemberButton.disabled = !(
-
-            writable &&
-
+        const canManage = writable &&
             room.type === "group" &&
+            sameId(room.created_by, currentUserId);
 
-            sameId(room.created_by, currentUserId)
-        );
-
-        /* 現在のAPIには情報編集処理がない */
-
-        editChatButton.disabled = true;
-
-        editChatButton.title = "チャット情報編集は未実装です。";
+        addMemberButton.disabled = !canManage || isAddingMembers || isEditingRoom;
+        editChatButton.disabled = !canManage || isEditingRoom || isAddingMembers;
+        addMemberButton.title = canManage ? "メンバーを追加" : "グループ作成者のみ追加できます。";
+        editChatButton.title = canManage ? "チャット情報を編集" : "グループ作成者のみ編集できます。";
 
         if (!hasRoom) {
 
@@ -2113,6 +2115,60 @@ document.addEventListener("DOMContentLoaded", () => {
        メンバー追加準備
     ======================================== */
 
+    function prepareEditChat() {
+        const room = getCurrentRoom();
+        if (!room || editChatButton.disabled) return;
+        editRoomId = String(room.id);
+        editChatName.value = room.name ?? "";
+        editChatDescription.value = room.description ?? "";
+        clearError(editChatError);
+        saveChatInfoButton.disabled = false;
+        bootstrap.Modal.getOrCreateInstance(editChatModal).show();
+    }
+
+    async function saveChatInfo(event) {
+        event.preventDefault();
+        const room = getCurrentRoom();
+        if (!room || !canSend || isEditingRoom || sessionExpired ||
+            room.type !== "group" || !sameId(room.created_by, currentUserId) ||
+            !sameId(editRoomId, currentRoomId)) return;
+        const name = editChatName.value.trim();
+        const description = editChatDescription.value.trim();
+        clearError(editChatError);
+        if (!name || Array.from(name).length > 50 || Array.from(description).length > 500) {
+            showError("グループ名は1～50文字、説明は500文字以内にしてください。", editChatError);
+            return;
+        }
+        const roomId = editRoomId;
+        isEditingRoom = true;
+        saveChatInfoButton.disabled = true;
+        updateControls();
+        let saved = false;
+        try {
+            const data = await requestApi("update_room", {
+                method: "POST",
+                data: { room_id: roomId, name, description }
+            });
+            saved = true;
+            const updatedRoom = rooms.find(item => sameId(item.id, roomId));
+            if (updatedRoom) {
+                updatedRoom.name = data.name;
+                updatedRoom.description = data.description;
+            }
+            bootstrap.Modal.getOrCreateInstance(editChatModal).hide();
+            renderRooms();
+            updateConversationHeader();
+            await loadRooms();
+        } catch (error) {
+            if (saved) showError("保存しましたが、画面の再取得に失敗しました。");
+            else showError(error.message, editChatError);
+        } finally {
+            isEditingRoom = false;
+            saveChatInfoButton.disabled = false;
+            updateControls();
+        }
+    }
+
     async function prepareAddMembers() {
 
         const room = getCurrentRoom();
@@ -2646,6 +2702,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isSending ||
             isCreating ||
             isAddingMembers ||
+            isEditingRoom ||
             isLoadingRoom ||
             isLoadingRooms ||
             sessionExpired ||
@@ -2900,6 +2957,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     /* メンバー追加 */
+
+    editChatButton.addEventListener("click", prepareEditChat);
+    editChatForm.addEventListener("submit", saveChatInfo);
 
     addMemberButton.addEventListener(
         "click",

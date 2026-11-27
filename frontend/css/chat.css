@@ -2310,3 +2310,127 @@
     }
 
 }
+/* ========================================
+   グループチャット編集・追加ボタン
+======================================== */
+
+#editChatButton,
+#addMemberButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+    flex-shrink: 0;
+
+    white-space: nowrap;
+}
+
+/* 操作可能なボタン */
+
+#editChatButton:not(:disabled),
+#addMemberButton:not(:disabled) {
+    color: var(--chat-primary);
+    border-color: var(--chat-primary);
+    background-color: #ffffff;
+
+    cursor: pointer;
+}
+
+/* マウスを重ねたとき */
+
+#editChatButton:hover:not(:disabled),
+#addMemberButton:hover:not(:disabled) {
+    color: #ffffff;
+    background-color: var(--chat-primary);
+}
+
+/* 操作できないボタン */
+
+#editChatButton:disabled,
+#addMemberButton:disabled {
+    opacity: 0.5;
+}
+
+/* ========================================
+   チャット情報編集モーダル
+======================================== */
+
+#editChatModal .modal-dialog {
+    max-height: calc(100dvh - 48px);
+}
+
+#editChatModal .modal-content {
+    max-height: calc(100dvh - 48px);
+    overflow: hidden;
+}
+
+/* フォームを縦方向に配置 */
+
+#editChatForm {
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* モーダルヘッダー */
+
+#editChatModal .modal-header {
+    flex-shrink: 0;
+}
+
+/* モーダルの中央部分 */
+
+#editChatModal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow-y: auto;
+}
+
+/* 説明入力欄 */
+
+#editChatDescription {
+    min-height: 96px;
+    resize: vertical;
+}
+
+/* エラーメッセージ */
+
+#editChatError {
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+}
+
+/* モーダル下部のボタンを固定 */
+
+#editChatModal .modal-footer {
+    flex-shrink: 0;
+
+    background-color: #ffffff;
+    border-top: 1px solid #dee2e6;
+
+    padding: 16px 24px;
+}
+
+/* 保存・追加ボタンの無効時 */
+
+#saveChatInfoButton:disabled,
+#confirmAddMemberButton:disabled {
+    opacity: 0.65;
+}
+
+/* ========================================
+   スマートフォン対応
+======================================== */
+
+@media (max-width: 576px) {
+
+    #editChatModal .modal-dialog,
+    #editChatModal .modal-content {
+        max-height: calc(100dvh - 16px);
+    }
+
+}
