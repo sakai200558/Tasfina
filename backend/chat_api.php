@@ -217,10 +217,13 @@ try {
         "members"
     ];
 
+    /* update_room を追加 */
+
     $writeActions = [
         "create",
         "send",
-        "add_members"
+        "add_members",
+        "update_room"
     ];
 
     if (in_array($action, $readActions, true)) {
@@ -874,7 +877,10 @@ try {
         }
 
         if ((int)$room["created_by"] !== $userId) {
-            fail("チャット作成者のみメンバーを追加できます。", 403);
+            fail(
+                "チャット作成者のみメンバーを追加できます。",
+                403
+            );
         }
 
         $userIds = getUserIds($data);
@@ -907,6 +913,117 @@ try {
         response([
             "success" => true,
             "message" => "メンバーを追加しました。"
+        ]);
+    }
+
+    /* ========================================
+       8. グループチャット情報更新
+       今回追加した処理
+    ======================================== */
+
+    if ($action === "update_room") {
+
+        $roomId = getRoomId($data);
+
+        /* チャット参加者か確認 */
+
+        requireMember($pdo, $roomId, $userId);
+
+        /* チャット情報を取得 */
+
+        $stmt = $pdo->prepare("
+            SELECT
+                id,
+                type,
+                created_by
+            FROM chat_rooms
+            WHERE id = ?
+        ");
+
+        $stmt->execute([$roomId]);
+
+        $room = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$room) {
+            fail("チャットが存在しません。", 404);
+        }
+
+        /* グループチャットのみ編集可能 */
+
+        if ($room["type"] !== "group") {
+            fail("グループチャットのみ編集できます。");
+        }
+
+        /* チャット作成者のみ編集可能 */
+
+        if ((int)$room["created_by"] !== $userId) {
+            fail(
+                "チャット作成者のみ編集できます。",
+                403
+            );
+        }
+
+        /* 入力形式を確認 */
+
+        if (
+            !isset($data["name"], $data["description"]) ||
+            !is_string($data["name"]) ||
+            !is_string($data["description"])
+        ) {
+            fail("入力内容が正しくありません。");
+        }
+
+        $name = trim($data["name"]);
+
+        $description = trim($data["description"]);
+
+        /* グループ名の入力チェック */
+
+        if (
+            $name === "" ||
+            mb_strlen($name) > 50
+        ) {
+            fail(
+                "グループ名は1～50文字で入力してください。"
+            );
+        }
+
+        /* 説明の入力チェック */
+
+        if (mb_strlen($description) > 500) {
+            fail(
+                "説明は500文字以内で入力してください。"
+            );
+        }
+
+        /* データベースを更新 */
+
+        $stmt = $pdo->prepare("
+            UPDATE chat_rooms
+            SET
+                name = ?,
+                description = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+              AND type = 'group'
+              AND created_by = ?
+        ");
+
+        $stmt->execute([
+            $name,
+            $description,
+            $roomId,
+            $userId
+        ]);
+
+        /* 更新結果を返す */
+
+        response([
+            "success" => true,
+            "room_id" => $roomId,
+            "name" => $name,
+            "description" => $description,
+            "message" => "チャット情報を更新しました。"
         ]);
     }
 
