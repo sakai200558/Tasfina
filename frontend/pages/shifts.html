@@ -27,12 +27,7 @@
 <body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col">
 
     <div id="header"></div>
-    <div class="p-4 bg-white border-b flex justify-end">
-        <select id="roleSelector" class="bg-[#1e3a8a] text-white text-sm font-semibold px-3 py-1 rounded focus:outline-none cursor-pointer">
-            <option value="general">一般ユーザー</option>
-            <option value="admin">管理者</option>
-        </select>
-    </div>
+   
 
     <div class="app-layout flex flex-1">
         <div id="sidebar"></div>
@@ -67,9 +62,6 @@
 
                     <!-- 管理者用ボタン群 -->
                     <div id="adminActionButtons" class="hidden flex items-center gap-2">
-                        <button class="flex items-center px-4 py-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded-md shadow-sm hover:bg-blue-50">
-                            希望シフト提出の締め切り設定
-                        </button>
                         <button id="openBusyModalBtn" class="flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-sm hover:bg-blue-700">
                             繁忙期設定
                         </button>
