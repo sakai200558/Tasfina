@@ -498,6 +498,9 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
             <!-- モーダルフッター -->
             <div class="flex justify-end gap-2 px-6 py-3 border-t border-gray-200 bg-gray-50">
                 <button id="cancelRouletteModalBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-100">キャンセル</button>
@@ -510,22 +513,23 @@
             </div>
         </div>
     </div>
+
     <!-- 申請履歴一覧モーダル（承認 / 拒否対応） -->
-<div id="applicationHistoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800">申請履歴一覧</h3>
-            <button type="button" id="closeApplicationHistoryBtn" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-        </div>
-        <div class="p-6 overflow-y-auto space-y-3 text-xs flex-1" id="applicationHistoryList">
-            <!-- JSで動的描画 -->
-        </div>
-        <div class="flex justify-end px-6 py-3 border-t border-gray-200 bg-gray-50">
-            <button type="button" id="closeApplicationHistoryFooterBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-100">
-                閉じる
-            </button>
+    <div id="applicationHistoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-bold text-gray-800">申請履歴一覧</h3>
+                <button type="button" id="closeApplicationHistoryBtn" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-3 text-xs flex-1" id="applicationHistoryList">
+                <!-- JSで動的描画 -->
+            </div>
+            <div class="flex justify-end px-6 py-3 border-t border-gray-200 bg-gray-50">
+                <button type="button" id="closeApplicationHistoryFooterBtn" class="px-4 py-1.5 border border-gray-300 text-gray-700 text-xs font-medium rounded hover:bg-gray-100">
+                    閉じる
+                </button>
+            </div>
         </div>
     </div>
-</div>
 </body>
 </html>
